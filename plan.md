@@ -4,9 +4,10 @@ Put this file at the root of an empty repository. Then start Claude Code with ag
 
 Natours is a tour-booking web app. Version 1 (`rithik56/natours`) was built with Express, Pug and MongoDB. It worked, but a code review found security holes, crash bugs and deployment problems.
 
-This plan rebuilds it from scratch as a **full-stack Next.js application** with a **full visual redesign**:
+This plan rebuilds it from scratch as a **full-stack Next.js application** with a **full visual redesign** and **new content: tours across India, priced in rupees**:
 - Pages are **rendered on the server wherever possible**.
 - Code runs in the browser only where a feature needs it (§7).
+- The seed content (tours, guides, users, reviews, bookings and freely licensed photos) is already in `seed/` (see `seed/README.md`).
 
 Every v1 mistake is listed as a numbered requirement, so the team builds the fix in from the start and proves it with a test.
 
@@ -45,9 +46,12 @@ Every v1 mistake is listed as a numbered requirement, so the team builds the fix
   - `params`, `searchParams`, `cookies()` and `headers()` are async.
   - The tagged data cache API.
 
-**Assets to copy from v1 before kickoff.**
-- Copy `public/img/**` (tour and user photos) to `seed/img/` and `dev-data/data/*.json` (seed data) to `seed/data/`.
-- **Don't copy any CSS, `.pug` or `.js` file.** The code and the UI are rebuilt from scratch.
+**Seed content is ready.** `seed/` holds everything the app starts with:
+- 13 tours across India, with itineraries, real coordinates and start dates in each region's season.
+- 35 users of Indian origin (an admin, guides and travellers), 52 reviews in English and 58 bookings.
+- 52 freely licensed photos from Wikimedia Commons, with author, licence and source for each.
+
+Nothing from v1 is reused: no code, no CSS, no data and no photos.
 
 **Prerequisites before Phase 3.** You need these accounts. Earlier phases use fakes, so they aren't needed until then.
 - Stripe (test mode keys)
@@ -86,7 +90,7 @@ Every v1 mistake is listed as a numbered requirement, so the team builds the fix
    - Update name, email and photo (with a preview before upload).
    - Deactivate the account, after confirming.
 4. Bookings:
-   - Pick a start date and book through Stripe Checkout.
+   - Pick a start date and book through Stripe Checkout, in Indian rupees (INR) only.
    - A confirmation state when the user comes back from Stripe.
    - "My tours" page with upcoming and past bookings.
 5. Reviews:
@@ -102,6 +106,8 @@ Every v1 mistake is listed as a numbered requirement, so the team builds the fix
 7. Emails in the new design: welcome, password reset, booking confirmation.
 8. A full visual redesign with a design system, light and dark themes, WCAG 2.2 AA accessibility and performance budgets (§9).
 9. Search-friendly pages: titles, descriptions and social preview images for every page, plus a sitemap and `robots.txt` (R10).
+10. Photo credits: every photo's author and licence are shown on its tour page and on a `/credits` page (U27). The seed photos' licences require this.
+11. Indian conventions throughout: prices in ₹ with Indian digit grouping (₹1,24,999), dates in India Standard Time, distances in kilometres, Indian English (B19, B20, U20).
 
 **Stretch (v2.1, only after the Phase 2 gate passes)**
 - Email verification on signup.
@@ -119,7 +125,7 @@ These Mongoose models (TypeScript) are a shared contract. The lead writes them i
 |---|---|
 | `name` | required, trimmed, 1–50 chars |
 | `email` | required, unique, lowercase, valid email |
-| `photo` | storage key, default `users/default.jpg` |
+| `photo` | optional storage key. Users without a photo get an initials avatar (U4); seed users have no photos. |
 | `role` | enum from §1.1, default `user` |
 | `password` | 8–72 chars (bcrypt ignores bytes past 72), `select: false` |
 | `passwordChangedAt` | Date |
@@ -140,13 +146,14 @@ These Mongoose models (TypeScript) are a shared contract. The lead writes them i
 | `difficulty` | enum `easy`, `medium`, `difficult` |
 | `ratingsAverage` | 1–5, default 4.5, rounded to 1 decimal by a setter |
 | `ratingsQuantity` | default 0 |
-| `price` | required, > 0, at most 2 decimals |
-| `priceDiscount` | must be less than `price` |
+| `price` | required, whole rupees (integer), > 0 (B20) |
+| `priceDiscount` | whole rupees, less than `price` |
 | `summary` | required |
 | `description` | |
 | `imageCover` | required; storage key |
 | `images` | `[String]` of storage keys, at most 3 |
-| `startDates` | `[Date]` |
+| `photoCredits` | `[{ file, title, author, license, licenseUrl, sourceUrl }]`, one per photo; required for every photo that isn't the company's own (U27) |
+| `startDates` | `[Date]`, each the start of a calendar day in India Standard Time (B19) |
 | `startLocation` | GeoJSON Point |
 | `locations` | `[GeoJSON Point + description + day]`; this is the itinerary the route map draws |
 | `guides` | `[ref User]` |
@@ -170,9 +177,9 @@ Unique index on `{ tour: 1, user: 1 }`.
 |---|---|
 | `tour` | ref Tour |
 | `user` | ref User |
-| `price` | snapshot of the price at checkout |
-| `currency` | |
-| `startDate` | required; must be one of the tour's future `startDates` |
+| `price` | snapshot of the price at checkout, in whole rupees |
+| `currency` | always `inr` |
+| `startDate` | required; a calendar day in IST (B19). At checkout it must be one of the tour's future `startDates` (B8); past bookings keep their past dates. |
 | `stripeSessionId` | unique, sparse |
 | `status` | enum `paid`, `refunded` |
 
@@ -283,6 +290,7 @@ How each page renders is set in §7.2.
 | `/me` | Account page (U15). Requires login; otherwise redirect to `/login?next=/me`. |
 | `/me/deactivate` | Confirmation step for deactivating the account. It works without JavaScript; with JavaScript it opens as a dialog. |
 | `/my-tours` | Upcoming and past bookings (U13). `?booking=success` shows the confirmation state (U12). Requires login. |
+| `/credits` | Every photo on the site with its author, licence and source (U27) |
 | `/styleguide` | Every component in every state (U5). **Development and test only; `notFound()` in production.** |
 | `not-found.tsx`, `error.tsx`, `global-error.tsx` | Error pages in the new design (U18) |
 | `sitemap.ts`, `robots.ts` | Generated from the tour list (R10) |
@@ -322,10 +330,11 @@ Forms on the site call **Server Actions**, not the REST API. Each action:
 | Validation | Zod for every input (forms, API bodies, query strings, route params) and for config | |
 | Auth | Our own session: a JWT (HS256, signed with `jose`) in an httpOnly cookie; passwords hashed with `bcryptjs` at cost 12 | `bcryptjs` is pure JavaScript, so no native build steps in Docker. |
 | Styling | Plain CSS: global token, reset and base files, plus CSS Modules per component, using cascade layers and linted by stylelint. No CSS framework. | Keeps the look distinctive and the CSP simple. v1 had a single 1,300-line file. |
-| Fonts | `next/font/google` (Barlow and Barlow Condensed, unless the design gate changes them) | Downloaded at build time and served from our own domain. |
+| Fonts | `next/font/google` (Anek Latin and Anek Devanagari, unless the design gate changes them) | Downloaded at build time and served from our own domain. Devanagari support keeps Hindi possible later. |
+| Locale | `en-IN` everywhere: Indian English, ₹ with Indian digit grouping, dates in India Standard Time (`Asia/Kolkata`), distances in kilometres. All formatting goes through `src/lib/format.ts` (§4.4). | B19, B20 |
 | Images | `next/image` for every image. Uploads are checked and re-encoded with sharp, then stored in object storage. | `next/image` produces resized WebP and AVIF versions on demand. |
-| Maps | Leaflet with OpenStreetMap tiles (no API key), loaded only in the browser and only on the tour page | |
-| Payments | Stripe Checkout and webhooks | |
+| Maps | Leaflet, loaded only in the browser and only on the tour page. The tile source is decided in Phase 0 (D14). | |
+| Payments | Stripe Checkout and webhooks, INR only | |
 | Background jobs | BullMQ on Redis, in a separate worker process (`src/worker/`) | v1 used the legacy `bull` and ran it inside the web process. |
 | Email | React Email templates, rendered by the worker and sent with nodemailer over SMTP; Mailpit for local development | |
 | Rate limiting | `rate-limiter-flexible` with Redis | |
@@ -408,6 +417,8 @@ src/
       tours/     model.ts service.ts schemas.ts dto.ts query-builder.ts cache.ts
       reviews/   model.ts service.ts schemas.ts dto.ts actions.ts
       bookings/  model.ts service.ts schemas.ts dto.ts actions.ts webhook.ts
+  lib/
+    format.ts                formatPrice, formatDate, formatDistance (safe on server and client)
   components/
     ui/                      design-system components, each with a .module.css file (designer)
     features/                page-level components: tour row, booking panel, review form, route map (web)
@@ -415,7 +426,7 @@ src/
   emails/                    React Email templates (designer)
   worker/index.ts            BullMQ email worker
 scripts/seed.ts  scripts/check-client-boundaries.ts  scripts/check-bundle.ts
-seed/                        photos and JSON copied from v1
+seed/                        tours, users, reviews, bookings and photos (see seed/README.md)
 test/
   setup.ts                   mongodb-memory-server, fakes, next/headers mock
   helpers/                   factories, callRoute(), mockSession()
@@ -519,6 +530,10 @@ type ActionState<T = void> =
 | `storage.put(key, buffer, contentType)` / `storage.delete(key)` / `storage.urlFor(key)` | |
 | `images.normalize(file, preset)` | Checks the upload, re-encodes it as WebP at most 2000px wide (users: 512px), and returns a buffer. |
 | `stripeClient.createCheckoutSession(params)` / `stripeClient.constructEvent(rawBody, signature)` | |
+| `formatPrice(rupees)` | `₹24,999`, `₹1,24,999`: `Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })` (B20) |
+| `formatDate(date, style?)` | `12 Mar 2027`, always with `timeZone: 'Asia/Kolkata'` (B19) |
+| `toIstDay(date)` / `fromIstDay('2027-03-12')` | convert between a stored `Date` and an IST calendar day (B19) |
+| `formatDistance(km)` | `16 km` |
 
 Email templates are `Welcome`, `PasswordReset` and `BookingConfirmed`. They are React Email components owned by the `designer`. Their props are listed in `docs/contracts.md`.
 
@@ -559,7 +574,7 @@ Each requirement needs a regression test whose name includes its ID, for example
 | **S14** | Session JWTs are verified with the algorithm pinned to HS256. The secret must be at least 32 characters, checked at startup. Tokens must have `exp`. Tokens issued before `passwordChangedAt` are rejected. | |
 | **S15** | Rate limits are stored in Redis: 300 requests per 15 minutes per IP on `/api/v1`, and 10 per 15 minutes per IP and email on signup, login, forgot-password, reset and change-password, whether they arrive through the API or a Server Action. Tests use an in-memory store. | The in-memory limiter reset on every serverless cold start. |
 | **S16** | Uploads are capped at 5 MB per file, through `serverActions.bodySizeLimit` and a check in `withApi`, with fixed file counts. Only JPEG, PNG and WebP are accepted, checked with sharp metadata rather than the browser-supplied type. Images are re-encoded (which removes EXIF data) and get random keys. Rejected uploads return 400, 413 or 415, or a matching `ActionState` error. | The type check trusted the client's mimetype, there was no size limit, and a rejected file returned 500. |
-| **S17** | Payments: the price comes from the database at checkout. A booking is created only from a verified webhook. The webhook finds the user by `metadata.userId`, not by email. Processing is idempotent by `stripeSessionId`. The signature is verified against the raw body from `await request.text()`. | The webhook found the user by email, and a duplicate webhook delivery created a duplicate booking. |
+| **S17** | Payments: the price comes from the database at checkout, and the currency is always `inr`. A booking is created only from a verified webhook. The webhook finds the user by `metadata.userId`, not by email. Processing is idempotent by `stripeSessionId`. The signature is verified against the raw body from `await request.text()`. | The webhook found the user by email, and a duplicate webhook delivery created a duplicate booking. |
 | **S18** | Secrets are never committed. `.env.example` lists every key with a placeholder. No secret goes in a `NEXT_PUBLIC_*` variable; CI fails if a `NEXT_PUBLIC_` name contains `SECRET`, `KEY` or `PASSWORD`. CI runs `npm audit --audit-level=high`, and Dependabot is enabled. | |
 | **S19** | Production errors never show stack traces. `error.tsx` shows a generic message and the error's digest. API errors use the format in §4.1. Unknown errors are logged with the request ID. | |
 | **S20** | Passwords must be 8–72 characters. Login runs a bcrypt compare against a dummy hash when the user isn't found, so response time doesn't reveal which emails exist. | |
@@ -580,7 +595,7 @@ Each requirement needs a regression test whose name includes its ID, for example
 | **B5** | Schema rules match the domain: `duration` isn't unique, `slug` is. Defaults are functions (use `timestamps`, never `default: Date.now()`). | `duration` was unique, so two tours couldn't have the same length. `createdAt` was computed once at startup. |
 | **B6** | The review service recalculates ratings after create, update and delete. It awaits the work, rounds to one decimal, and clears the cached tour and review data (R5). Deleting the last review resets the tour to its defaults. A missing document returns 404 instead of crashing. | The post-hook crashed when the document was `null`, and the recalculation wasn't awaited. |
 | **B7** | The webhook handler awaits all its work. It returns 2xx only once the booking is saved (or already exists), and 500 on failure so Stripe retries. | `checkoutBooking` was fire-and-forget inside `catchAsync` with no `next`. An error caused an unhandled rejection, which shut the server down. |
-| **B8** | Checkout returns 404 when the tour doesn't exist and 400 when `startDate` isn't one of its future start dates. `unit_amount` is `Math.round(price * 100)`. Image URLs are absolute and come from our own storage. `success_url` is `/my-tours?booking=success`. | A missing tour crashed. Images pointed at `natours.dev`. The amount wasn't rounded. No start date was recorded. |
+| **B8** | Checkout returns 404 when the tour doesn't exist and 400 when `startDate` isn't one of its future start dates. `currency` is `inr` and `unit_amount` is the price in paise (`price * 100`, an integer because prices are whole rupees). Image URLs are absolute and come from our own storage. `success_url` is `/my-tours?booking=success`. | A missing tour crashed. Images pointed at `natours.dev`. The amount wasn't rounded. No start date was recorded. |
 | **B9** | Errors always get a response, in every environment. `withApi` maps CastError, duplicate key errors (to 409), ValidationError, ZodError, JWT errors and Stripe signature errors to error codes. Server Actions return expected errors as `ActionState` and let unexpected ones reach `error.tsx`. Pages use `notFound()` for missing data. | When `NODE_ENV` was neither `development` nor `production`, requests hung with no response. |
 | **B10** | The app never hangs without a database. Mongoose uses `serverSelectionTimeoutMS: 5000`, requests fail with 503 when the database is unreachable, and `/readyz` reports it. | v1 logged the connection error and kept serving without a database. |
 | **B11** | Pagination: `page` ≥ 1; `limit` from 1 to 100, default 20. Responses include `meta.total`. Pages show a pagination control from the same numbers. | `limit` had no upper bound. |
@@ -591,6 +606,8 @@ Each requirement needs a regression test whose name includes its ID, for example
 | **B16** | Duplicate email or tour name returns 409 `CONFLICT`, or the matching field error in `ActionState`. | |
 | **B17** | Models and the Mongoose connection survive hot reload. Models are registered as `mongoose.models.X ?? model(...)`, and the connection promise is cached on `globalThis`. | New in v2 (Next.js reloads modules in development). |
 | **B18** | `redirect()` and `notFound()` are never inside a `try/catch` that could swallow them. The `action()` helper re-throws them. | New in v2 (Next.js pitfall). |
+| **B19** | Start dates are calendar days in India Standard Time. They're stored as 00:00 IST (18:30 UTC on the previous day), compared by IST calendar day ("is this departure in the future?"), and always displayed with `timeZone: 'Asia/Kolkata'` through `formatDate`. A test sets the server's time zone to UTC and checks that a 1 January departure shows as 1 January, not 31 December. | New in v2 (the classic off-by-one-day bug when servers run in UTC). |
+| **B20** | Money is whole rupees everywhere: the model, the API, bookings and the UI. Stripe gets paise (`price * 100`). Prices are always shown through `formatPrice` (₹ with Indian grouping, no decimals), never with string concatenation or `toFixed`. | New in v2. |
 
 ---
 
@@ -625,6 +642,7 @@ Each requirement needs a regression test whose name includes its ID, for example
 | `/me/deactivate` | Server-rendered | current user | none |
 | `/my-tours` | Server-rendered on each request (personal) | `bookingsService.listMine` | `BookingConfirmationPoller` (only with `?booking=success`; polls, then calls `router.refresh()`) |
 | Header (in the root layout) | Server-rendered; reads the session | current user | `MobileMenu` (open and closed state) |
+| `/credits` | Server-rendered from the tagged cache | `photoCredits` of every tour | none |
 | `/styleguide` | Server-rendered; `notFound()` in production | none | Interactive demos only |
 | Error pages | `not-found.tsx` is server-rendered. `error.tsx` and `global-error.tsx` are Client Components, which Next.js requires. | none | `error.tsx` (required by Next.js), with a "Try again" button |
 
@@ -643,10 +661,11 @@ Each requirement needs a regression test whose name includes its ID, for example
 | **D7** | Logs are structured JSON (pino) in production and pretty-printed in development. Every log line and every error response carries the request ID from `proxy.ts`. | |
 | **D8** | Multi-stage Dockerfile on `node:24-slim`, running as a non-root user. It runs `next build` with `output: 'standalone'`, copies `.next/static` and `public`, and bundles the worker with esbuild into `dist/worker.js`. `docker-compose.yml` runs `mongo`, `redis`, `mailpit`, `web` and `worker`. | |
 | **D9** | Build output (`.next`, `dist`, `coverage`, Playwright reports) is gitignored. | v1 committed `bundle.js` and its source map. |
-| **D10** | `npm run seed` (run with `tsx`) is idempotent and has a `--reset` flag. It hashes passwords through the model, uploads the seed photos to storage, moves start dates into the future so booking can be tested, and refuses to run when `NODE_ENV=production`. | v1's seed dates are in the past. |
+| **D10** | `npm run seed` (run with `tsx`) loads `seed/data/` as described in `seed/README.md`. It is idempotent and has a `--reset` flag. It sets every seed user's password from `SEED_USER_PASSWORD` (required, development and staging only, never committed) and hashes it once through the model. It uploads `seed/img/` to storage. If any tour start date has passed, it moves **all** dates (tour start dates, bookings, reviews) forward by the same whole number of years, so tours stay in season and past trips stay in the past. It refuses to run when `NODE_ENV=production`. | v1's seed dates were in the past, and its seed file held password hashes. |
 | **D11** | CI runs on every push and pull request: install, `tsc --noEmit`, lint (ESLint and stylelint), format check, the client-boundary check (R2), the `NEXT_PUBLIC_` check (S18), unit and integration tests with coverage, `next build`, the bundle budget (R9), `npm audit --audit-level=high`, knip, Playwright (e2e, no-JavaScript project, accessibility, screenshots), Lighthouse CI (U24), and a Docker build. | |
 | **D12** | Deployment: a `render.yaml` blueprint (web, worker, Redis), MongoDB Atlas, an S3 or R2 bucket, and the Stripe webhook pointed at `/webhooks/stripe`. The README covers deploying, rotating secrets and rolling back. | |
 | **D13** | API versioning with `/api/v1`. `docs/openapi/openapi.yaml` is kept in sync with the Route Handlers, and CI checks it with `redocly lint`. | |
+| **D14** | **Map tiles and India's borders.** Standard OpenStreetMap tiles may draw India's international boundaries differently from the official map of India, and the Ladakh tour runs close to them. In Phase 0 the lead compares tile providers that show India's boundaries as India officially recognises them against keeping every tour map zoomed in to its route, checks each provider's terms and pricing, and records the choice in an ADR. The map's CSP hosts follow that choice. | New in v2. |
 
 ---
 
@@ -659,40 +678,43 @@ v2 gets a new visual identity. **Nothing from v1's CSS is reused.** v1's look ha
 
 ### 9.1 Design brief
 
-- **Subject:** small-group outdoor adventure tours in North American landscapes: forest (Banff), sea (Miami), snow (Aspen), desert parks (Las Vegas), night skies (Utah, Yellowknife), cities (NYC) and wine country (California). Tours run 3 to 14 days, cost $397 to $2,997, and are rated easy, medium or difficult.
-- **Audience:** adults planning a trip. They compare tours on a phone as often as on a laptop, and they want to know whether a tour fits their fitness, their dates and their budget.
+- **Subject:** small-group tours across India: Himalayan treks and high passes (Uttarakhand, Ladakh, Spiti), the backwaters and tea hills of Kerala, the Thar Desert, the Andaman Islands, the heritage cities of the Golden Triangle and Hampi, tea country in Darjeeling and Sikkim, tiger country at Ranthambore, the living root bridges of Meghalaya and white water at Rishikesh. Tours run 3 to 8 days, cost ₹12,999 to ₹42,999, and are rated easy, medium or difficult.
+- **Audience:** Indian travellers, mostly in their 20s to 50s, planning on their phones. They want to know whether a tour fits their fitness, their dates and their budget, and whether it's the right season to go.
 - **Primary job:** help people choose a tour that fits, then book a start date with confidence.
 - **Secondary jobs:** see and manage bookings, leave a review after a trip, manage the account.
-- **Content:** the 9 seed tours, with their real names, places, itineraries and photos. **No lorem ipsum anywhere**, including the styleguide and mockups.
+- **Content:** the 13 seed tours, with their real names, places, itineraries, guides, reviews and photos.
+- **No placeholder content anywhere a person can see it**: no lorem ipsum, no "John Doe", no grey boxes or stock placeholder images, in the product, the styleguide, mockups and emails. Use the seed content. Test factories may generate data, but it must look real too.
 
-### 9.2 Starting direction: "Trail marker"
+### 9.2 Starting direction: "Milestone"
 
 The `designer` starts from this direction. They may change any part of it, but must explain each change in `docs/design/direction.md` and show the result at the design gate.
 
-**Idea.** Use the visual language of trail signs and topographic maps, the things a hiker actually reads along the way. The photography carries the colour. The interface stays quiet and precise, like a well-made trail sign: clear names, distances, difficulty and dates.
+**Idea.** All over India, roadside milestones tell travellers where they are and how far they have to go: a whitewashed stone with a coloured cap, a place name and a distance in kilometres. Yellow caps mark national highways and green caps state highways. The interface borrows that plain, legible way of giving directions. The photography carries the colour and the drama.
 
 **Palette** (light theme; the designer derives the dark theme and status colours):
 
 | Name | Hex | Role |
 |---|---|---|
-| Spruce | `#1F3D2B` | Headings, primary text, header, focus ring |
-| Granite | `#4A4F55` | Body text |
-| Lichen | `#E8ECE4` | Page background |
-| Snow | `#FBFCFA` | Surfaces: forms, panels, booking panel |
-| Glacier | `#9CC3D5` | Secondary: map water, info alerts, selected states |
-| Blaze | `#F2C230` | The single accent, like the paint marks on trees that show a trail: the main "Book" button and the route line on the map |
+| Neel | `#1F2B4D` | Headings, primary text, header, focus ring. The indigo blue of Indian dye and of the blueing in lime wash. |
+| Slate | `#45505E` | Body text |
+| Whitewash | `#EEF1F5` | Page background: the cool, slightly blue white of a lime-washed wall or milestone |
+| Paper | `#FAFBFC` | Surfaces: forms, panels, booking panel |
+| Highway yellow | `#F2B705` | The single accent, from national-highway milestone caps: the main "Book" button and the route line on the map |
+| State green | `#2F6B4F` | Secondary, from state-highway milestone caps: success messages and selected filters |
 
 Measured contrast ratios:
-- Spruce on Lichen: 9.97:1
-- Granite on Lichen: 6.91:1
-- Granite on Snow: 8.03:1
-- Spruce text on Blaze: 7.12:1
+- Neel on Whitewash: 12.27:1
+- Slate on Whitewash: 7.23:1
+- Slate on Paper: 7.91:1
+- Neel text on Highway yellow: 7.64:1
+- State green text on Whitewash: 5.55:1
+- Paper text on State green: 6.07:1
 
-Blaze on Lichen is only 1.4:1, so **Blaze is never used for text and never as the only thing marking an edge**. A Blaze button always has Spruce text. On the map, the route line gets a Spruce outline so it stands out against the map tiles.
+Highway yellow on Whitewash is only 1.6:1, so **Highway yellow is never used for text and never as the only thing marking an edge**. A yellow button always has Neel text. On the map, the route line gets a Neel outline so it stands out against the map tiles.
 
 **Type.**
-- One family in two widths: **Barlow Condensed** (semibold) for display and headings, and **Barlow** (regular and medium) for text. Barlow is modelled on California highway and public signs, which fits the trail-sign idea.
-- Prices, days and dates use tabular figures, so numbers line up in columns.
+- One family in two widths: **Anek Latin** set narrow (semi-condensed, semibold) for display and headings, like the lettering on a milestone, and at normal width for text. **Anek Devanagari** is the same design for Hindi, so the site can add Hindi later without changing fonts. The designer confirms both are available through `next/font/google` and records the result in `direction.md`.
+- Prices, days and dates line up in columns. Use tabular figures if the font has them; otherwise align them with the layout.
 - Scale: ratio 1.25 from a 1rem (16px) body size: 0.8, 1, 1.25, 1.563, 1.953, 2.441, 3.052, 3.815rem.
 - Line height: 1.55 for body text, 1.1 for headings.
 - Paragraphs are 45–75 characters wide.
@@ -701,60 +723,60 @@ Blaze on Lichen is only 1.4:1, so **Blaze is never used for text and never as th
 **Layout.**
 - Mobile-first and left-aligned.
 - Content is at most about 72rem wide, on a 12-column grid from 64em up.
-- **Overview as a trailhead board.** A trailhead sign lists each route with its difficulty, distance and destination, so the overview is a list of tours rather than a grid of identical cards. Each row shows: photo, difficulty symbol and word, name, place, length in days, next start date, and the "from" price. Facts line up in columns on desktop and stack under the photo on mobile.
-- **Tour page:** photo with the tour name, then a strip of facts, then the route map next to the itinerary, then the description, guides and reviews. The booking panel sticks to the side on desktop and becomes a bar at the bottom of the screen on mobile.
+- **Overview as the road ahead.** A list of tours rather than a grid of identical cards. Each row shows: photo, a small milestone marker with the length in days, name, region, difficulty, next start date and the "from" price. Facts line up in columns on desktop and stack under the photo on mobile.
+- **Tour page:** photo with the tour name, then a strip of facts, then the route map next to the day-by-day itinerary, then the description, guides, reviews and photo credits. The booking panel sticks to the side on desktop and becomes a bar at the bottom of the screen on mobile.
 
 ```
 Overview (desktop)
-┌──────────────────────────────────────────────────────────────────┐
-│ Natours                                Tours  My tours  Account  │
-├──────────────────────────────────────────────────────────────────┤
-│ Find your next trail                                             │
-│ [Difficulty ▾] [Length ▾] [Month ▾] [Max price ▾] [Sort ▾]       │
-│ 9 tours                                                          │
-├──────────────────────────────────────────────────────────────────┤
-│ [photo]  ● Easy       The Forest Hiker    5 days   12 Mar   $397 │
-│          Banff, Canada                                           │
-├──────────────────────────────────────────────────────────────────┤
-│ [photo]  ◆ Difficult  The Snow Adventurer 4 days   2 Jan    $997 │
-│          Aspen, USA                                              │
-└──────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│ Natours                                      Tours  My tours  Account  │
+├────────────────────────────────────────────────────────────────────────┤
+│ Find your next trip                                                    │
+│ [Difficulty ▾] [Length ▾] [Month ▾] [Max price ▾] [Sort ▾]             │
+│ 13 tours                                                               │
+├────────────────────────────────────────────────────────────────────────┤
+│ [photo]  [5 days]  Kerala Backwaters and Hills   ▲ Easy      5 Dec     │
+│                    Fort Kochi, Kerala                       ₹24,999    │
+├────────────────────────────────────────────────────────────────────────┤
+│ [photo]  [8 days]  Ladakh High Passes            ▲▲▲ Difficult 12 Jun  │
+│                    Leh, Ladakh                              ₹42,999    │
+└────────────────────────────────────────────────────────────────────────┘
 
 Tour page (desktop)
-┌──────────────────────────────────────────────────────────────────┐
-│ [ wide photo                                                   ] │
-│ [ The Snow Adventurer                                          ] │
-├──────────────────────────────────────────────────────────────────┤
-│ ◆ Difficult   4 days   Up to 10 people   Aspen, USA   ★ 4.5 (6)  │
-├───────────────────────────────────────┬──────────────────────────┤
-│ [ map: route line through stops     ] │ Book this tour           │
-│ [ 1 ── 2 ── 3                       ] │ Start date [2 Jan ▾]     │
-│ Day 1  Aspen Highlands                │ $997 per person          │
-│ Day 2  ...                            │ [ Book this tour ]       │
-│ About this tour (max 75 characters    │                          │
-│ per line)                             │                          │
-│ Your guides                           │                          │
-│ Reviews                               │                          │
-└───────────────────────────────────────┴──────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│ [ wide photo                                                         ] │
+│ [ Valley of Flowers Trek                                             ] │
+├────────────────────────────────────────────────────────────────────────┤
+│ ▲▲ Medium   6 days   Up to 14 people   Rishikesh, Uttarakhand   ★ 4.5  │
+├─────────────────────────────────────────────┬──────────────────────────┤
+│ [ map: route line through day markers     ] │ Book this tour           │
+│ [ 1 ── 2 ── 3 ── 4                        ] │ Start date [10 Jul ▾]    │
+│ Day 1  Drive along the Alaknanda to         │ ₹18,999 per person       │
+│        Joshimath                            │ [ Book this tour ]       │
+│ Day 2  Walk up to Ghangaria                 │                          │
+│ About this tour (max 75 characters a line)  │                          │
+│ Your guides   Reviews   Photo credits       │                          │
+└─────────────────────────────────────────────┴──────────────────────────┘
 ```
 
-**Signature element: the route.**
-- On the tour page, the map draws the itinerary as a Blaze line (with a Spruce outline) joining stops numbered by day, next to the day-by-day list.
+**Signature element: the route as milestones.**
+- On the tour page, the map draws the itinerary as a Highway yellow line (with a Neel outline). Each day's stop is a small milestone-shaped marker with the day number, matching the day-by-day list beside it.
 - Day numbers appear here because the itinerary really is a sequence. **No other part of the site uses numbered markers.**
 - When the map first comes into view, the line draws itself once along the route in at most 1.2 seconds. With `prefers-reduced-motion`, it appears already drawn.
 - This is where the design is bold. Everything else stays quiet.
 
-**Difficulty.** Shown with trail-rating symbols, always together with the word: a circle for easy, a square for medium, a diamond for difficult. The shape carries the meaning, so colour is never the only signal.
+**Difficulty.** Shown as one, two or three small peaks, always together with the word: easy, medium, difficult. The number of peaks carries the meaning, so colour is never the only signal.
 
 **Voice and copy.**
-- Plain, specific and in sentence case, written from the traveller's point of view.
+- Indian English with British spelling (colour, organise, travelling), plain and specific, in sentence case, written from the traveller's point of view.
+- Prices as `₹24,999` and `₹1,24,999` (Indian grouping, no decimals), dates as `12 Mar 2027`, distances in kilometres and heights in metres.
 - Buttons say exactly what happens ("Book this tour", "Save changes", never "Submit"). An action keeps the same word through the whole flow: "Book this tour", then Stripe, then "Booked" on My tours.
 - Errors say what happened and how to fix it, and don't apologise.
 - Empty states invite the next action ("No tours match these filters. Clear filters").
 
 ### 9.3 Defaults to avoid
 
-These are the look of a generic template or AI-generated site, not choices made for this brief. The designer checks the direction and every screen against this list. Using any of them needs a written reason in `direction.md`.
+These are the look of a generic template, an AI-generated site or a tourism cliché, not choices made for this brief. The designer checks the direction and every screen against this list. Using any of them needs a written reason in `direction.md`.
 
 - Cream background with a high-contrast serif and a terracotta accent; or near-black with a single acid-green or bright red accent; or a newspaper layout with thin rules and dense columns.
 - The SaaS card kit: everything in identical rounded cards with the same soft grey shadow, one border radius on everything, gradient washes as decoration.
@@ -762,6 +784,7 @@ These are the look of a generic template or AI-generated site, not choices made 
 - Headlines with one word picked out in italic, bold or another colour.
 - Numbered markers (01, 02, 03) on content that isn't a sequence.
 - Every section fading and sliding up on scroll; cards that lift or grow on hover.
+- **India tourism clichés:** saffron, white and green used as a decorative palette; mandala, paisley or rangoli patterns as background ornament; Taj Mahal, elephant or lotus silhouettes as icons; "exotic", "mystical" or "incredible" in the copy; Latin fonts dressed up to look like Devanagari, with a bar along the top.
 - From v1: green gradients, skewed image shapes, grey text below AA contrast.
 
 ### 9.4 Design system requirements
@@ -771,9 +794,9 @@ These are the look of a generic template or AI-generated site, not choices made 
 | **U1** | **Tokens.** `src/styles/tokens.css` defines CSS custom properties for colour (by role: `--color-bg`, `--color-surface`, `--color-text`, `--color-text-muted`, `--color-accent`, `--color-focus`, plus status colours), type (families from `next/font` variables, scale steps, weights, line heights), spacing (4px base: 4, 8, 12, 16, 24, 32, 48, 64, 96), radius (at most two values, each with a stated use), one elevation (for overlays only), and motion (durations and easing). Breakpoints are documented in `direction.md`, because custom properties can't be used in media queries. **No raw hex colours or pixel values outside `tokens.css`**; stylelint enforces this. |
 | **U2** | **Themes.** Light and dark themes follow `prefers-color-scheme`, by swapping token values only. Both themes meet the contrast rules in U22. |
 | **U3** | **CSS structure.** Global files (`reset.css`, `tokens.css`, `base.css`) are imported once in the root layout and use the cascade layers `reset, tokens, base, components, utilities`. Each component has a CSS Module that writes its rules inside `@layer components`. Selectors are single classes: no IDs, no `!important`, at most one level of nesting. |
-| **U4** | **Components** live in `src/components/ui/` with typed props, and are Server Components unless R1 requires otherwise. The minimum set: button (primary, secondary, quiet), link, text field, select, checkbox, file input with preview, star rating (display, plus a keyboard-usable input), alert and toast, difficulty symbol, price, start-date select, tour row, facts strip, itinerary, map frame, booking panel, review item, review form, guide item, avatar, pagination, empty state, confirm dialog (native `<dialog>`), header with mobile menu, footer, skip link, and a skeleton for each streamed section (R4). |
+| **U4** | **Components** live in `src/components/ui/` with typed props, and are Server Components unless R1 requires otherwise. The minimum set: button (primary, secondary, quiet), link, text field, select, checkbox, file input with preview, star rating (display, plus a keyboard-usable input), alert and toast, difficulty symbol, price, start-date select, tour row, facts strip, itinerary, map frame, booking panel, review item, review form, guide item, avatar (photo, or initials when there's no photo), photo credits, pagination, empty state, confirm dialog (native `<dialog>`), header with mobile menu, footer, skip link, and a skeleton for each streamed section (R4). |
 | **U5** | **Styleguide.** `/styleguide` (development and test only) shows every component in every state: default, hover, focus, active, disabled, error, pending and empty. It works in both themes and at mobile and desktop widths. |
-| **U6** | **Fonts** load through `next/font` (in `src/styles/fonts.ts`) with only the weights the design uses, exposed as CSS variables for the tokens. |
+| **U6** | **Fonts** load through `next/font` (in `src/styles/fonts.ts`) with only the weights and subsets the design uses (Latin now; Devanagari ready for Hindi), exposed as CSS variables for the tokens. |
 | **U7** | **Images.** Every image uses `next/image` with a correct `sizes` value and `priority` only on the first visible photo, so the browser gets right-sized files and the layout doesn't shift. Photos are never stretched or cut into shapes. |
 | **U8** | **Emails** are React Email components in `src/emails/`. They use the same palette and type, with a system-font fallback, and include a plain-text version. They're previewed with the React Email dev server and checked in Mailpit in light and dark mail clients. |
 
@@ -792,7 +815,7 @@ These are the look of a generic template or AI-generated site, not choices made 
 | **U17** | **Feedback:** every submit button shows a pending state (`useFormStatus`) and is disabled until the action finishes. Alerts and toasts use a live region. Messages follow the voice rules in §9.2. |
 | **U18** | **Error pages:** `not-found.tsx` and `error.tsx` in the new design, with a way back to the tours. They never show stack traces (S19). |
 | **U19** | **Header:** Tours, My tours, and either an account menu or "Log in" and "Sign up". On mobile, the menu is a button that opens and closes it, with `aria-expanded`. Without JavaScript, the links are shown in a plain list. |
-| **U20** | **Copy:** `docs/design/copy.md` holds the glossary (tour, start date, booking, guide, review) and the list of button and message wording. Pages use exactly that wording. |
+| **U20** | **Copy:** `docs/design/copy.md` holds the glossary (tour, start date, booking, guide, review), the list of button and message wording, and the Indian English and formatting rules from §9.2. Pages use exactly that wording. |
 
 ### 9.6 Accessibility, performance and visual quality
 
@@ -804,6 +827,7 @@ These are the look of a generic template or AI-generated site, not choices made 
 | **U24** | **Performance budget** (Lighthouse CI, mobile, on the overview and a tour page, against `next start`): Performance ≥ 90, Accessibility 100, Best Practices ≥ 95, SEO ≥ 95. LCP under 2.5 seconds, CLS under 0.1. JavaScript per R9. |
 | **U25** | **Motion:** one moment that plays by itself, the route line (§9.2). All other motion responds to something the user did (opening a menu or dialog, a toast appearing), lasts at most 200ms, and never runs on scroll. Everything respects `prefers-reduced-motion`. |
 | **U26** | **Visual regression:** Playwright screenshots of the styleguide, overview, tour page, My tours and account page at 375 and 1280px, in both themes. Baselines are generated in the CI container, because font rendering differs between machines. A changed baseline needs the lead's approval. |
+| **U27** | **Photo credits.** The seed photos are licensed CC BY, CC BY-SA or similar, which require credit. Each tour page has a "Photo credits" section listing every photo's author and licence, with links to the licence and the source page. `/credits` lists every photo on the site the same way. A test checks that every tour photo has a credit. |
 
 ### 9.7 Design process and gate
 
@@ -856,13 +880,13 @@ Teammates share one checkout. **Only edit files in your owned paths.** If you ne
 
 | Teammate | Owns (write access) | Main requirement IDs |
 |---|---|---|
-| **lead** | `plan.md`, `docs/contracts.md`, `docs/adr/`, `docs/openapi/openapi.yaml`, `docs/bundle-baseline.json`, `package.json` and lockfile, `tsconfig.json`, `test/setup.ts`, `test/helpers/`, all model files (`src/server/modules/*/model.ts`, written in Phase 0, then changed only through the lead) | Phase 0, the gates, Q8, Q10 |
+| **lead** | `plan.md`, `docs/contracts.md`, `docs/adr/`, `docs/openapi/openapi.yaml`, `docs/bundle-baseline.json`, `src/lib/format.ts`, `package.json` and lockfile, `tsconfig.json`, `test/setup.ts`, `test/helpers/`, all model files (`src/server/modules/*/model.ts`, written in Phase 0, then changed only through the lead) | Phase 0, the gates, Q8, Q10 |
 | **platform** | `next.config.ts`, `src/proxy.ts`, `src/instrumentation.ts`, `src/server/{config,deps,db,logger,errors,rate-limit}.ts`, `src/server/{api,actions,queue,storage,stripe,mailer}/**`, `src/server/images.ts`, `src/worker/**`, `src/app/{healthz,readyz}/**`, `scripts/check-*.ts`, Docker and compose files, `render.yaml`, `lighthouserc.json`, `.github/`, ESLint, stylelint and Prettier configs | S2, S9–S12, S15, S16, S18, S19, S23 (proxy side), B9, B10, B17, B18, R2, R9, D1–D13 |
 | **identity** | `src/server/session.ts`, `src/server/redirects.ts`, `src/server/modules/{auth,users}/**` except models, `src/app/api/v1/{auth,users}/**`, `docs/openapi/paths/{auth,users}.yaml` | S3–S9, S13, S14, S20, S22, S23, B13–B16 |
-| **catalog** | `src/server/modules/{tours,reviews}/**` except models, `src/app/api/v1/{tours,reviews}/**`, `scripts/seed.ts`, `docs/openapi/paths/{tours,reviews}.yaml` | S4, S5, S7, B1–B6, B11, B12, B16, R5 (cache tags), D10 |
-| **commerce** | `src/server/modules/bookings/**` except the model, `src/app/api/v1/bookings/**`, `src/app/webhooks/stripe/**`, `docs/openapi/paths/bookings.yaml` | S1 (bookings), S17, B7, B8 |
+| **catalog** | `src/server/modules/{tours,reviews}/**` except models, `src/app/api/v1/{tours,reviews}/**`, `scripts/seed.ts`, `seed/**`, `docs/openapi/paths/{tours,reviews}.yaml` | S4, S5, S7, B1–B6, B11, B12, B16, B19, R5 (cache tags), D10 |
+| **commerce** | `src/server/modules/bookings/**` except the model, `src/app/api/v1/bookings/**`, `src/app/webhooks/stripe/**`, `docs/openapi/paths/bookings.yaml` | S1 (bookings), S17, B7, B8, B20 |
 | **designer** | `docs/design/**`, `src/styles/**`, `src/components/ui/**`, `src/emails/**`, `src/app/styleguide/**` | U1–U8, U20, U25, and the look of everything |
-| **web** | `src/app/**` except `api/`, `webhooks/`, `healthz/`, `readyz/` and `styleguide/`; `src/components/features/**`; `public/**` | R1, R3, R4, R6–R8, R10, R11, S21, U9–U19, U21, U23 |
+| **web** | `src/app/**` except `api/`, `webhooks/`, `healthz/`, `readyz/` and `styleguide/`; `src/components/features/**`; `public/**` | R1, R3, R4, R6–R8, R10, R11, S21, U9–U19, U21, U23, U27 |
 | **reviewer** | `test/security/**`, `test/regression/**`, `test/e2e/**`, `test/a11y/**`, `test/visual/**`, `docs/design/a11y-walkthrough.md`. Read-only everywhere else. | All S and B IDs, R5 (two-user test), R11, U22, U24, U26 (verification) |
 
 Each module owner writes the integration tests for their module under `test/integration/<module>/`. `web` and `designer` write component tests under `test/components/`.
@@ -910,12 +934,12 @@ Phase D (design) runs **at the same time** as Phase 1, because it doesn't need t
 | Task | Work | Depends on |
 |---|---|---|
 | P0-1 | Check current stable Next.js, React and Node versions and the Next.js docs; write `docs/adr/0001-versions.md`. Run `create-next-app` (TypeScript, App Router, `src/` directory, ESLint, no Tailwind). Install every dependency from §2. Add `.gitignore`, `.env.example`, stylelint, Prettier and Vitest configs, and the npm scripts `dev`, `build`, `start`, `worker`, `typecheck`, `lint`, `format:check`, `test`, `test:e2e` and `seed`. | none |
-| P0-2 | `src/server/config.ts` (Zod), `instrumentation.ts`, `logger.ts`, `errors.ts` (AppError and the codes from §4.2), `deps.ts` | P0-1 |
+| P0-2 | `src/server/config.ts` (Zod), `instrumentation.ts`, `logger.ts`, `errors.ts` (AppError and the codes from §4.2), `deps.ts`, `src/lib/format.ts` with tests for B19 and B20 | P0-1 |
 | P0-3 | `db.ts` (connection cached on `globalThis`) and all four models exactly as in §1.3, with DTO mappers | P0-2 |
 | P0-4 | `session.ts` (`getSession`, `getCurrentUser`, `requireUser`, `requireRole`), `redirects.ts` (`safeNext`), and `bookingsService.hasPaidBooking` | P0-3 |
 | P0-5 | `withApi`, `action()`, `ActionState`, `parseQuery`, response helpers; `/healthz` | P0-4 |
 | P0-6 | Fake adapters (mailer, storage, Stripe, rate limiter), `test/setup.ts` (including the `next/headers` mock), factories, `callRoute`, `mockSession`; one example test each for a Route Handler, a Server Action and a page data function | P0-5 |
-| P0-7 | `docs/contracts.md` (§4 with exact TypeScript signatures), empty module folders, a placeholder page for every route in §1.5, `docs/bundle-baseline.json` from a first `next build` (R9), the `docs/openapi` skeleton, and a CI workflow running typecheck, lint, tests and build | P0-6 |
+| P0-7 | The map-tile decision (D14) as an ADR. `docs/contracts.md` (§4 with exact TypeScript signatures), empty module folders, a placeholder page for every route in §1.5, `docs/bundle-baseline.json` from a first `next build` (R9), the `docs/openapi` skeleton, and a CI workflow running typecheck, lint, tests and build | P0-6 |
 
 **Phase 0 gate:**
 - `npm run typecheck && npm run lint && npm test && npm run build` pass.
@@ -950,13 +974,13 @@ Phase D (design) runs **at the same time** as Phase 1, because it doesn't need t
 | P1-CA2 | catalog | Tour service with cache tags, tour CRUD and `PUT /tours/[id]/images` | S4, B4, B5, B12, B16, R5 | P1-CA1, P1-PL3 |
 | P1-CA3 | catalog | `top-5-cheap` alias, stats, monthly plan, geo endpoints | B2, B3 | P1-CA1 |
 | P1-CA4 | catalog | Reviews: service with cache tags, API, the three review actions, `canReview`, rating recalculation | S4, S5, B6, R5 | P1-CA2 |
-| P1-CA5 | catalog | `scripts/seed.ts`, which uploads photos and sets future start dates | D10 | P1-CA2 |
-| P1-CO1 | commerce | Checkout service, `POST /api/v1/bookings/checkout-session` and `startCheckoutAction` (redirects to Stripe) | S9, S17, B8 | P0 |
+| P1-CA5 | catalog | `scripts/seed.ts` as described in D10 and `seed/README.md`: loads users, tours (with photo credits), bookings and reviews, uploads photos, shifts dates when needed | D10, B19 | P1-CA2 |
+| P1-CO1 | commerce | Checkout service in INR, `POST /api/v1/bookings/checkout-session` and `startCheckoutAction` (redirects to Stripe) | S9, S17, B8, B20 | P0 |
 | P1-CO2 | commerce | Stripe webhook Route Handler: signature check, idempotency, booking-confirmed email | S17, B7 | P1-CO1, P1-PL2 |
 | P1-CO3 | commerce | `listMine`, `GET /api/v1/bookings/mine` and admin booking CRUD | S1, S5, B12 | P0 |
 | P1-WE1 | web | App shell: route groups, root layout with header and footer, `MobileMenu`, `not-found.tsx`, `error.tsx`, `global-error.tsx`, `loading.tsx` files, `generateMetadata`, `sitemap.ts`, `robots.ts`; unstyled versions of every page in §1.5 | R1, R4, R10, S19, U9, U18, U19 | P0 |
 | P1-WE2 | web | Overview: server-rendered GET filter form, sorting, pagination, empty state | R3, R11, U10 | P1-WE1, P1-CA1, PD-4 |
-| P1-WE3 | web | Tour page: server-rendered sections with `<Suspense>`, `RouteMap` (lazy, browser only), booking form, review list, `ReviewForm` | R3, R4, R6, R8, U11, U14 | P1-WE1, P1-CA4, P1-CO1, PD-4 |
+| P1-WE3 | web | Tour page: server-rendered sections with `<Suspense>`, `RouteMap` (lazy, browser only, tiles per D14), booking form, review list, `ReviewForm`, photo credits; the `/credits` page | R3, R4, R6, R8, U11, U14, U27, D14 | P1-WE1, P1-CA4, P1-CO1, PD-4 |
 | P1-WE4 | web | Login, signup, forgot-password and reset-password pages using the auth actions | R7, U16 | P1-WE1, P1-ID2, PD-4 |
 | P1-WE5 | web | Account page, `/me/deactivate`, My tours, `BookingConfirmationPoller` | R7, U12, U13, U15 | P1-WE1, P1-ID3, P1-CO3, PD-4 |
 | P1-RV1 | reviewer | Access-matrix test for every Route Handler and Server Action, plus the S23 test that sends the `x-middleware-subrequest` header | S1, S23 | P0 |
@@ -1003,7 +1027,7 @@ Phase D (design) runs **at the same time** as Phase 1, because it doesn't need t
 
 **Backend**
 - [ ] Every Route Handler in §1.4 and every Server Action in §1.6 exists and matches the access-matrix test.
-- [ ] Every ID from S1 to S23 and B1 to B18 has a passing, tagged regression test.
+- [ ] Every ID from S1 to S23 and B1 to B20 has a passing, tagged regression test.
 - [ ] Coverage thresholds from Q6 are met.
 - [ ] Typecheck, lint, format check, audit, knip, the client-boundary check, the `NEXT_PUBLIC_` check and the OpenAPI lint pass in CI.
 - [ ] `docker compose up` starts the web server, worker, Mongo, Redis and Mailpit; `/readyz` returns 200.
@@ -1028,6 +1052,9 @@ Phase D (design) runs **at the same time** as Phase 1, because it doesn't need t
 - [ ] Lighthouse budgets (U24) pass on the overview and a tour page.
 - [ ] Screenshot baselines exist for the pages in U26 and match the approved direction.
 - [ ] Emails render in the new design in Mailpit.
+- [ ] Prices show as ₹ with Indian grouping and dates in IST on every page and email; the B19 time-zone test passes.
+- [ ] Every tour photo has a visible credit on its tour page and on `/credits` (U27).
+- [ ] No placeholder text, names or images appear anywhere (§9.1).
 
 **Process**
 - [ ] Every deviation from this plan has an ADR in `docs/adr/`.
@@ -1039,8 +1066,8 @@ Phase D (design) runs **at the same time** as Phase 1, because it doesn't need t
 Paste this into Claude Code, with agent teams enabled, in the repository that contains this file:
 
 ```text
-Read plan.md in full. You are the team lead for the Natours v2 rebuild: a full-stack Next.js app with
-a full redesign, rendered on the server wherever possible.
+Read plan.md and seed/README.md in full. You are the team lead for the Natours v2 rebuild: a full-stack
+Next.js app for tours across India, with a full redesign, rendered on the server wherever possible.
 
 1. Do Phase 0 (P0-1 … P0-7) yourself. Start by checking the current stable Next.js, React and Node
    versions and the Next.js docs, and record them in docs/adr/0001-versions.md. Do not create

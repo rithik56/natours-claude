@@ -1,470 +1,1572 @@
 [
   {
-    "startLocation": {
-      "description": "Miami, USA",
-      "type": "Point",
-      "coordinates": [-80.185942, 25.774772],
-      "address": "301 Biscayne Blvd, Miami, FL 33132, USA"
-    },
-    "ratingsAverage": 4.8,
-    "ratingsQuantity": 6,
-    "images": ["tour-2-1.jpg", "tour-2-2.jpg", "tour-2-3.jpg"],
-    "startDates": [
-      "2021-06-19T09:00:00.000Z",
-      "2021-07-20T09:00:00.000Z",
-      "2021-08-18T09:00:00.000Z"
-    ],
-    "_id": "5c88fa8cf4afda39709c2955",
-    "name": "The Sea Explorer",
-    "duration": 7,
-    "maxGroupSize": 15,
+    "_id": "feca81d3ccf5abe9838809ad",
+    "name": "Valley of Flowers Trek",
+    "slug": "valley-of-flowers-trek",
+    "duration": 6,
+    "maxGroupSize": 14,
     "difficulty": "medium",
-    "guides": ["5c8a22c62f8fb814b56fa18b", "5c8a1f4e2f8fb814b56fa185"],
-    "price": 497,
-    "summary": "Exploring the jaw-dropping US east coast by foot and by boat",
-    "description": "Consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\nIrure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-    "imageCover": "tour-2-cover.jpg",
+    "price": 18999,
+    "summary": "Walk through alpine meadows in full bloom and climb to the glacial lake at Hemkund Sahib.",
+    "description": "The Valley of Flowers is a high-altitude national park in Uttarakhand's Chamoli district and part of a UNESCO World Heritage Site. During the monsoon its meadows fill with hundreds of species of wildflowers, from blue poppies to cobra lilies, framed by waterfalls and snowy peaks.\nFrom Rishikesh we drive to Joshimath (Jyotirmath) and Govindghat, then walk up to the village of Ghangaria, our base for a full day in the valley and a climb to Gurdwara Hemkund Sahib, which sits beside a glacial lake at over 4,600 metres. Expect 10 to 14 kilometres of steady walking on trekking days. Guesthouse stays, meals and park permits are included.",
+    "imageCover": "valley-of-flowers-trek-cover.jpg",
+    "images": [
+      "valley-of-flowers-trek-1.jpg",
+      "valley-of-flowers-trek-2.jpg",
+      "valley-of-flowers-trek-3.jpg"
+    ],
+    "startDates": [
+      "2027-07-10",
+      "2027-07-31",
+      "2027-08-21"
+    ],
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        78.29722,
+        30.10833
+      ],
+      "address": "Rishikesh, Uttarakhand",
+      "description": "Rishikesh"
+    },
     "locations": [
       {
-        "_id": "5c88fa8cf4afda39709c2959",
-        "description": "Lummus Park Beach",
         "type": "Point",
-        "coordinates": [-80.128473, 25.781842],
+        "coordinates": [
+          79.565,
+          30.555
+        ],
+        "description": "Drive along the Alaknanda river to Joshimath",
         "day": 1
       },
       {
-        "_id": "5c88fa8cf4afda39709c2958",
-        "description": "Islamorada",
         "type": "Point",
-        "coordinates": [-80.647885, 24.909047],
+        "coordinates": [
+          79.59359,
+          30.7017
+        ],
+        "description": "Drive to Govindghat, then walk up to Ghangaria",
         "day": 2
       },
       {
-        "_id": "5c88fa8cf4afda39709c2957",
-        "description": "Sombrero Beach",
         "type": "Point",
-        "coordinates": [-81.0784, 24.707496],
+        "coordinates": [
+          79.6175,
+          30.73
+        ],
+        "description": "A full day in the Valley of Flowers",
         "day": 3
       },
       {
-        "_id": "5c88fa8cf4afda39709c2956",
-        "description": "West Key",
         "type": "Point",
-        "coordinates": [-81.768719, 24.552242],
+        "coordinates": [
+          79.61598,
+          30.70022
+        ],
+        "description": "Climb to Gurdwara Hemkund Sahib and its glacial lake",
+        "day": 4
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          79.55,
+          30.62
+        ],
+        "description": "Walk down to Govindghat and drive to Joshimath",
         "day": 5
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          78.29722,
+          30.10833
+        ],
+        "description": "Drive back to Rishikesh",
+        "day": 6
       }
-    ]
-  },
-  {
-    "startLocation": {
-      "description": "Banff, CAN",
-      "type": "Point",
-      "coordinates": [-115.570154, 51.178456],
-      "address": "224 Banff Ave, Banff, AB, Canada"
-    },
-    "ratingsAverage": 5,
-    "ratingsQuantity": 9,
-    "images": ["tour-1-1.jpg", "tour-1-2.jpg", "tour-1-3.jpg"],
-    "startDates": [
-      "2021-04-25T09:00:00.000Z",
-      "2021-07-20T09:00:00.000Z",
-      "2021-10-05T09:00:00.000Z"
     ],
-    "_id": "5c88fa8cf4afda39709c2951",
-    "name": "The Forest Hiker",
-    "duration": 5,
-    "maxGroupSize": 25,
-    "difficulty": "easy",
     "guides": [
-      "5c8a21d02f8fb814b56fa189",
-      "5c8a201e2f8fb814b56fa186",
-      "5c8a1f292f8fb814b56fa184"
+      "2edcba4a2bb2e3be057fed4e",
+      "fc06743eddcfd358ec4ff326"
     ],
-    "price": 397,
-    "summary": "Breathtaking hike through the Canadian Banff National Park",
-    "description": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\nLorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-    "imageCover": "tour-1-cover.jpg",
-    "locations": [
+    "photoCredits": [
       {
-        "_id": "5c88fa8cf4afda39709c2954",
-        "description": "Banff National Park",
-        "type": "Point",
-        "coordinates": [-116.214531, 51.417611],
-        "day": 1
+        "file": "valley-of-flowers-trek-cover.jpg",
+        "title": "Valley of flowers national park, Uttarakhand, India 03 (edit).jpg",
+        "author": "Rohit Sharma (edited by UnpetitproleX)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Valley_of_flowers_national_park,_Uttarakhand,_India_03_(edit).jpg"
       },
       {
-        "_id": "5c88fa8cf4afda39709c2953",
-        "description": "Jasper National Park",
-        "type": "Point",
-        "coordinates": [-118.076152, 52.875223],
-        "day": 3
+        "file": "valley-of-flowers-trek-1.jpg",
+        "title": "Valley of flowers national park, Uttarakhand, India 01.jpg",
+        "author": "Rohit Sharma",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Valley_of_flowers_national_park,_Uttarakhand,_India_01.jpg"
       },
       {
-        "_id": "5c88fa8cf4afda39709c2952",
-        "description": "Glacier National Park of Canada",
-        "type": "Point",
-        "coordinates": [-117.490309, 51.261937],
-        "day": 5
+        "file": "valley-of-flowers-trek-2.jpg",
+        "title": "Hemkund Lake.JPG",
+        "author": "Amareshwara Sainadh",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hemkund_Lake.JPG"
+      },
+      {
+        "file": "valley-of-flowers-trek-3.jpg",
+        "title": "Brahma kamal at Valley of flowers national park, India.jpg",
+        "author": "Rohit Sharma",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Brahma_kamal_at_Valley_of_flowers_national_park,_India.jpg"
       }
-    ]
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.5
   },
   {
-    "startLocation": {
-      "description": "Aspen, USA",
-      "type": "Point",
-      "coordinates": [-106.822318, 39.190872],
-      "address": "419 S Mill St, Aspen, CO 81611, USA"
-    },
-    "ratingsAverage": 4.5,
-    "ratingsQuantity": 6,
-    "images": ["tour-3-1.jpg", "tour-3-2.jpg", "tour-3-3.jpg"],
-    "startDates": [
-      "2022-01-05T10:00:00.000Z",
-      "2022-02-12T10:00:00.000Z",
-      "2023-01-06T10:00:00.000Z"
-    ],
-    "_id": "5c88fa8cf4afda39709c295a",
-    "name": "The Snow Adventurer",
-    "duration": 4,
-    "maxGroupSize": 10,
-    "difficulty": "difficult",
-    "guides": [
-      "5c8a21d02f8fb814b56fa189",
-      "5c8a23412f8fb814b56fa18c",
-      "5c8a1f4e2f8fb814b56fa185"
-    ],
-    "price": 997,
-    "summary": "Exciting adventure in the snow with snowboarding and skiing",
-    "description": "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum!\nDolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur, exercitation ullamco laboris nisi ut aliquip. Lorem ipsum dolor sit amet, consectetur adipisicing elit!",
-    "imageCover": "tour-3-cover.jpg",
-    "locations": [
-      {
-        "_id": "5c88fa8cf4afda39709c295c",
-        "description": "Aspen Highlands",
-        "type": "Point",
-        "coordinates": [-106.855385, 39.182677],
-        "day": 1
-      },
-      {
-        "_id": "5c88fa8cf4afda39709c295b",
-        "description": "Beaver Creek",
-        "type": "Point",
-        "coordinates": [-106.516623, 39.60499],
-        "day": 2
-      }
-    ]
-  },
-  {
-    "startLocation": {
-      "description": "Las Vegas, USA",
-      "type": "Point",
-      "coordinates": [-115.172652, 36.110904],
-      "address": "3663 S Las Vegas Blvd, Las Vegas, NV 89109, USA"
-    },
-    "ratingsAverage": 4.7,
-    "ratingsQuantity": 7,
-    "images": ["tour-5-1.jpg", "tour-5-2.jpg", "tour-5-3.jpg"],
-    "startDates": [
-      "2021-08-05T09:00:00.000Z",
-      "2022-03-20T10:00:00.000Z",
-      "2022-08-12T09:00:00.000Z"
-    ],
-    "_id": "5c88fa8cf4afda39709c2961",
-    "name": "The Park Camper",
-    "duration": 10,
-    "maxGroupSize": 15,
+    "_id": "7512c23d8a627bdb4f4a3b7c",
+    "name": "Kedarkantha Winter Trek",
+    "slug": "kedarkantha-winter-trek",
+    "duration": 6,
+    "maxGroupSize": 16,
     "difficulty": "medium",
-    "guides": [
-      "5c8a21f22f8fb814b56fa18a",
-      "5c8a23412f8fb814b56fa18c",
-      "5c8a201e2f8fb814b56fa186"
+    "price": 14999,
+    "summary": "A snow trek through pine forest to a summit with views across the Garhwal Himalaya.",
+    "description": "Kedarkantha is one of the best-known winter treks in India. The trail climbs from the village of Sankri through pine and oak forest inside Govind Pashu Vihar National Park to open snowfields and a summit at around 3,800 metres, with views of Swargarohini, Bandarpoonch and Black Peak.\nWe drive from Dehradun to Sankri, camp at Juda Ka Talab and the Kedarkantha base, and leave for the summit before dawn. Tents, sleeping bags, microspikes and all meals on the trail are included. You should be comfortable walking for five to seven hours a day with a light pack.",
+    "imageCover": "kedarkantha-winter-trek-cover.jpg",
+    "images": [
+      "kedarkantha-winter-trek-1.jpg",
+      "kedarkantha-winter-trek-2.jpg",
+      "kedarkantha-winter-trek-3.jpg"
     ],
-    "price": 1497,
-    "summary": "Breathing in Nature in America's most spectacular National Parks",
-    "description": "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\nDuis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum!",
-    "imageCover": "tour-5-cover.jpg",
-    "locations": [
-      {
-        "_id": "5c88fa8cf4afda39709c2965",
-        "description": "Zion Canyon National Park",
-        "type": "Point",
-        "coordinates": [-112.987418, 37.198125],
-        "day": 1
-      },
-      {
-        "_id": "5c88fa8cf4afda39709c2964",
-        "description": "Antelope Canyon",
-        "type": "Point",
-        "coordinates": [-111.376161, 36.86438],
-        "day": 4
-      },
-      {
-        "_id": "5c88fa8cf4afda39709c2963",
-        "description": "Grand Canyon National Park",
-        "type": "Point",
-        "coordinates": [-112.115763, 36.058973],
-        "day": 5
-      },
-      {
-        "_id": "5c88fa8cf4afda39709c2962",
-        "description": "Joshua Tree National Park",
-        "type": "Point",
-        "coordinates": [-116.107963, 34.011646],
-        "day": 9
-      }
-    ]
-  },
-  {
-    "startLocation": {
-      "description": "NYC, USA",
-      "type": "Point",
-      "coordinates": [-73.985141, 40.75894],
-      "address": "Manhattan, NY 10036, USA"
-    },
-    "ratingsAverage": 4.6,
-    "ratingsQuantity": 5,
-    "images": ["tour-4-1.jpg", "tour-4-2.jpg", "tour-4-3.jpg"],
     "startDates": [
-      "2021-03-11T10:00:00.000Z",
-      "2021-05-02T09:00:00.000Z",
-      "2021-06-09T09:00:00.000Z"
+      "2026-12-19",
+      "2027-01-16",
+      "2027-02-13"
     ],
-    "_id": "5c88fa8cf4afda39709c295d",
-    "name": "The City Wanderer",
-    "duration": 9,
-    "maxGroupSize": 20,
-    "difficulty": "easy",
-    "guides": ["5c8a22c62f8fb814b56fa18b", "5c8a201e2f8fb814b56fa186"],
-    "price": 1197,
-    "summary": "Living the life of Wanderlust in the US' most beatiful cities",
-    "description": "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat lorem ipsum dolor sit amet.\nConsectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur, nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat!",
-    "imageCover": "tour-4-cover.jpg",
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        78.029,
+        30.345
+      ],
+      "address": "Dehradun, Uttarakhand",
+      "description": "Dehradun"
+    },
     "locations": [
       {
-        "_id": "5c88fa8cf4afda39709c2960",
-        "description": "New York",
         "type": "Point",
-        "coordinates": [-73.967696, 40.781821],
+        "coordinates": [
+          78.1837,
+          31.07844
+        ],
+        "description": "Drive from Dehradun to the village of Sankri",
         "day": 1
       },
       {
-        "_id": "5c88fa8cf4afda39709c295f",
-        "description": "Los Angeles",
         "type": "Point",
-        "coordinates": [-118.324396, 34.097984],
+        "coordinates": [
+          78.177319,
+          31.031428
+        ],
+        "description": "Camp below the summit at Kedarkantha base",
         "day": 3
       },
       {
-        "_id": "5c88fa8cf4afda39709c295e",
-        "description": "San Francisco",
         "type": "Point",
-        "coordinates": [-122.408865, 37.787825],
-        "day": 5
-      }
-    ]
-  },
-  {
-    "startLocation": {
-      "description": "California, USA",
-      "type": "Point",
-      "coordinates": [-118.803461, 34.006072],
-      "address": "29130 Cliffside Dr, Malibu, CA 90265, USA"
-    },
-    "ratingsAverage": 3.9,
-    "ratingsQuantity": 7,
-    "images": ["tour-6-1.jpg", "tour-6-2.jpg", "tour-6-3.jpg"],
-    "startDates": [
-      "2021-07-19T09:00:00.000Z",
-      "2021-09-06T09:00:00.000Z",
-      "2022-03-18T10:00:00.000Z"
-    ],
-    "_id": "5c88fa8cf4afda39709c2966",
-    "name": "The Sports Lover",
-    "duration": 14,
-    "maxGroupSize": 8,
-    "difficulty": "difficult",
-    "guides": [
-      "5c8a21f22f8fb814b56fa18a",
-      "5c8a1f292f8fb814b56fa184",
-      "5c8a1f4e2f8fb814b56fa185"
-    ],
-    "price": 2997,
-    "summary": "Surfing, skating, parajumping, rock climbing and more, all in one tour",
-    "description": "Nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\nVoluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur!",
-    "imageCover": "tour-6-cover.jpg",
-    "locations": [
-      {
-        "_id": "5c88fa8cf4afda39709c296b",
-        "description": "Point Dume Beach",
-        "type": "Point",
-        "coordinates": [-118.809361, 34.003098],
-        "day": 1
-      },
-      {
-        "_id": "5c88fa8cf4afda39709c296a",
-        "description": "Venice Skate Park",
-        "type": "Point",
-        "coordinates": [-118.47549, 33.987367],
+        "coordinates": [
+          78.1719,
+          31.02253
+        ],
+        "description": "Summit day, starting before dawn",
         "day": 4
       },
       {
-        "_id": "5c88fa8cf4afda39709c2969",
-        "description": "San Diego Skydive",
         "type": "Point",
-        "coordinates": [-116.830104, 33.022843],
+        "coordinates": [
+          78.1837,
+          31.07844
+        ],
+        "description": "Descend through the forest to Sankri",
+        "day": 5
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          78.029,
+          30.345
+        ],
+        "description": "Drive back to Dehradun",
+        "day": 6
+      }
+    ],
+    "guides": [
+      "2edcba4a2bb2e3be057fed4e",
+      "fc06743eddcfd358ec4ff326"
+    ],
+    "photoCredits": [
+      {
+        "file": "kedarkantha-winter-trek-cover.jpg",
+        "title": "Kedarkantha Peak.jpg",
+        "author": "Kanthi Kiran",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kedarkantha_Peak.jpg"
+      },
+      {
+        "file": "kedarkantha-winter-trek-1.jpg",
+        "title": "Juda ka Talab.jpg",
+        "author": "Kanthi Kiran",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Juda_ka_Talab.jpg"
+      },
+      {
+        "file": "kedarkantha-winter-trek-2.jpg",
+        "title": "Kedarkantha.jpg",
+        "author": "rakesh kumar",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kedarkantha.jpg"
+      },
+      {
+        "file": "kedarkantha-winter-trek-3.jpg",
+        "title": "A view from peak.jpg",
+        "author": "rakesh kumar",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_view_from_peak.jpg"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.3
+  },
+  {
+    "_id": "2a1f7d966889438bf4a94a47",
+    "name": "Ladakh High Passes",
+    "slug": "ladakh-high-passes",
+    "duration": 8,
+    "maxGroupSize": 12,
+    "difficulty": "difficult",
+    "price": 42999,
+    "summary": "Cross some of the highest roads in the world to Nubra's dunes and the blue water of Pangong Tso.",
+    "description": "Ladakh is a high-altitude desert of monasteries, river valleys and mountain passes above 5,000 metres. This trip starts with two unhurried days in Leh, at around 3,500 metres, so your body can adjust before we go higher.\nFrom Leh we cross Khardung La into the Nubra Valley, visit Diskit Monastery and the sand dunes and Bactrian camels at Hunder, then follow the Shyok river to the shore of Pangong Tso. We return over Chang La and finish at Hemis Monastery. Permits, a dedicated vehicle and driver, oxygen on board and an experienced local guide are included.",
+    "imageCover": "ladakh-high-passes-cover.jpg",
+    "images": [
+      "ladakh-high-passes-1.jpg",
+      "ladakh-high-passes-2.jpg",
+      "ladakh-high-passes-3.jpg"
+    ],
+    "startDates": [
+      "2027-06-12",
+      "2027-07-17",
+      "2027-09-04"
+    ],
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        77.57726,
+        34.15287
+      ],
+      "address": "Leh, Ladakh",
+      "description": "Leh"
+    },
+    "locations": [
+      {
+        "type": "Point",
+        "coordinates": [
+          77.57726,
+          34.15287
+        ],
+        "description": "Arrive in Leh and rest",
+        "day": 1
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          77.6665,
+          34.05567
+        ],
+        "description": "Morning prayers at Thiksey Monastery",
+        "day": 2
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          77.60417,
+          34.27833
+        ],
+        "description": "Cross Khardung La and drop into the Nubra Valley",
+        "day": 3
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          77.49482,
+          34.57584
+        ],
+        "description": "Diskit Monastery and the dunes at Hunder",
+        "day": 4
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          78.4573,
+          33.90719
+        ],
+        "description": "Along the Shyok river to Pangong Tso",
+        "day": 5
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          77.93054,
+          34.04704
+        ],
+        "description": "Sunrise at the lake, then over Chang La to Leh",
         "day": 6
       },
       {
-        "_id": "5c88fa8cf4afda39709c2968",
-        "description": "Kern River Rafting",
         "type": "Point",
-        "coordinates": [-118.4547, 35.710359],
+        "coordinates": [
+          77.70283,
+          33.91248
+        ],
+        "description": "Hemis Monastery and a farewell dinner",
         "day": 7
       },
       {
-        "_id": "5c88fa8cf4afda39709c2967",
-        "description": "Yosemite National Park",
         "type": "Point",
-        "coordinates": [-119.600492, 37.742371],
-        "day": 10
+        "coordinates": [
+          77.57726,
+          34.15287
+        ],
+        "description": "Fly home from Leh",
+        "day": 8
       }
-    ]
+    ],
+    "guides": [
+      "40d533933b377c8d3d0525d5",
+      "2c51ee0f287a344f83ee82a9"
+    ],
+    "photoCredits": [
+      {
+        "file": "ladakh-high-passes-cover.jpg",
+        "title": "Pangong Tso VM.JPG",
+        "author": "Vishal Akki",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pangong_Tso_VM.JPG"
+      },
+      {
+        "file": "ladakh-high-passes-1.jpg",
+        "title": "Nubra Valley 2.jpg",
+        "author": "KennyOMG",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nubra_Valley_2.jpg"
+      },
+      {
+        "file": "ladakh-high-passes-2.jpg",
+        "title": "Thiksey Monastery, Ladakh 01.jpg",
+        "author": "Bernard Gagnon",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Thiksey_Monastery,_Ladakh_01.jpg"
+      },
+      {
+        "file": "ladakh-high-passes-3.jpg",
+        "title": "Saser Muztagh from Khardung La 2.jpg",
+        "author": "Vyacheslav Argenberg",
+        "license": "CC BY 2.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Saser_Muztagh_from_Khardung_La_2.jpg"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.5
   },
   {
-    "startLocation": {
-      "description": "Utah, USA",
-      "type": "Point",
-      "coordinates": [-109.55099, 37.283469],
-      "address": "Bluff, UT 84512, USA"
-    },
-    "ratingsAverage": 4.8,
-    "ratingsQuantity": 6,
-    "images": ["tour-8-1.jpg", "tour-8-2.jpg", "tour-8-3.jpg"],
-    "startDates": [
-      "2021-03-23T10:00:00.000Z",
-      "2021-10-25T09:00:00.000Z",
-      "2022-01-30T10:00:00.000Z"
-    ],
-    "_id": "5c88fa8cf4afda39709c2970",
-    "name": "The Star Gazer",
-    "duration": 9,
-    "maxGroupSize": 8,
+    "_id": "0a774089ad654650d1deea80",
+    "name": "Spiti Valley Star Gazer",
+    "slug": "spiti-valley-star-gazer",
+    "duration": 7,
+    "maxGroupSize": 10,
     "difficulty": "medium",
-    "guides": ["5c8a21d02f8fb814b56fa189", "5c8a1f292f8fb814b56fa184"],
-    "price": 2997,
-    "summary": "The most remote and stunningly beautiful places for seeing the night sky",
-    "description": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.\nLorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-    "imageCover": "tour-8-cover.jpg",
+    "price": 32999,
+    "summary": "High desert villages, old monasteries and some of the darkest night skies in India.",
+    "description": "Spiti is a cold desert valley in Himachal Pradesh, cut off by snow for half the year. Its high villages, thin dry air and almost no light pollution make it one of the best places in India to see the Milky Way with the naked eye.\nWe drive from Manali through the Atal Tunnel to the crescent-shaped lake of Chandra Taal, then over Kunzum Pass to Kaza. From there we visit Key Monastery, Kibber, Langza, Hikkim and Komic, with telescope sessions on clear nights. Homestays, meals, a vehicle with driver and permits are included.",
+    "imageCover": "spiti-valley-star-gazer-cover.jpg",
+    "images": [
+      "spiti-valley-star-gazer-1.jpg",
+      "spiti-valley-star-gazer-2.jpg",
+      "spiti-valley-star-gazer-3.jpg"
+    ],
+    "startDates": [
+      "2027-06-05",
+      "2027-08-07",
+      "2027-09-18"
+    ],
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        77.18925,
+        32.24318
+      ],
+      "address": "Manali, Himachal Pradesh",
+      "description": "Manali"
+    },
     "locations": [
       {
-        "_id": "5c88fa8cf4afda39709c2973",
-        "description": "Natural Bridges National Monument",
         "type": "Point",
-        "coordinates": [-109.99953, 37.629017],
+        "coordinates": [
+          77.61706,
+          32.47518
+        ],
+        "description": "Through the Atal Tunnel to Chandra Taal",
         "day": 1
       },
       {
-        "_id": "5c88fa8cf4afda39709c2972",
-        "description": "Horseshoe Bend",
         "type": "Point",
-        "coordinates": [-111.50954, 36.883269],
+        "coordinates": [
+          77.64853,
+          32.4158
+        ],
+        "description": "Over Kunzum Pass to Kaza",
+        "day": 2
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          78.01194,
+          32.29778
+        ],
+        "description": "Key Monastery and the village of Kibber",
         "day": 3
       },
       {
-        "_id": "5c88fa8cf4afda39709c2971",
-        "description": "Death Valley National Park",
         "type": "Point",
-        "coordinates": [-117.07399, 36.501435],
+        "coordinates": [
+          78.0816,
+          32.2738
+        ],
+        "description": "Fossils at Langza and a night under the stars",
+        "day": 4
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          78.08333,
+          32.23333
+        ],
+        "description": "Post a letter from Hikkim, then on to Komic",
+        "day": 5
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          78.21194,
+          32.09056
+        ],
+        "description": "Dhankar Monastery above the Spiti and Pin rivers",
         "day": 6
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          77.18925,
+          32.24318
+        ],
+        "description": "Long drive back to Manali",
+        "day": 7
       }
-    ]
+    ],
+    "guides": [
+      "40d533933b377c8d3d0525d5",
+      "5422d0050fdeb751d13f7288"
+    ],
+    "photoCredits": [
+      {
+        "file": "spiti-valley-star-gazer-cover.jpg",
+        "title": "Key Monastery - Spiti -Himachal Pradesh MG 6796.jpg",
+        "author": "Prasad Gaude",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Key_Monastery_-_Spiti_-Himachal_Pradesh_MG_6796.jpg"
+      },
+      {
+        "file": "spiti-valley-star-gazer-1.jpg",
+        "title": "Chandratal July 2017.jpg",
+        "author": "Wayfarersonmove",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chandratal_July_2017.jpg"
+      },
+      {
+        "file": "spiti-valley-star-gazer-2.jpg",
+        "title": "Dhankar Gompa, Spiti.jpg",
+        "author": "Deepank Ranka",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dhankar_Gompa,_Spiti.jpg"
+      },
+      {
+        "file": "spiti-valley-star-gazer-3.jpg",
+        "title": "Spiti River Kaza Himachal Jun18 D72 7232.jpg",
+        "author": "This Photo was taken by Timothy A. Gonsalves. Feel free to use my photos, but please mention me as the author. I would",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Spiti_River_Kaza_Himachal_Jun18_D72_7232.jpg"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.5
   },
   {
-    "startLocation": {
-      "description": "Yellowknife, CAN",
-      "type": "Point",
-      "coordinates": [-114.406097, 62.439943],
-      "address": "Yellowknife, NT X1A 2L2, Canada"
-    },
-    "ratingsAverage": 4.7,
-    "ratingsQuantity": 7,
-    "images": ["tour-9-1.jpg", "tour-9-2.jpg", "tour-9-3.jpg"],
-    "startDates": [
-      "2021-12-16T10:00:00.000Z",
-      "2022-01-16T10:00:00.000Z",
-      "2022-12-12T10:00:00.000Z"
-    ],
-    "_id": "5c88fa8cf4afda39709c2974",
-    "name": "The Northern Lights",
-    "duration": 3,
+    "_id": "ce95bd13a37c15beba5782e9",
+    "name": "Kerala Backwaters and Hills",
+    "slug": "kerala-backwaters-and-hills",
+    "duration": 5,
     "maxGroupSize": 12,
     "difficulty": "easy",
-    "guides": [
-      "5c8a21f22f8fb814b56fa18a",
-      "5c8a201e2f8fb814b56fa186",
-      "5c8a23412f8fb814b56fa18c"
+    "price": 24999,
+    "summary": "Old Fort Kochi, misty tea hills in Munnar and a night on a houseboat in the backwaters.",
+    "description": "Kerala fits very different landscapes into a short distance. This trip starts among the Chinese fishing nets and spice warehouses of Fort Kochi, climbs into the tea estates of Munnar and comes back down to the backwaters around Alappuzha and Vembanad Lake.\nYou will walk through a working tea estate, look for Nilgiri tahr in Eravikulam National Park, spend a night on a traditional kettuvallam houseboat and finish in Kumarakom. Hotels, the houseboat, all transfers and most meals are included.",
+    "imageCover": "kerala-backwaters-and-hills-cover.jpg",
+    "images": [
+      "kerala-backwaters-and-hills-1.jpg",
+      "kerala-backwaters-and-hills-2.jpg",
+      "kerala-backwaters-and-hills-3.jpg"
     ],
-    "price": 1497,
-    "summary": "Enjoy the Northern Lights in one of the best places in the world",
-    "description": "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum!\nDolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur, exercitation ullamco laboris nisi ut aliquip. Lorem ipsum dolor sit amet, consectetur adipisicing elit!",
-    "imageCover": "tour-9-cover.jpg",
-    "locations": [
-      {
-        "_id": "5c88fa8cf4afda39709c2975",
-        "description": "Yellowknife",
-        "type": "Point",
-        "coordinates": [-114.406097, 62.439943],
-        "day": 1
-      }
-    ]
-  },
-  {
-    "startLocation": {
-      "description": "California, USA",
-      "type": "Point",
-      "coordinates": [-122.29286, 38.294065],
-      "address": "560 Jefferson St, Napa, CA 94559, USA"
-    },
-    "ratingsAverage": 4.4,
-    "ratingsQuantity": 7,
-    "images": ["tour-7-1.jpg", "tour-7-2.jpg", "tour-7-3.jpg"],
     "startDates": [
-      "2021-02-12T10:00:00.000Z",
-      "2021-04-14T09:00:00.000Z",
-      "2021-09-01T09:00:00.000Z"
+      "2026-12-05",
+      "2027-01-23",
+      "2027-02-27"
     ],
-    "_id": "5c88fa8cf4afda39709c296c",
-    "name": "The Wine Taster",
-    "duration": 5,
-    "maxGroupSize": 8,
-    "difficulty": "easy",
-    "guides": ["5c8a22c62f8fb814b56fa18b", "5c8a23412f8fb814b56fa18c"],
-    "price": 1997,
-    "summary": "Exquisite wines, scenic views, exclusive barrel tastings,  and much more",
-    "description": "Consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\nIrure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-    "imageCover": "tour-7-cover.jpg",
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        76.2421,
+        9.9658
+      ],
+      "address": "Fort Kochi, Kerala",
+      "description": "Fort Kochi"
+    },
     "locations": [
       {
-        "_id": "5c88fa8cf4afda39709c296f",
-        "description": "Beringer Vineyards",
         "type": "Point",
-        "coordinates": [-122.479887, 38.510312],
+        "coordinates": [
+          76.2421,
+          9.9658
+        ],
+        "description": "Fishing nets and spice markets of Fort Kochi",
         "day": 1
       },
       {
-        "_id": "5c88fa8cf4afda39709c296e",
-        "description": "Clos Pegase Winery & Tasting Room",
         "type": "Point",
-        "coordinates": [-122.582948, 38.585707],
+        "coordinates": [
+          77.05972,
+          10.08917
+        ],
+        "description": "Drive up into the tea estates of Munnar",
+        "day": 2
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          77.083,
+          10.2
+        ],
+        "description": "Nilgiri tahr in Eravikulam National Park",
         "day": 3
       },
       {
-        "_id": "5c88fa8cf4afda39709c296d",
-        "description": "Raymond Vineyard and Cellar",
         "type": "Point",
-        "coordinates": [-122.434697, 38.482181],
+        "coordinates": [
+          76.33,
+          9.49
+        ],
+        "description": "Board a houseboat in Alappuzha",
+        "day": 4
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          76.43028,
+          9.595
+        ],
+        "description": "Morning on Vembanad Lake at Kumarakom",
         "day": 5
       }
-    ]
+    ],
+    "guides": [
+      "54d6406e367b4e8eb85a03ac",
+      "03b29b06a2c89195f680d5f4"
+    ],
+    "photoCredits": [
+      {
+        "file": "kerala-backwaters-and-hills-cover.jpg",
+        "title": "Kerala backwaters, Houseboats, India.jpg",
+        "author": "Vyacheslav Argenberg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kerala_backwaters,_Houseboats,_India.jpg"
+      },
+      {
+        "file": "kerala-backwaters-and-hills-1.jpg",
+        "title": "Munnar Tea Plantations-WUS07343-Pano.jpg",
+        "author": "Rainer Halama",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Munnar_Tea_Plantations-WUS07343-Pano.jpg"
+      },
+      {
+        "file": "kerala-backwaters-and-hills-2.jpg",
+        "title": "Eravikulam National Park-WUS07186.jpg",
+        "author": "Rainer Halama",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Eravikulam_National_Park-WUS07186.jpg"
+      },
+      {
+        "file": "kerala-backwaters-and-hills-3.jpg",
+        "title": "Kerala backwaters, Canal, Palm trees, India.jpg",
+        "author": "Vyacheslav Argenberg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kerala_backwaters,_Canal,_Palm_trees,_India.jpg"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.8
+  },
+  {
+    "_id": "d7f085c37c8aa724c3bf455c",
+    "name": "Thar Desert Camel Safari",
+    "slug": "thar-desert-camel-safari",
+    "duration": 4,
+    "maxGroupSize": 15,
+    "difficulty": "easy",
+    "price": 16999,
+    "summary": "A golden sandstone fort, an abandoned village and a night under the stars in the dunes.",
+    "description": "Jaisalmer rises out of the Thar Desert in western Rajasthan, and its sandstone fort is one of the few in the world where people still live inside the walls. It is part of the Hill Forts of Rajasthan UNESCO World Heritage Site.\nAfter a day in the fort and the carved havelis of the old town, we visit the abandoned village of Kuldhara, then ride camels into the dunes at Sam for sunset, folk music and a night in a desert camp. Hotel and camp stays, camel rides and all meals are included.",
+    "imageCover": "thar-desert-camel-safari-cover.jpg",
+    "images": [
+      "thar-desert-camel-safari-1.jpg",
+      "thar-desert-camel-safari-2.jpg",
+      "thar-desert-camel-safari-3.jpg"
+    ],
+    "startDates": [
+      "2026-12-12",
+      "2027-01-09",
+      "2027-02-06"
+    ],
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        70.915,
+        26.913
+      ],
+      "address": "Jaisalmer, Rajasthan",
+      "description": "Jaisalmer"
+    },
+    "locations": [
+      {
+        "type": "Point",
+        "coordinates": [
+          70.9126,
+          26.9127
+        ],
+        "description": "Inside the walls of Jaisalmer Fort",
+        "day": 1
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          70.785,
+          26.87
+        ],
+        "description": "The abandoned village of Kuldhara",
+        "day": 2
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          70.50694,
+          26.82972
+        ],
+        "description": "Camel ride and a night in the dunes at Sam",
+        "day": 3
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          70.915,
+          26.913
+        ],
+        "description": "Sunrise in the desert, then back to Jaisalmer",
+        "day": 4
+      }
+    ],
+    "guides": [
+      "68b8da21ce5e75756aaefb0a",
+      "fefe81734080bab7f2e60327"
+    ],
+    "photoCredits": [
+      {
+        "file": "thar-desert-camel-safari-cover.jpg",
+        "title": "Sunset Sand Dunes Jaisalmer Dec14 DSC 6540.jpg",
+        "author": "This Photo was taken by Timothy A. Gonsalves. Feel free to use my photos, but please mention me as the author. I would",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sunset_Sand_Dunes_Jaisalmer_Dec14_DSC_6540.jpg"
+      },
+      {
+        "file": "thar-desert-camel-safari-1.jpg",
+        "title": "Jaisalmer Fort, India.jpg",
+        "author": "Clément Bardot",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jaisalmer_Fort,_India.jpg"
+      },
+      {
+        "file": "thar-desert-camel-safari-2.jpg",
+        "title": "Dromedary in Thar desert.jpg",
+        "author": "Clément Bardot",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dromedary_in_Thar_desert.jpg"
+      },
+      {
+        "file": "thar-desert-camel-safari-3.jpg",
+        "title": "Sam dunes (Jaisalmer).jpg",
+        "author": "Roshanrajverma",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sam_dunes_(Jaisalmer).jpg"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.5
+  },
+  {
+    "_id": "da1d7de749e9b7d99b0b6819",
+    "name": "Andaman Island Explorer",
+    "slug": "andaman-island-explorer",
+    "duration": 6,
+    "maxGroupSize": 12,
+    "difficulty": "easy",
+    "price": 38999,
+    "summary": "White-sand beaches, coral reefs and the history of Port Blair across three islands.",
+    "description": "The Andaman Islands lie in the Bay of Bengal, closer to Myanmar than to mainland India, with clear water, coral reefs and forest that runs down to the sand. We cover Port Blair, Havelock (Swaraj Dweep) and Neil (Shaheed Dweep), travelling between them by ferry.\nHighlights include the Cellular Jail and its evening light and sound show, the ruins on Ross Island (Netaji Subhas Chandra Bose Dweep), sunset at Radhanagar Beach and a guided snorkelling trip off Havelock. No diving experience is needed. Hotels, ferries, transfers and breakfasts are included.",
+    "imageCover": "andaman-island-explorer-cover.jpg",
+    "images": [
+      "andaman-island-explorer-1.jpg",
+      "andaman-island-explorer-2.jpg",
+      "andaman-island-explorer-3.jpg"
+    ],
+    "startDates": [
+      "2026-12-07",
+      "2027-02-15",
+      "2027-04-05"
+    ],
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        92.73778,
+        11.66833
+      ],
+      "address": "Port Blair, Andaman and Nicobar Islands",
+      "description": "Port Blair"
+    },
+    "locations": [
+      {
+        "type": "Point",
+        "coordinates": [
+          92.73778,
+          11.66833
+        ],
+        "description": "Cellular Jail and the light and sound show",
+        "day": 1
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          92.763,
+          11.675
+        ],
+        "description": "Ruins of Ross Island, then the ferry to Havelock",
+        "day": 2
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          92.964,
+          11.982
+        ],
+        "description": "Sunset at Radhanagar Beach",
+        "day": 3
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          93,
+          11.96
+        ],
+        "description": "Guided snorkelling off Havelock",
+        "day": 4
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          93.04,
+          11.83
+        ],
+        "description": "Rock bridge and quiet beaches on Neil Island",
+        "day": 5
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          92.73778,
+          11.66833
+        ],
+        "description": "Ferry back to Port Blair and fly home",
+        "day": 6
+      }
+    ],
+    "guides": [
+      "54d6406e367b4e8eb85a03ac",
+      "03b29b06a2c89195f680d5f4"
+    ],
+    "photoCredits": [
+      {
+        "file": "andaman-island-explorer-cover.jpg",
+        "title": "Havelock Island, Ethereal mangrove tree, Andaman Islands.jpg",
+        "author": "Vyacheslav Argenberg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Havelock_Island,_Ethereal_mangrove_tree,_Andaman_Islands.jpg"
+      },
+      {
+        "file": "andaman-island-explorer-1.jpg",
+        "title": "Radhanagar Beach Havelock vrvbaan042k24 (10).jpg",
+        "author": "Vinayaraj",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Radhanagar_Beach_Havelock_vrvbaan042k24_(10).jpg"
+      },
+      {
+        "file": "andaman-island-explorer-2.jpg",
+        "title": "Shaheed Island, Andaman Islands, Tropical beach.jpg",
+        "author": "Vyacheslav Argenberg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shaheed_Island,_Andaman_Islands,_Tropical_beach.jpg"
+      },
+      {
+        "file": "andaman-island-explorer-3.jpg",
+        "title": "Havelock Island, Sandy lagoon, Andaman Islands.jpg",
+        "author": "Vyacheslav Argenberg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Havelock_Island,_Sandy_lagoon,_Andaman_Islands.jpg"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.8
+  },
+  {
+    "_id": "5a61903924ba4073643b79c0",
+    "name": "Golden Triangle Heritage",
+    "slug": "golden-triangle-heritage",
+    "duration": 6,
+    "maxGroupSize": 16,
+    "difficulty": "easy",
+    "price": 29999,
+    "summary": "Delhi, the Taj Mahal at sunrise and the pink city of Jaipur in one classic loop.",
+    "description": "The Golden Triangle links three of north India's great cities: Delhi, Agra and Jaipur. Between them they hold several UNESCO World Heritage Sites, including Humayun's Tomb, the Qutb Minar, the Taj Mahal, Agra Fort and Fatehpur Sikri.\nWe start in Old and New Delhi, drive to Agra for the fort and a sunrise visit to the Taj Mahal, stop at Fatehpur Sikri on the way to Jaipur and finish with Amber Fort, the City Palace and Hawa Mahal. The Taj Mahal is closed on Fridays, so every departure is timed around it. Hotels, an air-conditioned vehicle, monument tickets and breakfasts are included.",
+    "imageCover": "golden-triangle-heritage-cover.jpg",
+    "images": [
+      "golden-triangle-heritage-1.jpg",
+      "golden-triangle-heritage-2.jpg",
+      "golden-triangle-heritage-3.jpg"
+    ],
+    "startDates": [
+      "2026-11-28",
+      "2027-01-30",
+      "2027-03-06"
+    ],
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        77.25069,
+        28.59328
+      ],
+      "address": "New Delhi, Delhi",
+      "description": "New Delhi"
+    },
+    "locations": [
+      {
+        "type": "Point",
+        "coordinates": [
+          77.25069,
+          28.59328
+        ],
+        "description": "Humayun's Tomb and the gardens of Nizamuddin",
+        "day": 1
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          77.2334,
+          28.6507
+        ],
+        "description": "Jama Masjid and a food walk in Old Delhi",
+        "day": 2
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          78.0211,
+          27.17954
+        ],
+        "description": "Drive to Agra and visit Agra Fort",
+        "day": 3
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          78.0419,
+          27.175
+        ],
+        "description": "Sunrise at the Taj Mahal, then Fatehpur Sikri on the way to Jaipur",
+        "day": 4
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          75.8507,
+          26.9859
+        ],
+        "description": "Amber Fort above Maota Lake",
+        "day": 5
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          75.8267,
+          26.9239
+        ],
+        "description": "City Palace and Hawa Mahal, then back to Delhi",
+        "day": 6
+      }
+    ],
+    "guides": [
+      "68b8da21ce5e75756aaefb0a",
+      "0d25f1792d6b3b210eb8435c"
+    ],
+    "photoCredits": [
+      {
+        "file": "golden-triangle-heritage-cover.jpg",
+        "title": "Taj Mahal, Agra, India.jpg",
+        "author": "Yann",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Taj_Mahal,_Agra,_India.jpg"
+      },
+      {
+        "file": "golden-triangle-heritage-1.jpg",
+        "title": "Amber Fort Jaipur 01.jpg",
+        "author": "Rijin S",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Amber_Fort_Jaipur_01.jpg"
+      },
+      {
+        "file": "golden-triangle-heritage-2.jpg",
+        "title": "Wind Palace-Jaipur-India0002.JPG",
+        "author": "Diego Delso",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wind_Palace-Jaipur-India0002.JPG"
+      },
+      {
+        "file": "golden-triangle-heritage-3.jpg",
+        "title": "Tomb Humayun.jpg",
+        "author": "VijayRajawat00",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tomb_Humayun.jpg"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.5
+  },
+  {
+    "_id": "d5e27ddf7f0e38e2c5bcc0ca",
+    "name": "Darjeeling and Sikkim Tea Trails",
+    "slug": "darjeeling-and-sikkim-tea-trails",
+    "duration": 7,
+    "maxGroupSize": 12,
+    "difficulty": "easy",
+    "price": 34999,
+    "summary": "Sunrise over Kangchenjunga, the toy train and tea estates across Darjeeling and Sikkim.",
+    "description": "Tea has been grown on the steep slopes around Darjeeling since the 1800s, and on a clear morning Kangchenjunga, the third-highest mountain in the world, fills the northern sky. This trip pairs tea estates and tastings with monasteries, mountain views and the Darjeeling Himalayan Railway, a UNESCO World Heritage Site.\nFrom Darjeeling we ride the toy train to Ghum and around the Batasia Loop, cross into Sikkim for Pelling and Pemayangtse Monastery, walk through Temi Tea Garden and finish in Gangtok with Tsomgo Lake and Rumtek Monastery. Hotels, transfers, permits, the toy train, breakfasts and dinners are included.",
+    "imageCover": "darjeeling-and-sikkim-tea-trails-cover.jpg",
+    "images": [
+      "darjeeling-and-sikkim-tea-trails-1.jpg",
+      "darjeeling-and-sikkim-tea-trails-2.jpg",
+      "darjeeling-and-sikkim-tea-trails-3.jpg"
+    ],
+    "startDates": [
+      "2027-03-20",
+      "2027-04-24",
+      "2027-10-16"
+    ],
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        88.26306,
+        27.0375
+      ],
+      "address": "Darjeeling, West Bengal",
+      "description": "Darjeeling"
+    },
+    "locations": [
+      {
+        "type": "Point",
+        "coordinates": [
+          88.26306,
+          27.0375
+        ],
+        "description": "Arrive in Darjeeling",
+        "day": 1
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          88.28542,
+          26.99484
+        ],
+        "description": "Sunrise over Kangchenjunga from Tiger Hill, then tea tasting",
+        "day": 2
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          88.2471,
+          27.0167
+        ],
+        "description": "Toy train to Ghum and the Batasia Loop",
+        "day": 3
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          88.25278,
+          27.30444
+        ],
+        "description": "Drive to Pelling and Pemayangtse Monastery",
+        "day": 4
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          88.415324,
+          27.233713
+        ],
+        "description": "Walk through Temi Tea Garden on the way to Gangtok",
+        "day": 5
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          88.76389,
+          27.37528
+        ],
+        "description": "Day trip to Tsomgo Lake",
+        "day": 6
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          88.56139,
+          27.28861
+        ],
+        "description": "Rumtek Monastery before departure",
+        "day": 7
+      }
+    ],
+    "guides": [
+      "b4a0d0cb8599d647c75fb6af",
+      "8269b0f10db7667248bdb783"
+    ],
+    "photoCredits": [
+      {
+        "file": "darjeeling-and-sikkim-tea-trails-cover.jpg",
+        "title": "Tea plantation Darjeeling.JPG",
+        "author": "Joydeep",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tea_plantation_Darjeeling.JPG"
+      },
+      {
+        "file": "darjeeling-and-sikkim-tea-trails-1.jpg",
+        "title": "Toy Train by Paramanu Sarkar 01.jpg",
+        "author": "Paramanu Sarkar",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Toy_Train_by_Paramanu_Sarkar_01.jpg"
+      },
+      {
+        "file": "darjeeling-and-sikkim-tea-trails-2.jpg",
+        "title": "Cherry Resort inside Temi Tea Garden, Namchi, Sikkim.jpg",
+        "author": "Subhrajyoti07",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cherry_Resort_inside_Temi_Tea_Garden,_Namchi,_Sikkim.jpg"
+      },
+      {
+        "file": "darjeeling-and-sikkim-tea-trails-3.jpg",
+        "title": "Do-drul Chorten, Gangtok 01.jpg",
+        "author": "Bernard Gagnon",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Do-drul_Chorten,_Gangtok_01.jpg"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.5
+  },
+  {
+    "_id": "c12ba56324f065fa830cfb14",
+    "name": "Ranthambore Tiger Safari",
+    "slug": "ranthambore-tiger-safari",
+    "duration": 3,
+    "maxGroupSize": 6,
+    "difficulty": "easy",
+    "price": 21999,
+    "summary": "Four jeep safaris in one of the best places in India to see a wild tiger.",
+    "description": "Ranthambore National Park in Rajasthan is a dry forest of lakes, ravines and old ruins, and one of the best places in India to see Bengal tigers in the wild. Leopards, sloth bears, crocodiles, sambar deer and more than 300 species of birds share the park.\nWe stay in Sawai Madhopur and go on four safaris, mornings and afternoons, in a private jeep with an expert naturalist. Between drives we walk up to Ranthambore Fort, a UNESCO World Heritage Site inside the park. Sightings are never guaranteed, and the park is closed from July to September. Lodge stay, safaris and meals are included.",
+    "imageCover": "ranthambore-tiger-safari-cover.jpg",
+    "images": [
+      "ranthambore-tiger-safari-1.jpg",
+      "ranthambore-tiger-safari-2.jpg",
+      "ranthambore-tiger-safari-3.jpg"
+    ],
+    "startDates": [
+      "2026-12-17",
+      "2027-02-18",
+      "2027-04-15"
+    ],
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        76.35,
+        26
+      ],
+      "address": "Sawai Madhopur, Rajasthan",
+      "description": "Sawai Madhopur"
+    },
+    "locations": [
+      {
+        "type": "Point",
+        "coordinates": [
+          76.50257,
+          26.01733
+        ],
+        "description": "Afternoon safari in Ranthambore National Park",
+        "day": 1
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          76.455,
+          26.02028
+        ],
+        "description": "Morning safari and a walk up to Ranthambore Fort",
+        "day": 2
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          76.50257,
+          26.01733
+        ],
+        "description": "Final morning safari, then depart",
+        "day": 3
+      }
+    ],
+    "guides": [
+      "68b8da21ce5e75756aaefb0a",
+      "fefe81734080bab7f2e60327"
+    ],
+    "photoCredits": [
+      {
+        "file": "ranthambore-tiger-safari-cover.jpg",
+        "title": "Tiger - Ranthambore National Park 2012-06-04.jpg",
+        "author": "Asif N Khan",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tiger_-_Ranthambore_National_Park_2012-06-04.jpg"
+      },
+      {
+        "file": "ranthambore-tiger-safari-1.jpg",
+        "title": "Ranthambore Tiger 1C.jpg",
+        "author": "Drsouvikpaul",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ranthambore_Tiger_1C.jpg"
+      },
+      {
+        "file": "ranthambore-tiger-safari-2.jpg",
+        "title": "077 Sloth bear in Ranthambore National Park Photo by Giles Laurent.jpg",
+        "author": "Giles Laurent",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:077_Sloth_bear_in_Ranthambore_National_Park_Photo_by_Giles_Laurent.jpg"
+      },
+      {
+        "file": "ranthambore-tiger-safari-3.jpg",
+        "title": "070 Mugger crocodile in Ranthambore National Park Photo by Giles Laurent.jpg",
+        "author": "Giles Laurent",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:070_Mugger_crocodile_in_Ranthambore_National_Park_Photo_by_Giles_Laurent.jpg"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.8
+  },
+  {
+    "_id": "ca3f49dd06ed8b2111c11eff",
+    "name": "Meghalaya Living Root Bridges",
+    "slug": "meghalaya-living-root-bridges",
+    "duration": 5,
+    "maxGroupSize": 10,
+    "difficulty": "difficult",
+    "price": 27999,
+    "summary": "Walk down to the double-decker root bridge at Nongriat and boat on the clear Umngot river.",
+    "description": "In the wet hills of Meghalaya, Khasi villagers have trained the roots of rubber fig trees across streams for generations, growing bridges that get stronger with age. The most famous, the double-decker bridge at Nongriat, sits at the bottom of a steep stairway of about 3,500 steps.\nFrom Shillong we head to Sohra (Cherrapunji), one of the wettest places on earth, and Nohkalikai Falls, then walk down to Nongriat for a night in a village homestay. The trip ends at Mawlynnong and the clear Umngot river at Dawki. Homestays, hotels, transfers and meals are included. Expect rain at any time of year.",
+    "imageCover": "meghalaya-living-root-bridges-cover.jpg",
+    "images": [
+      "meghalaya-living-root-bridges-1.jpg",
+      "meghalaya-living-root-bridges-2.jpg",
+      "meghalaya-living-root-bridges-3.jpg"
+    ],
+    "startDates": [
+      "2026-11-21",
+      "2027-01-14",
+      "2027-03-11"
+    ],
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        91.89444,
+        25.58222
+      ],
+      "address": "Shillong, Meghalaya",
+      "description": "Shillong"
+    },
+    "locations": [
+      {
+        "type": "Point",
+        "coordinates": [
+          91.89444,
+          25.58222
+        ],
+        "description": "Arrive in Shillong",
+        "day": 1
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          91.68667,
+          25.27556
+        ],
+        "description": "Drive to Sohra and Nohkalikai Falls",
+        "day": 2
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          91.67195,
+          25.25126
+        ],
+        "description": "Walk down to the double-decker root bridge at Nongriat",
+        "day": 3
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          92.01667,
+          25.18333
+        ],
+        "description": "Mawlynnong and a boat on the Umngot at Dawki",
+        "day": 4
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          91.89444,
+          25.58222
+        ],
+        "description": "Return to Shillong",
+        "day": 5
+      }
+    ],
+    "guides": [
+      "b4a0d0cb8599d647c75fb6af",
+      "6fc1a1704798b6741e1695b5"
+    ],
+    "photoCredits": [
+      {
+        "file": "meghalaya-living-root-bridges-cover.jpg",
+        "title": "Living root bridges of Nongriat village in East Khasi Hills district, Meghalaya JEG7387.jpg",
+        "author": "PJeganathan",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Living_root_bridges_of_Nongriat_village_in_East_Khasi_Hills_district,_Meghalaya_JEG7387.jpg"
+      },
+      {
+        "file": "meghalaya-living-root-bridges-1.jpg",
+        "title": "Nohkalikai Falls Cherrapunji.JPG",
+        "author": "Kunal Dalui",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nohkalikai_Falls_Cherrapunji.JPG"
+      },
+      {
+        "file": "meghalaya-living-root-bridges-2.jpg",
+        "title": "Dawki Lake, Meghalaya, India.jpg",
+        "author": "Joydeep Chakraborty",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dawki_Lake,_Meghalaya,_India.jpg"
+      },
+      {
+        "file": "meghalaya-living-root-bridges-3.jpg",
+        "title": "Living root bridge, Maghalaya, India1.jpg",
+        "author": "Joydeep Chakraborty",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Living_root_bridge,_Maghalaya,_India1.jpg"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.8
+  },
+  {
+    "_id": "d1cf05b0bb82be0738ed752b",
+    "name": "Hampi Ruins and Boulders",
+    "slug": "hampi-ruins-and-boulders",
+    "duration": 4,
+    "maxGroupSize": 12,
+    "difficulty": "medium",
+    "price": 19999,
+    "summary": "Temples, royal ruins and giant boulders in the old capital of the Vijayanagara empire.",
+    "description": "Hampi was the capital of the Vijayanagara empire and, in the early 1500s, one of the largest cities in the world. Its ruins spread across a landscape of granite boulders, banana plantations and the Tungabhadra river, and are a UNESCO World Heritage Site.\nWe explore the Virupaksha Temple, the Royal Enclosure, the Lotus Mahal and the Vittala Temple with its stone chariot, partly by bicycle. Mornings start early for sunrise from Matanga Hill, and afternoons include a coracle ride on the river and the climb up Anjanadri Hill. Expect several hours of walking and scrambling each day. Guesthouse stays, bicycles, entry tickets and breakfasts are included.",
+    "imageCover": "hampi-ruins-and-boulders-cover.jpg",
+    "images": [
+      "hampi-ruins-and-boulders-1.jpg",
+      "hampi-ruins-and-boulders-2.jpg",
+      "hampi-ruins-and-boulders-3.jpg"
+    ],
+    "startDates": [
+      "2026-11-26",
+      "2026-12-26",
+      "2027-01-28"
+    ],
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        76.3909,
+        15.2689
+      ],
+      "address": "Hosapete, Karnataka",
+      "description": "Hosapete"
+    },
+    "locations": [
+      {
+        "type": "Point",
+        "coordinates": [
+          76.45872,
+          15.33517
+        ],
+        "description": "Virupaksha Temple and the old bazaar",
+        "day": 1
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          76.4755,
+          15.3422
+        ],
+        "description": "Sunrise from Matanga Hill, then cycle to the Vittala Temple",
+        "day": 2
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          76.4713,
+          15.3203
+        ],
+        "description": "Royal Enclosure, the Lotus Mahal and a coracle ride",
+        "day": 3
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          76.469814,
+          15.354483
+        ],
+        "description": "Climb Anjanadri Hill, then return to Hosapete",
+        "day": 4
+      }
+    ],
+    "guides": [
+      "54d6406e367b4e8eb85a03ac",
+      "1ec3a2e813b5f6446dde267d"
+    ],
+    "photoCredits": [
+      {
+        "file": "hampi-ruins-and-boulders-cover.jpg",
+        "title": "Krishna Pushkarani - Hampi Ruins.jpg",
+        "author": "Dey.sandip",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Krishna_Pushkarani_-_Hampi_Ruins.jpg"
+      },
+      {
+        "file": "hampi-ruins-and-boulders-1.jpg",
+        "title": "Hampi, India, Lotus Mahal.jpg",
+        "author": "Vyacheslav Argenberg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hampi,_India,_Lotus_Mahal.jpg"
+      },
+      {
+        "file": "hampi-ruins-and-boulders-2.jpg",
+        "title": "Hampi - Tungabhadra River from Hampi River Walk.jpg",
+        "author": "Ingo Mehling",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hampi_-_Tungabhadra_River_from_Hampi_River_Walk.jpg"
+      },
+      {
+        "file": "hampi-ruins-and-boulders-3.jpg",
+        "title": "Hampi, India, Temple on top of Matanga Hill.jpg",
+        "author": "Vyacheslav Argenberg",
+        "license": "CC BY 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hampi,_India,_Temple_on_top_of_Matanga_Hill.jpg"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.5
+  },
+  {
+    "_id": "92da98fc3b348f5b6de92063",
+    "name": "Rishikesh Ganga Rafting",
+    "slug": "rishikesh-ganga-rafting",
+    "duration": 3,
+    "maxGroupSize": 16,
+    "difficulty": "medium",
+    "price": 12999,
+    "summary": "White-water rafting on the Ganga, the evening aarti and the Beatles Ashram in three days.",
+    "description": "Rishikesh sits where the Ganga leaves the Himalayan foothills, and the stretch of river above the town is the best-known rafting run in India. Between September and June the water is clear and cold, with rapids such as Roller Coaster and Golf Course on the run down from Shivpuri.\nAfter a safety briefing and a practice session, we raft about 16 kilometres from Shivpuri back towards Rishikesh with certified river guides. The rest of the trip is gentler: the evening aarti at Triveni Ghat, the bridges and cafes around Ram Jhula and a morning walk through the Beatles Ashram. Hotel, rafting, equipment and meals are included. You need to be comfortable in water while wearing a life jacket.",
+    "imageCover": "rishikesh-ganga-rafting-cover.jpg",
+    "images": [
+      "rishikesh-ganga-rafting-1.jpg",
+      "rishikesh-ganga-rafting-2.jpg",
+      "rishikesh-ganga-rafting-3.jpg"
+    ],
+    "startDates": [
+      "2026-11-27",
+      "2027-03-12",
+      "2027-04-09"
+    ],
+    "startLocation": {
+      "type": "Point",
+      "coordinates": [
+        78.29722,
+        30.10833
+      ],
+      "address": "Rishikesh, Uttarakhand",
+      "description": "Rishikesh"
+    },
+    "locations": [
+      {
+        "type": "Point",
+        "coordinates": [
+          78.299334,
+          30.103173
+        ],
+        "description": "Evening aarti at Triveni Ghat",
+        "day": 1
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          78.3145,
+          30.1233
+        ],
+        "description": "Raft from Shivpuri down to Rishikesh",
+        "day": 2
+      },
+      {
+        "type": "Point",
+        "coordinates": [
+          78.31277,
+          30.10975
+        ],
+        "description": "Morning walk through the Beatles Ashram",
+        "day": 3
+      }
+    ],
+    "guides": [
+      "2edcba4a2bb2e3be057fed4e",
+      "fc06743eddcfd358ec4ff326"
+    ],
+    "photoCredits": [
+      {
+        "file": "rishikesh-ganga-rafting-cover.jpg",
+        "title": "Rapid ahead!.jpg",
+        "author": "Ritikamaheshwari58",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rapid_ahead!.jpg"
+      },
+      {
+        "file": "rishikesh-ganga-rafting-1.jpg",
+        "title": "The Ganges at Rishikesh - 1.jpg",
+        "author": "Emőke Dénes",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Ganges_at_Rishikesh_-_1.jpg"
+      },
+      {
+        "file": "rishikesh-ganga-rafting-2.jpg",
+        "title": "River rafting at Rishikesh Photographed By Sumita Roy.jpg",
+        "author": "Sumita Roy Dutta",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:River_rafting_at_Rishikesh_Photographed_By_Sumita_Roy.jpg"
+      },
+      {
+        "file": "rishikesh-ganga-rafting-3.jpg",
+        "title": "A rafting camp on the banks of Ganga.JPG",
+        "author": "Vvnataraj",
+        "license": "CC BY-SA 3.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_rafting_camp_on_the_banks_of_Ganga.JPG"
+      }
+    ],
+    "ratingsQuantity": 4,
+    "ratingsAverage": 4.5
   }
 ]
