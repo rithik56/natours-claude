@@ -348,16 +348,131 @@ The review (`docs/plan-review/`, Round 1) logged 127 findings: 8 Blockers, 80 Ma
 
 ## Traceability
 
-Which phases cover which requirements. The roadmapper fills this in.
+Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase goals and success criteria. Cross-cutting rules map to the phase that first establishes and enforces them; feature requirements map to the phase that completes them.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| F1 | Phase 4 | Pending |
+| F2 | Phase 4 | Pending |
+| F3 | Phase 5 | Pending |
+| F4 | Phase 5 | Pending |
+| F5 | Phase 5 | Pending |
+| F6 | Phase 4 | Pending |
+| F7 | Phase 6 | Pending |
+| S1 | Phase 1 | Pending |
+| S2 | Phase 3 | Pending |
+| S3 | Phase 1 | Pending |
+| S4 | Phase 4 | Pending |
+| S5 | Phase 6 | Pending |
+| S6 | Phase 5 | Pending |
+| S7 | Phase 4 | Pending |
+| S8 | Phase 5 | Pending |
+| S9 | Phase 1 | Pending |
+| S10 | Phase 1 | Pending |
+| S11 | Phase 1 | Pending |
+| S12 | Phase 8 | Pending |
+| S13 | Phase 5 | Pending |
+| S14 | Phase 1 | Pending |
+| S15 | Phase 5 | Pending |
+| S16 | Phase 4 | Pending |
+| S17 | Phase 6 | Pending |
+| S18 | Phase 1 | Pending |
+| S19 | Phase 3 | Pending |
+| S20 | Phase 5 | Pending |
+| S21 | Phase 1 | Pending |
+| S22 | Phase 5 | Pending |
+| S23 | Phase 5 | Pending |
+| B1 | Phase 4 | Pending |
+| B2 | Phase 4 | Pending |
+| B3 | Phase 4 | Pending |
+| B4 | Phase 4 | Pending |
+| B5 | Phase 1 | Pending |
+| B6 | Phase 6 | Pending |
+| B7 | Phase 6 | Pending |
+| B8 | Phase 6 | Pending |
+| B9 | Phase 1 | Pending |
+| B10 | Phase 1 | Pending |
+| B11 | Phase 4 | Pending |
+| B12 | Phase 4 | Pending |
+| B13 | Phase 1 | Pending |
+| B14 | Phase 1 | Pending |
+| B15 | Phase 5 | Pending |
+| B16 | Phase 5 | Pending |
+| B17 | Phase 1 | Pending |
+| B18 | Phase 1 | Pending |
+| B19 | Phase 1 | Pending |
+| B20 | Phase 1 | Pending |
+| R1 | Phase 1 | Pending |
+| R2 | Phase 1 | Pending |
+| R3 | Phase 4 | Pending |
+| R4 | Phase 4 | Pending |
+| R5 | Phase 6 | Pending |
+| R6 | Phase 1 | Pending |
+| R7 | Phase 5 | Pending |
+| R8 | Phase 4 | Pending |
+| R9 | Phase 1 | Pending |
+| R10 | Phase 4 | Pending |
+| R11 | Phase 7 | Pending |
+| D1 | Phase 5 | Pending |
+| D2 | Phase 4 | Pending |
+| D3 | Phase 5 | Pending |
+| D4 | Phase 1 | Pending |
+| D5 | Phase 5 | Pending |
+| D6 | Phase 5 | Pending |
+| D7 | Phase 1 | Pending |
+| D8 | Phase 5 | Pending |
+| D9 | Phase 1 | Pending |
+| D10 | Phase 4 | Pending |
+| D11 | Phase 7 | Pending |
+| D12 | Phase 8 | Pending |
+| D13 | Phase 7 | Pending |
+| D14 | Phase 2 | Pending |
+| U1 | Phase 3 | Pending |
+| U2 | Phase 3 | Pending |
+| U3 | Phase 3 | Pending |
+| U4 | Phase 3 | Pending |
+| U5 | Phase 3 | Pending |
+| U6 | Phase 3 | Pending |
+| U7 | Phase 4 | Pending |
+| U8 | Phase 5 | Pending |
+| U9 | Phase 3 | Pending |
+| U10 | Phase 4 | Pending |
+| U11 | Phase 4 | Pending |
+| U12 | Phase 6 | Pending |
+| U13 | Phase 6 | Pending |
+| U14 | Phase 6 | Pending |
+| U15 | Phase 5 | Pending |
+| U16 | Phase 5 | Pending |
+| U17 | Phase 5 | Pending |
+| U18 | Phase 3 | Pending |
+| U19 | Phase 3 | Pending |
+| U20 | Phase 2 | Pending |
+| U21 | Phase 7 | Pending |
+| U22 | Phase 7 | Pending |
+| U23 | Phase 7 | Pending |
+| U24 | Phase 7 | Pending |
+| U25 | Phase 3 | Pending |
+| U26 | Phase 7 | Pending |
+| U27 | Phase 4 | Pending |
+| Q1 | Phase 1 | Pending |
+| Q2 | Phase 1 | Pending |
+| Q3 | Phase 1 | Pending |
+| Q4 | Phase 1 | Pending |
+| Q5 | Phase 1 | Pending |
+| Q6 | Phase 1 | Pending |
+| Q7 | Phase 1 | Pending |
+| Q8 | Phase 1 | Pending |
+| Q9 | Phase 1 | Pending |
+| Q10 | Phase 1 | Pending |
+| Q11 | Phase 1 | Pending |
 
 **Coverage:**
 - v1 requirements: 113 total (F 7, S 23, B 20, R 11, D 14, U 27, Q 11)
-- Mapped to phases: 0 (until the roadmap is created)
-- Unmapped: 113
+- Mapped to phases: 113
+- Unmapped: 0
+
+**By phase:** Phase 1: 35, Phase 2: 2, Phase 3: 12, Phase 4: 22, Phase 5: 22, Phase 6: 10, Phase 7: 8, Phase 8: 2.
 
 ---
 *Requirements defined: 8 Nov 2026*
-*Last updated: 8 Nov 2026 after initial definition*
+*Last updated: 8 Nov 2026 after roadmap creation*
