@@ -1,0 +1,12 @@
+*.md
+seed/
+.planning/
+.claude/
+docs/plan-review/
+package-lock.json
+.next/
+coverage/
+dist/
+.lighthouseci/
+next-env.d.ts
+.gsd/

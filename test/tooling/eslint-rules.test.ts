@@ -71,6 +71,18 @@ describe('ESLint rules', () => {
     expect(found).toHaveLength(0);
   });
 
+  it('[Q4] a type-only import of a model is allowed', async () => {
+    const source = lines(
+      "import type { UserDoc } from '@/server/modules/users/model';",
+      'export type Probe = UserDoc;',
+    );
+    const found = forRule(
+      await messagesFor(source, 'src/server/modules/tours/service.ts'),
+      'no-restricted-imports',
+    );
+    expect(found).toHaveLength(0);
+  });
+
   it('[Q4] a module service may import its own model', async () => {
     const source = lines(
       "import { UserModel } from './model';",
