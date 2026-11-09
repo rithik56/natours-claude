@@ -18,6 +18,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "smoke": "node scripts/smoke.ts",
+    "ci:mongo": "node scripts/ci-mongo.ts",
     "lhci:collect": "lhci collect --config=lighthouserc.cjs",
     "bundle:record": "npm run lhci:collect && node scripts/measure-bundle.ts --record",
     "bundle:check": "npm run lhci:collect && lhci assert --config=lighthouserc.cjs && node scripts/measure-bundle.ts --check"
