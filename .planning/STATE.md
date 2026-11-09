@@ -4,16 +4,16 @@ milestone: v2
 current_phase: 01
 current_phase_name: Foundation and contracts
 status: executing
-stopped_at: Completed 01-09-PLAN.md
-last_updated: "2026-11-09T05:50:22.986Z"
+stopped_at: Completed 01-10-PLAN.md
+last_updated: "2026-11-09T14:26:52.900Z"
 last_activity: 2026-11-09
 last_activity_desc: Phase 01 execution resumed (wave continue)
-state_head: 0587d869ab2286e683fc0e7f5baae8c2526c92b8
+state_head: 082fe041f0c75e964546c739f3ee8100e41ef79e
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 15
-  completed_plans: 9
+  completed_plans: 10
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 8 Nov 2026)
 ## Current Position
 
 Phase: 01 (Foundation and contracts) — EXECUTING
-Plan: 10 of 15
+Plan: 11 of 15
 Status: Ready to execute
 Last activity: 2026-11-09 — Phase 01 execution resumed (wave continue)
 
@@ -66,6 +66,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P07 | 50min | 3 tasks | 16 files |
 | Phase 01 P08 | 20min | 3 tasks | 13 files |
 | Phase 01 P09 | 80min | 2 tasks | 11 files |
+| Phase 01 P10 | 15min | 3 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,8 @@ Recent decisions affecting current work:
 - [Phase 01]: Tour discount field dropped; one price per tour (ADR 0014, D-05)
 - [Phase 01]: Tour startLocation is required so toTourSummary always has a start point
 - [Phase 01]: Session: token refused when iat is before the second of passwordChangedAt; same second accepted (ADR 0015)
+- [Phase 01]: 01-10: Staging and production getDeps getters throw a plain Error naming the missing adapter and phase (ADR 0016); the cache is the fake only under APP_ENV test
+- [Phase 01]: 01-10: The fake rate limiter reads now() from the clock so APP_NOW pins freeze its window in development
 
 ### Pending Todos
 
@@ -113,6 +116,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-09T05:50:22.968Z
-Stopped at: Completed 01-09-PLAN.md
+Last session: 2026-11-09T14:26:52.881Z
+Stopped at: Completed 01-10-PLAN.md
 Resume file: None
