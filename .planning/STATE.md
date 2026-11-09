@@ -4,16 +4,16 @@ milestone: v2
 current_phase: 01
 current_phase_name: Foundation and contracts
 status: executing
-stopped_at: Completed 01-10-PLAN.md
-last_updated: "2026-11-09T14:26:52.900Z"
+stopped_at: Completed 01-11-PLAN.md
+last_updated: "2026-11-09T14:56:03.906Z"
 last_activity: 2026-11-09
 last_activity_desc: Phase 01 execution resumed (wave continue)
-state_head: 082fe041f0c75e964546c739f3ee8100e41ef79e
+state_head: d7fb719d5460425b3e5d14cf1ad93fac08724ac2
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 15
-  completed_plans: 10
+  completed_plans: 11
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 8 Nov 2026)
 ## Current Position
 
 Phase: 01 (Foundation and contracts) — EXECUTING
-Plan: 11 of 15
+Plan: 12 of 15
 Status: Ready to execute
 Last activity: 2026-11-09 — Phase 01 execution resumed (wave continue)
 
@@ -67,6 +67,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P08 | 20min | 3 tasks | 13 files |
 | Phase 01 P09 | 80min | 2 tasks | 11 files |
 | Phase 01 P10 | 15min | 3 tasks | 15 files |
+| Phase 01 P11 | 11min | 3 tasks | 19 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,7 @@ Recent decisions affecting current work:
 - [Phase 01]: Session: token refused when iat is before the second of passwordChangedAt; same second accepted (ADR 0015)
 - [Phase 01]: 01-10: Staging and production getDeps getters throw a plain Error naming the missing adapter and phase (ADR 0016); the cache is the fake only under APP_ENV test
 - [Phase 01]: 01-10: The fake rate limiter reads now() from the clock so APP_NOW pins freeze its window in development
+- [Phase 01]: withApi requires an access declaration and fails closed with 403; resolveAccess reads the user through getCurrentUser(request.cookies) (ADR 0017)
 
 ### Pending Todos
 
@@ -116,6 +118,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-09T14:26:52.881Z
-Stopped at: Completed 01-10-PLAN.md
+Last session: 2026-11-09T14:56:03.888Z
+Stopped at: Completed 01-11-PLAN.md
 Resume file: None

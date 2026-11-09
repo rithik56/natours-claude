@@ -21,7 +21,7 @@
 
 ### Security (S)
 
-- [ ] **S1**: Every Route Handler, Server Action and protected page declares its access level, and anything undeclared is denied. An access-matrix test checks every API route and action as an anonymous visitor, `user`, `guide` and `admin`.
+- [x] **S1**: Every Route Handler, Server Action and protected page declares its access level, and anything undeclared is denied. An access-matrix test checks every API route and action as an anonymous visitor, `user`, `guide` and `admin`.
 - [ ] **S2**: There are no debug endpoints. `/healthz` returns only `{ status: 'ok' }`, and `/styleguide` is a 404 in production.
 - [x] **S3**: Sensitive fields never leave the server. API responses and Client Component props go through DTO mappers, and queue jobs carry only `{ to, firstName, url }`.
 - [ ] **S4**: No mass assignment. Strict input schemas list exactly the allowed fields, and admin user updates allow only `name`, `email`, `role` and `active`.
@@ -32,11 +32,11 @@
 - [ ] **S6**: *(amended)* Deactivated users are left out of queries and can't log in, and their existing sessions stop working on their next request to a page, action or the API. `requireUser`, `requireRole`, `withApi` and `action()` always go through `getCurrentUser()`, which reads the user and their role from the database.
 - [ ] **S7**: No injection. All input is Zod-validated, login fields must be strings, and tour filters are built from an allowlist of fields and operators.
 - [ ] **S8**: The password field is selected only in the login and change-password services, and never appears in `getCurrentUser()` or in any props.
-- [ ] **S9**: Cookies and origin checks:
+- [x] **S9**: Cookies and origin checks:
   - The session cookie is httpOnly, secure in production, `sameSite: 'lax'` and `path: '/'`, and logout deletes it with the same options.
   - Nothing changes state on a GET.
   - `withApi` checks the origin on POST, PUT, PATCH and DELETE, except for the Stripe webhook.
-- [ ] **S10**: The API is same-origin. CORS headers are sent only for origins listed in `CORS_ORIGINS`.
+- [x] **S10**: The API is same-origin. CORS headers are sent only for origins listed in `CORS_ORIGINS`.
 - [x] **S11**: The CSP uses a per-request nonce set in `proxy.ts`, with `'strict-dynamic'`. Production has no `'unsafe-inline'` for scripts, and only exact hosts are allowed (Stripe, map tiles, storage).
 - [ ] **S12**: *(amended)* TLS certificate checks stay on for MongoDB Atlas and SMTP. Redis runs without TLS, and only on the instance's private Docker network.
 - [ ] **S13**: Password reset:
@@ -86,7 +86,7 @@
   - Charges in INR paise.
   - Uses absolute image URLs from our own storage.
   - Sets `success_url` to `/my-tours?booking=success`.
-- [ ] **B9**: Every error gets a response:
+- [x] **B9**: Every error gets a response:
   - `withApi` maps CastError, duplicate keys (409), ValidationError, ZodError, JWT errors and Stripe signature errors.
   - Actions return expected errors as `ActionState`.
   - Pages use `notFound()` for missing data.
@@ -213,7 +213,7 @@
   - CSS Module classes are camelCase.
 - [x] **Q4**: The module boundaries from §3.2 and UI boundaries from §4.6 hold.
 - [x] **Q5**: No commented-out code, no `TODO` without an issue link, and no leftover debugging logs.
-- [ ] **Q6**: *(amended)* Testing and coverage:
+- [x] **Q6**: *(amended)* Testing and coverage:
   - Every Route Handler and action has happy-path, validation and authorisation tests.
   - Every S and B ID has a tagged regression test, written with its feature.
   - Coverage is at least 85% of service lines and 75% of `src/server/**`.
@@ -359,7 +359,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | F5 | Phase 5 | Pending |
 | F6 | Phase 4 | Pending |
 | F7 | Phase 6 | Pending |
-| S1 | Phase 1 | Pending |
+| S1 | Phase 1 | Complete |
 | S2 | Phase 3 | Pending |
 | S3 | Phase 1 | Complete |
 | S4 | Phase 4 | Pending |
@@ -367,8 +367,8 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | S6 | Phase 5 | Pending |
 | S7 | Phase 4 | Pending |
 | S8 | Phase 5 | Pending |
-| S9 | Phase 1 | Pending |
-| S10 | Phase 1 | Pending |
+| S9 | Phase 1 | Complete |
+| S10 | Phase 1 | Complete |
 | S11 | Phase 1 | Complete |
 | S12 | Phase 8 | Pending |
 | S13 | Phase 5 | Pending |
@@ -390,7 +390,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | B6 | Phase 6 | Pending |
 | B7 | Phase 6 | Pending |
 | B8 | Phase 6 | Pending |
-| B9 | Phase 1 | Pending |
+| B9 | Phase 1 | Complete |
 | B10 | Phase 1 | Complete |
 | B11 | Phase 4 | Pending |
 | B12 | Phase 4 | Pending |
@@ -459,7 +459,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | Q3 | Phase 1 | Complete |
 | Q4 | Phase 1 | Complete |
 | Q5 | Phase 1 | Complete |
-| Q6 | Phase 1 | Pending |
+| Q6 | Phase 1 | Complete |
 | Q7 | Phase 1 | Complete |
 | Q8 | Phase 1 | Pending |
 | Q9 | Phase 1 | Complete |
