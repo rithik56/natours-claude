@@ -5,7 +5,11 @@ export const metadata: Metadata = {
   title: 'Natours',
 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   // Render every page per request so the CSP nonce can reach its scripts.
   await connection();
   return (

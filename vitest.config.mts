@@ -5,8 +5,11 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, 'src'),
-      // server-only throws outside React Server rendering, so tests get an empty module.
-      'server-only': path.resolve(import.meta.dirname, 'test/empty.ts'),
+      // server-only throws outside React Server rendering, so tests get the package's own empty module.
+      'server-only': path.resolve(
+        import.meta.dirname,
+        'node_modules/server-only/empty.js',
+      ),
     },
   },
   test: {

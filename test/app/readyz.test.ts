@@ -8,7 +8,10 @@ describe('/readyz with MongoDB up', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe('no-store');
-    expect(await response.json()).toEqual({ status: 'ready', checks: { mongo: 'up' } });
+    expect(await response.json()).toEqual({
+      status: 'ready',
+      checks: { mongo: 'up' },
+    });
   });
 
   it('[B17] connectDb returns the same promise on every call', async () => {
