@@ -1,6 +1,8 @@
+import { fromIstDay } from '@/lib/ist';
+import { Tour, type TourDoc } from '@/server/modules/tours/model';
 import { User, type UserDoc } from '@/server/modules/users/model';
 import type { Role } from '@/server/roles';
-import { seedUsers, type SeedUser } from './seed';
+import { seedTours, seedUsers, type SeedUser } from './seed';
 
 /** A test-only password, used for every factory user. It is never shown to a person. */
 export const TEST_PASSWORD = 'Test-only-passphrase-2026';
@@ -68,4 +70,101 @@ export async function createUser(
     );
   }
   return { user, password };
+}
+
+type SeedTourRecord = ReturnType<typeof seedTours>[number] & {
+  startLocation: {
+    type: 'Point';
+    coordinates: [number, number];
+    address: string;
+    description: string;
+  };
+  locations: Array<{
+    type: 'Point';
+    coordinates: [number, number];
+    description: string;
+    day: number;
+  }>;
+  photoCredits: Array<{
+    file: string;
+    title: string;
+    author: string;
+    license: string;
+    licenseUrl: string;
+    sourceUrl: string;
+  }>;
+};
+
+type CreateTourOptions = {
+  /** Selects that seed tour. Without it, the next seed tour not yet in this database. */
+  slug?: string;
+  /** Only numbers, dates and the enum may change. Text always comes from the seed. */
+  overrides?: Partial<{
+    price: number;
+    duration: number;
+    maxGroupSize: number;
+    difficulty: 'easy' | 'medium' | 'difficult';
+    startDates: Date[];
+    ratingsAverage: number;
+    ratingsQuantity: number;
+  }>;
+  /** Also creates the tour's seed guides, so populate('guides') finds them. */
+  withGuides?: boolean;
+};
+
+function seedTourRecords(): SeedTourRecord[] {
+  return seedTours() as SeedTourRecord[];
+}
+
+async function pickSeedTour(slug: string | undefined): Promise<SeedTourRecord> {
+  const records = seedTourRecords();
+  if (slug !== undefined) {
+    const record = records.find((entry) => entry.slug === slug);
+    if (!record) {
+      throw new Error(
+        `createTour: ${slug} is not a tour in seed/data/tours.json`,
+      );
+    }
+    return record;
+  }
+  const taken = await Tour.find({ _id: { $in: records.map((r) => r._id) } })
+    .select('_id')
+    .lean();
+  const takenIds = new Set(taken.map((entry) => String(entry._id)));
+  const next = records.find((entry) => !takenIds.has(entry._id));
+  if (!next) {
+    throw new Error(
+      'createTour: every seed tour already exists in this database',
+    );
+  }
+  return next;
+}
+
+async function createSeedGuides(guideIds: string[]): Promise<void> {
+  const people = seedUsers();
+  for (const id of guideIds) {
+    if (await User.exists({ _id: id })) continue;
+    const person = people.find((entry) => entry._id === id);
+    if (!person) {
+      throw new Error(`createTour: guide ${id} is not in seed/data/users.json`);
+    }
+    await createUser({ email: person.email });
+  }
+}
+
+/**
+ * Creates a tour by copying a real record from seed/data/tours.json, with its
+ * seed _id (D-08, QA-17). Seed start dates become 00:00 IST instants (B19).
+ */
+export async function createTour(
+  options: CreateTourOptions = {},
+): Promise<TourDoc> {
+  const record = await pickSeedTour(options.slug);
+  if (options.withGuides) await createSeedGuides(record.guides);
+  const { startDates, ...rest } = record;
+  return Tour.create({
+    ...rest,
+    startDates: startDates.map(fromIstDay),
+    ...options.overrides,
+  });
 }
