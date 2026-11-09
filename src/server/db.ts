@@ -38,3 +38,9 @@ export async function pingDb(): Promise<boolean> {
     return false;
   }
 }
+
+export async function disconnectDb(): Promise<void> {}
+
+export function isDbUnavailableError(_error: unknown): boolean {
+  return false;
+}
