@@ -4,16 +4,16 @@ milestone: v2
 current_phase: 01
 current_phase_name: Foundation and contracts
 status: executing
-stopped_at: Completed 01-08-PLAN.md
-last_updated: "2026-11-09T03:13:51.818Z"
+stopped_at: Completed 01-09-PLAN.md
+last_updated: "2026-11-09T05:50:22.986Z"
 last_activity: 2026-11-09
 last_activity_desc: Phase 01 execution resumed (wave continue)
-state_head: c7a0520850ef2c002615ec0bf422b4f558633421
+state_head: 0587d869ab2286e683fc0e7f5baae8c2526c92b8
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 15
-  completed_plans: 8
+  completed_plans: 9
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 8 Nov 2026)
 ## Current Position
 
 Phase: 01 (Foundation and contracts) — EXECUTING
-Plan: 9 of 15
+Plan: 10 of 15
 Status: Ready to execute
 Last activity: 2026-11-09 — Phase 01 execution resumed (wave continue)
 
@@ -65,6 +65,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P06 | 25min | 2 tasks | 7 files |
 | Phase 01 P07 | 50min | 3 tasks | 16 files |
 | Phase 01 P08 | 20min | 3 tasks | 13 files |
+| Phase 01 P09 | 80min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -88,6 +89,7 @@ Recent decisions affecting current work:
 - [Phase 01]: 01-07: passwordChangedAt is stamped with now() (the one clock); findActiveById validates the id shape before connecting
 - [Phase 01]: Tour discount field dropped; one price per tour (ADR 0014, D-05)
 - [Phase 01]: Tour startLocation is required so toTourSummary always has a start point
+- [Phase 01]: Session: token refused when iat is before the second of passwordChangedAt; same second accepted (ADR 0015)
 
 ### Pending Todos
 
@@ -111,6 +113,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-09T03:13:51.800Z
-Stopped at: Completed 01-08-PLAN.md
+Last session: 2026-11-09T05:50:22.968Z
+Stopped at: Completed 01-09-PLAN.md
 Resume file: None

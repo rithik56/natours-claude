@@ -43,7 +43,7 @@
   - Forgot-password gives the same response whether or not the email exists.
   - Reset tokens are 32 random bytes, stored as a sha256 hash, valid for 10 minutes and usable once.
   - The emailed link opens `/reset-password/[token]`.
-- [ ] **S14**: *(amended)* Session JWTs:
+- [x] **S14**: *(amended)* Session JWTs:
   - Verified with the algorithm pinned to HS256 and a secret of at least 32 characters.
   - Expire after 7 days, with the cookie's `maxAge` matching, and carry no role.
   - Rejected if issued before `passwordChangedAt`.
@@ -372,7 +372,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | S11 | Phase 1 | Complete |
 | S12 | Phase 8 | Pending |
 | S13 | Phase 5 | Pending |
-| S14 | Phase 1 | Pending |
+| S14 | Phase 1 | Complete |
 | S15 | Phase 5 | Pending |
 | S16 | Phase 4 | Pending |
 | S17 | Phase 6 | Pending |
