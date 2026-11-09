@@ -639,18 +639,16 @@ export default defineConfig({
 | A12 | Vitest 5 can alias `@` without a tsconfig-paths plugin (manual alias used) | Code Examples | None; manual alias verified pattern |
 | A13 | `deps.ts` returns fakes for `development`, `test`, `ci` and throws for staging/production until real adapters land | Open Questions | Dev experience in Phases 2-4 |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **`CastError` mapping: 400 or 404?**
-   - Known: `plan.md` §4.2 has no code for a bad ID; spec says Cast errors are mapped (B9). Both are defensible.
-   - Recommendation: `VALIDATION_ERROR` 400 for malformed IDs in params (they fail Zod `objectId` validation first anyway); `NOT_FOUND` only for well-formed missing IDs. Record in contracts.
-2. **What does `deps.ts` do in `development` in Phases 1-4?**
-   - Known: real adapters are Phases 5/6/8 (CONTEXT). Phase 4's seed needs storage.
-   - Recommendation: fakes for `development|test|ci`; throw a clear `INTERNAL` configuration error for `staging|production` until real adapters land (A13). Phase 4 may add a local-disk storage adapter via ADR.
-3. **Hash cost and `SESSION_SECRET` in `.env.example`.** `.env.example` must contain a non-secret placeholder; S18 text says "with a placeholder", and CLAUDE.md bans placeholder text only where a person can see it (DEL-23 proposes allowing `.env.example` values). The rewritten CLAUDE.md should state this explicitly.
-4. **Mobile vs desktop Lighthouse preset for the floor.** Phase 7 gates U24 on mobile; a preset change later would invalidate the floor. Recommend `mobile` now (A: assumed).
-5. **Should `docs/bundle-baseline.json` be rewritten by CI or only checked?** Recommend: written locally by `npm run bundle:record`, committed; CI runs `--check` (CONTEXT says "records").
-6. **Does the user want `eslint-plugin-security` retained with one rule off (A5)?** Low stakes; planner can decide.
+Resolved by the planner on 9 Nov 2026 under Claude's Discretion (CONTEXT.md); each is carried into the named plan and ADR.
+
+1. **`CastError` mapping: 400 or 404?** RESOLVED: `VALIDATION_ERROR` 400 for malformed IDs; services throw `NOT_FOUND` for well-formed missing IDs. Plan 01-11, ADR 0017, `docs/contracts.md`.
+2. **What does `deps.ts` do in `development` in Phases 1-4?** RESOLVED: fakes for `development|test|ci`; in `staging|production` the mail, queue, storage, Stripe and rate-limit adapters throw a clear error until their real adapters land; the cache adapter is real outside `test`. Plan 01-10, ADR 0016.
+3. **Hash cost and `SESSION_SECRET` in `.env.example`.** RESOLVED: bcrypt cost 12, and 4 only under `APP_ENV=test` (plan 01-07). `.env.example` lists every key with a comment; secret values stay empty (with a "generate with openssl rand -base64 48" comment), and `check:env` fails if a secret-named key has a value. The rewritten CLAUDE.md states that `.env.example` is configuration, not visible content. Plans 01-02 and 01-04, ADR 0010.
+4. **Mobile vs desktop Lighthouse preset for the floor.** RESOLVED: Lighthouse's default mobile emulation, so the floor matches Phase 7's U24 runs. Plan 01-13, ADR 0018.
+5. **Should `docs/bundle-baseline.json` be rewritten by CI or only checked?** RESOLVED: recorded locally with `npm run bundle:record` and committed; CI runs `npm run bundle:check` only. Plan 01-13, ADR 0018.
+6. **Does the user want `eslint-plugin-security` retained with one rule off (A5)?** RESOLVED: keep the plugin's recommended config with only `security/detect-object-injection` off, explained in ADR 0009. Plan 01-03.
 
 ## Environment Availability
 
