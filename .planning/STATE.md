@@ -4,16 +4,16 @@ milestone: v2
 current_phase: 01
 current_phase_name: Foundation and contracts
 status: executing
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-11-09T02:27:54.883Z"
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-11-09T02:37:06.410Z"
 last_activity: 2026-11-09
 last_activity_desc: Phase 01 execution resumed (wave continue)
-state_head: b8deb70e20389392e9ba50ea5df1eb0952ec7e85
+state_head: 5edbd427c97978855a4dc5dedd36b4c5c648ee0f
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 15
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 8 Nov 2026)
 ## Current Position
 
 Phase: 01 (Foundation and contracts) — EXECUTING
-Plan: 4 of 15
+Plan: 5 of 15
 Status: Ready to execute
 Last activity: 2026-11-09 — Phase 01 execution resumed (wave continue)
 
@@ -60,6 +60,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P01 | 15min | 3 tasks | 22 files |
 | Phase 01 P02 | 20 min | 3 tasks | 16 files |
 | Phase 01 P03 | 25min | 3 tasks | 25 files |
+| Phase 01 P04 | 25min | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,7 @@ Recent decisions affecting current work:
 - [Phase 01]: ADRs 0001 to 0008 recorded: versions, GSD replaces agent team, plan.md as spec, install when first used, contracts per phase, home page only, regression tests with features, review findings per phase
 - [Phase 01]: package.json type module and vitest.config.mts: scripts run as ES modules without Node warning (ADR 0009)
 - [Phase 01]: CI gates npm audit at --audit-level=high; moderate minimatch advisory via eslint-config-next tolerated
+- [Phase 01]: 01-04: parseConfig throws ConfigError (not ZodError) because zod imports are restricted by ADR 0009; config validated in register() with process.exit(1)
 
 ### Pending Todos
 
@@ -99,6 +101,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-09T02:27:54.866Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-11-09T02:37:06.393Z
+Stopped at: Completed 01-04-PLAN.md
 Resume file: None

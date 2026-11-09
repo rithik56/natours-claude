@@ -132,7 +132,7 @@
   - The web app enqueues, and the worker renders and sends with 3 retries and backoff.
   - A failed email never fails the user's request. The exception is forgot-password when Redis is down.
   - The queue connects on first use.
-- [ ] **D4**: Config is validated with Zod in `instrumentation.ts` at startup, and the app refuses to start if it's invalid. CI checks that every key is in `.env.example`.
+- [x] **D4**: Config is validated with Zod in `instrumentation.ts` at startup, and the app refuses to start if it's invalid. CI checks that every key is in `.env.example`.
 - [ ] **D5**: Graceful shutdown on SIGTERM. The worker finishes its current job. The web server lets in-flight requests finish (up to 10 seconds), then closes Mongo and Redis.
 - [ ] **D6**: `/healthz` is the liveness check and `/readyz` checks Mongo and Redis. The Docker `HEALTHCHECK` uses `/healthz`.
 - [ ] **D7**: Logs are structured JSON (pino) in production and pretty-printed in development. Every log line and error response carries the request ID.
@@ -416,7 +416,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | D1 | Phase 5 | Pending |
 | D2 | Phase 4 | Pending |
 | D3 | Phase 5 | Pending |
-| D4 | Phase 1 | Pending |
+| D4 | Phase 1 | Complete |
 | D5 | Phase 5 | Pending |
 | D6 | Phase 5 | Pending |
 | D7 | Phase 1 | Pending |
