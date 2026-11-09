@@ -5,7 +5,7 @@ titles: json
 findings:
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: deferred
     title: "`withApi` reads an unbounded JSON body, and `PAYLOAD_TOO_LARGE` is never produced"
   - id: WR-02
     severity: warning
@@ -21,7 +21,7 @@ findings:
     title: "The \"password is written only by `save()`\" guard has gaps"
   - id: WR-05
     severity: warning
-    disposition: open
+    disposition: deferred
     title: "Tour slug can go stale, be empty, or collide as a misleading CONFLICT"
   - id: WR-06
     severity: warning
@@ -37,7 +37,7 @@ findings:
     title: "The password-change cut-off uses the pinned clock, but the JWT `iat` uses the wall clock"
   - id: WR-09
     severity: warning
-    disposition: open
+    disposition: deferred
     title: "`getSession` swallows every error, including Next control-flow and configuration errors"
   - id: IN-01
     severity: info
@@ -55,7 +55,7 @@ findings:
     severity: info
     disposition: open
     title: "The `ratingsAverage` setter also rewrites query filters"
-open: 7
+open: 4
 total: 13
 recorded: 2026-11-09T16:44:47.761Z
 ---
@@ -64,15 +64,15 @@ recorded: 2026-11-09T16:44:47.761Z
 
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
-| WR-01 | warning | open | orchestrator re-checked against the code on 9 Nov 2026 and confirmed |
+| WR-01 | warning | deferred | deferred by the user on 9 Nov 2026: chose to leave this open for Phase 4 when approving the review fixes |
 | WR-02 | warning | fixed | commit 8e17cc6 (REVIEW-FIX.md) |
 | WR-03 | warning | fixed | commit 97af577 (REVIEW-FIX.md) |
 | WR-04 | warning | fixed | commit a8712eb (REVIEW-FIX.md) |
-| WR-05 | warning | open | - |
+| WR-05 | warning | deferred | deferred by the user on 9 Nov 2026: chose to leave this open for Phase 4 when approving the review fixes |
 | WR-06 | warning | fixed | commit 2be5d5d (REVIEW-FIX.md) |
 | WR-07 | warning | fixed | commit 03014b8 (REVIEW-FIX.md) |
 | WR-08 | warning | fixed | commit 11336ae (REVIEW-FIX.md) |
-| WR-09 | warning | open | - |
+| WR-09 | warning | deferred | deferred by the user on 9 Nov 2026: chose to leave this open for Phase 4 when approving the review fixes |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
 | IN-03 | info | open | - |
