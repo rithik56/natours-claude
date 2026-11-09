@@ -113,6 +113,10 @@ describe('isDbUnavailableError', () => {
     'MongooseServerSelectionError',
     'MongoServerSelectionError',
     'MongoNetworkError',
+    'MongoNetworkTimeoutError',
+    'MongoPoolClearedError',
+    'MongoTopologyClosedError',
+    'MongoNotConnectedError',
   ])('[B10] is true for %s', (name) => {
     expect(isDbUnavailableError(namedError(name))).toBe(true);
   });
@@ -135,6 +139,8 @@ describe('isDbUnavailableError', () => {
   it('[B10] is false for other errors and non-errors', () => {
     expect(isDbUnavailableError(new Error('boom'))).toBe(false);
     expect(isDbUnavailableError(namedError('CastError'))).toBe(false);
+    expect(isDbUnavailableError(namedError('MongoServerError'))).toBe(false);
+    expect(isDbUnavailableError(namedError('MongoParseError'))).toBe(false);
     expect(isDbUnavailableError(new AppError('NOT_FOUND'))).toBe(false);
     expect(isDbUnavailableError('MongoNetworkError')).toBe(false);
     expect(isDbUnavailableError(undefined)).toBe(false);

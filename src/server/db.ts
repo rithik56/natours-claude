@@ -11,11 +11,17 @@ const UNAVAILABLE_ERROR_NAMES = new Set([
   'MongooseServerSelectionError',
   'MongoServerSelectionError',
   'MongoNetworkError',
+  // Each of these has its own name in the driver, so MongoNetworkError alone misses them.
+  'MongoNetworkTimeoutError',
+  'MongoPoolClearedError',
+  'MongoTopologyClosedError',
+  'MongoNotConnectedError',
 ]);
 
 /**
- * True for errors that mean MongoDB cannot be reached: server selection and
- * network failures, a query before the initial connection finished, and the
+ * True for errors that mean MongoDB cannot be reached: server selection,
+ * network and timeout failures, a cleared or closed connection pool, a driver
+ * that is not connected, a query before the initial connection finished, and the
  * AppError that connectDb raises for them. Callers answer 503 for these (B10).
  */
 export function isDbUnavailableError(error: unknown): boolean {
