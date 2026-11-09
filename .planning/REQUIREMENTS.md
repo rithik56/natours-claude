@@ -37,7 +37,7 @@
   - Nothing changes state on a GET.
   - `withApi` checks the origin on POST, PUT, PATCH and DELETE, except for the Stripe webhook.
 - [ ] **S10**: The API is same-origin. CORS headers are sent only for origins listed in `CORS_ORIGINS`.
-- [ ] **S11**: The CSP uses a per-request nonce set in `proxy.ts`, with `'strict-dynamic'`. Production has no `'unsafe-inline'` for scripts, and only exact hosts are allowed (Stripe, map tiles, storage).
+- [x] **S11**: The CSP uses a per-request nonce set in `proxy.ts`, with `'strict-dynamic'`. Production has no `'unsafe-inline'` for scripts, and only exact hosts are allowed (Stripe, map tiles, storage).
 - [ ] **S12**: *(amended)* TLS certificate checks stay on for MongoDB Atlas and SMTP. Redis runs without TLS, and only on the instance's private Docker network.
 - [ ] **S13**: Password reset:
   - Forgot-password gives the same response whether or not the email exists.
@@ -135,7 +135,7 @@
 - [x] **D4**: Config is validated with Zod in `instrumentation.ts` at startup, and the app refuses to start if it's invalid. CI checks that every key is in `.env.example`.
 - [ ] **D5**: Graceful shutdown on SIGTERM. The worker finishes its current job. The web server lets in-flight requests finish (up to 10 seconds), then closes Mongo and Redis.
 - [ ] **D6**: `/healthz` is the liveness check and `/readyz` checks Mongo and Redis. The Docker `HEALTHCHECK` uses `/healthz`.
-- [ ] **D7**: Logs are structured JSON (pino) in production and pretty-printed in development. Every log line and error response carries the request ID.
+- [x] **D7**: Logs are structured JSON (pino) in production and pretty-printed in development. Every log line and error response carries the request ID.
 - [ ] **D8**: A multi-stage Dockerfile on `node:24-slim` runs as a non-root user, with standalone output and the worker bundled by esbuild. `docker-compose.yml` runs `mongo`, `redis`, `mailpit`, `web` and `worker`.
 - [x] **D9**: Build output (`.next`, `dist`, `coverage`, Playwright reports) is gitignored.
 - [ ] **D10**: *(amended)* `npm run seed`:
@@ -369,7 +369,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | S8 | Phase 5 | Pending |
 | S9 | Phase 1 | Pending |
 | S10 | Phase 1 | Pending |
-| S11 | Phase 1 | Pending |
+| S11 | Phase 1 | Complete |
 | S12 | Phase 8 | Pending |
 | S13 | Phase 5 | Pending |
 | S14 | Phase 1 | Pending |
@@ -419,7 +419,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | D4 | Phase 1 | Complete |
 | D5 | Phase 5 | Pending |
 | D6 | Phase 5 | Pending |
-| D7 | Phase 1 | Pending |
+| D7 | Phase 1 | Complete |
 | D8 | Phase 5 | Pending |
 | D9 | Phase 1 | Complete |
 | D10 | Phase 4 | Pending |

@@ -4,16 +4,16 @@ milestone: v2
 current_phase: 01
 current_phase_name: Foundation and contracts
 status: executing
-stopped_at: Completed 01-05-PLAN.md
-last_updated: "2026-11-09T02:47:11.307Z"
+stopped_at: Completed 01-06-PLAN.md
+last_updated: "2026-11-09T02:53:44.038Z"
 last_activity: 2026-11-09
 last_activity_desc: Phase 01 execution resumed (wave continue)
-state_head: 1f9247424d0ba86de46a149a2ac0269e8fde17ea
+state_head: cec54a5188bbcbda1ceb1c4f6fb19d2bc1db153d
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 15
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 8 Nov 2026)
 ## Current Position
 
 Phase: 01 (Foundation and contracts) — EXECUTING
-Plan: 6 of 15
+Plan: 7 of 15
 Status: Ready to execute
 Last activity: 2026-11-09 — Phase 01 execution resumed (wave continue)
 
@@ -62,6 +62,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P03 | 25min | 3 tasks | 25 files |
 | Phase 01 P04 | 25min | 2 tasks | 14 files |
 | Phase 01 P05 | 40min | 3 tasks | 15 files |
+| Phase 01 P06 | 25min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,7 @@ Recent decisions affecting current work:
 - [Phase 01]: 01-04: parseConfig throws ConfigError (not ZodError) because zod imports are restricted by ADR 0009; config validated in register() with process.exit(1)
 - [Phase 01]: APP_NOW values with no offset are read as IST by now() in clock.ts
 - [Phase 01]: requestLogger takes an optional base logger so tests can capture JSON lines
+- [Phase 01]: 01-06: matcher test uses a literal pattern plus a source-equality assertion because security/detect-non-literal-regexp bars new RegExp from config
 
 ### Pending Todos
 
@@ -104,6 +106,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-09T02:47:11.288Z
-Stopped at: Completed 01-05-PLAN.md
+Last session: 2026-11-09T02:53:44.021Z
+Stopped at: Completed 01-06-PLAN.md
 Resume file: None
