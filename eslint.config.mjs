@@ -35,9 +35,25 @@ const eslintConfig = defineConfig([
       // noUncheckedIndexedAccess code is full of, and that breaks --max-warnings=0.
       'security/detect-object-injection': 'off',
       'no-console': 'error',
+      '@typescript-eslint/no-explicit-any': 'error',
+    },
+  },
+  {
+    // Not *.cjs: the react plugin is only registered for these files.
+    files: ['**/*.{js,jsx,mjs,ts,mts,tsx}'],
+    rules: {
       // S21: user content is JSX text, never HTML.
       'react/no-danger': 'error',
-      '@typescript-eslint/no-explicit-any': 'error',
+    },
+  },
+  {
+    // lighthouserc.cjs is CommonJS because Lighthouse CI loads it with require().
+    files: ['**/*.cjs'],
+    languageOptions: { sourceType: 'commonjs' },
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      // The config reads one repository file it chose itself (ADR 0009).
+      'security/detect-non-literal-fs-filename': 'off',
     },
   },
   {
