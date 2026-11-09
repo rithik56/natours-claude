@@ -13,6 +13,8 @@ export async function clearDatabase(): Promise<void> {
 /**
  * Connects to this test file's in-memory database, builds indexes for every
  * registered model (QA-18) and empties the collections after each test.
+ * Call it once per test file: a second call would connect again after the first
+ * file-level teardown.
  */
 export function useTestDatabase(): void {
   beforeAll(async () => {
