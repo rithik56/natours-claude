@@ -1,7 +1,7 @@
 import 'server-only';
 import { messages } from '@/lib/messages';
 
-// Skeleton for the RED commit: the code list is data, the behaviour is not written yet.
+/** plan.md 4.2: every error code the API and the actions can return. */
 export const ERROR_CODES = [
   'VALIDATION_ERROR',
   'UNAUTHENTICATED',
@@ -19,13 +19,27 @@ export const ERROR_CODES = [
 
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
-export const ERROR_STATUS = {} as Record<ErrorCode, number>;
+export const ERROR_STATUS: Record<ErrorCode, number> = {
+  VALIDATION_ERROR: 400,
+  UNAUTHENTICATED: 401,
+  INVALID_CREDENTIALS: 401,
+  TOKEN_EXPIRED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  PAYLOAD_TOO_LARGE: 413,
+  UNSUPPORTED_MEDIA_TYPE: 415,
+  RATE_LIMITED: 429,
+  INTERNAL: 500,
+  SERVICE_UNAVAILABLE: 503,
+};
 
 export type ErrorDetail = { path: string; message: string };
 
+/** An error with a code from plan.md 4.2. Its default message comes from messages.ts. */
 export class AppError extends Error {
   readonly code: ErrorCode;
-  readonly status: number = 0;
+  readonly status: number;
   readonly details: ErrorDetail[] | undefined;
 
   constructor(
@@ -34,11 +48,13 @@ export class AppError extends Error {
     details?: ErrorDetail[],
   ) {
     super(message);
+    this.name = 'AppError';
     this.code = code;
+    this.status = ERROR_STATUS[code];
     this.details = details;
   }
 }
 
 export function isAppError(value: unknown): value is AppError {
-  return value === undefined;
+  return value instanceof AppError;
 }

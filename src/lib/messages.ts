@@ -25,11 +25,10 @@ export const messages = {
   },
   validation: {
     required: 'Fill in this field.',
-    invalidType:
-      "This value isn't in the expected form. Check it and try again.",
+    invalidType: "This value isn't in the right form. Check it and try again.",
     invalidEmail: 'Enter a valid email address.',
     invalidFormat:
-      "This value isn't in the expected format. Check it and try again.",
+      "This value isn't in the right format. Check it and try again.",
     invalidOption: 'Choose one of the available options.',
     invalidValue: "This value isn't allowed. Check it and try again.",
     invalidId: "That identifier isn't valid. Check it and try again.",
