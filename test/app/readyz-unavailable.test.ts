@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { callRoute } from '../helpers/call-route';
 
 type MongoCache = { __natoursMongo?: unknown };
 
@@ -13,20 +14,23 @@ describe('/readyz with MongoDB down', () => {
     vi.stubEnv('DB_SERVER_SELECTION_TIMEOUT_MS', '500');
     delete (globalThis as MongoCache).__natoursMongo;
     vi.resetModules();
-    const { GET } = await import('@/app/readyz/route');
+    const route = await import('@/app/readyz/route');
 
     const startedAt = Date.now();
-    const response = await GET();
+    const result = await callRoute(route, { path: '/readyz' });
     const elapsed = Date.now() - startedAt;
 
-    expect(response.status).toBe(503);
+    expect(result.status).toBe(503);
     expect(elapsed).toBeLessThan(3000);
-    const text = await response.text();
-    expect(JSON.parse(text)).toEqual({
+    expect(result.body).toEqual({
       status: 'not-ready',
       checks: { mongo: 'down' },
     });
-    expect(text).not.toMatch(/127\.0\.0\.1|ECONNREFUSED|Mongo.*Error/);
+    expect(result.headers.get('cache-control')).toBe('no-store');
+    expect(result.headers.get('x-request-id')).not.toBeNull();
+    expect(JSON.stringify(result.body)).not.toMatch(
+      /127\.0\.0\.1|ECONNREFUSED|Mongo.*Error/,
+    );
   }, 10_000);
 
   it('[B17] a failed connection attempt is not cached, so the next call retries', async () => {
