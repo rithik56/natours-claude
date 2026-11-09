@@ -8,6 +8,16 @@ import { seedTours } from '../../../helpers/seed';
 
 const seed = seedTours();
 
+/** A plain copy of a saved tour without the named fields, ready to be created again. */
+function copyWithout(
+  tour: { toObject(): Record<string, unknown> },
+  ...omitted: string[]
+): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(tour.toObject()).filter(([key]) => !omitted.includes(key)),
+  );
+}
+
 describe('tours data layer', () => {
   useTestDatabase();
 
@@ -53,14 +63,14 @@ describe('tours data layer', () => {
 
     it('[B5] rejects a second tour with an existing name with a duplicate-key error', async () => {
       const first = await createTour();
-      const { _id: _unusedId, slug: _unusedSlug, ...rest } = first.toObject();
+      const rest = copyWithout(first, '_id', 'slug');
 
       await expect(Tour.create(rest)).rejects.toMatchObject({ code: 11000 });
     });
 
     it('[B5] rejects a second tour with an existing slug with a duplicate-key error', async () => {
       const first = await createTour();
-      const { _id: _unusedId, slug: _unusedSlug, ...rest } = first.toObject();
+      const rest = copyWithout(first, '_id', 'slug');
 
       await expect(
         Tour.create({ ...rest, name: first.name.toUpperCase() }),
@@ -70,7 +80,7 @@ describe('tours data layer', () => {
     it('[B5] generates a slug from the name when none is given', async () => {
       const tour = await createTour();
       await Tour.collection.deleteMany({});
-      const { _id: _unusedId, slug: _unusedSlug, ...rest } = tour.toObject();
+      const rest = copyWithout(tour, '_id', 'slug');
 
       const saved = await Tour.create(rest);
 
@@ -79,7 +89,7 @@ describe('tours data layer', () => {
 
     it('[B5] accepts an empty images array and adds createdAt and updatedAt', async () => {
       const tour = await createTour();
-      const { _id: _unusedId, ...rest } = tour.toObject();
+      const rest = copyWithout(tour, '_id');
       await Tour.collection.deleteMany({});
 
       const saved = await Tour.create({ ...rest, images: [] });
