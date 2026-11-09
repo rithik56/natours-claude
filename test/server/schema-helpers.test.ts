@@ -357,6 +357,188 @@ describe('operations that skip validators are refused (WR-04, ADR 0027)', () => 
     });
   });
 
+  describe('pipeline (array) updates are refused on every model (WR-04 follow-up, ADR 0027)', () => {
+    const pipeline = {
+      User: [
+        {
+          $replaceWith: {
+            $setField: {
+              field: 'password',
+              input: '$$ROOT',
+              value: 'plain-text-pass-9',
+            },
+          },
+        },
+      ],
+      Tour: [{ $set: { price: -5 } }],
+      Review: [{ $set: { rating: 99 } }],
+      Booking: [{ $set: { price: -5 } }],
+    } as const;
+    const on = { updatePipeline: true } as never;
+
+    describe.each(cases)('$name', (entry) => {
+      const update = () => pipeline[entry.name as keyof typeof pipeline];
+
+      it('[WR-04] updateOne with a pipeline is refused and stores nothing', async () => {
+        const stored = await entry.create();
+
+        await expectRefusal(
+          entry.model.updateOne({ _id: stored._id }, update() as never, on),
+          `${entry.name}.updateOne`,
+        );
+
+        expect(await raw(entry.model, stored._id)).toEqual(stored);
+      });
+
+      it('[WR-04] updateMany with a pipeline is refused and stores nothing', async () => {
+        const stored = await entry.create();
+
+        await expectRefusal(
+          entry.model.updateMany({ _id: stored._id }, update() as never, on),
+          `${entry.name}.updateMany`,
+        );
+
+        expect(await raw(entry.model, stored._id)).toEqual(stored);
+      });
+
+      it('[WR-04] findOneAndUpdate with a pipeline is refused and stores nothing', async () => {
+        const stored = await entry.create();
+
+        await expectRefusal(
+          entry.model.findOneAndUpdate(
+            { _id: stored._id },
+            update() as never,
+            on,
+          ),
+          `${entry.name}.findOneAndUpdate`,
+        );
+
+        expect(await raw(entry.model, stored._id)).toEqual(stored);
+      });
+
+      it('[WR-04] a pipeline update is still refused with middleware: false', async () => {
+        const stored = await entry.create();
+
+        await expectRefusal(
+          entry.model.updateOne(
+            { _id: stored._id },
+            update() as never,
+            {
+              updatePipeline: true,
+              middleware: false,
+            } as never,
+          ),
+          `${entry.name}.updateOne`,
+        );
+
+        expect(await raw(entry.model, stored._id)).toEqual(stored);
+      });
+
+      it('[WR-04] the pipeline refusal carries no document data', async () => {
+        const stored = await entry.create();
+
+        const error = await entry.model
+          .updateOne({ _id: stored._id }, update() as never, on)
+          .then(
+            () => null,
+            (caught: unknown) => caught,
+          );
+
+        expect(error).toBeInstanceOf(Error);
+        const message = (error as Error).message;
+        expect(message).toContain(`${entry.name}.updateOne`);
+        expect(message).not.toContain('plain-text-pass-9');
+        expect(message).not.toContain('99');
+        expect(message).not.toContain('-5');
+      });
+    });
+
+    it('[WR-04] User.updateOne stores no plain-text password for the $setField pipeline', async () => {
+      const { user } = await createUser();
+      const before = await raw(User as unknown as AnyModel, user._id);
+
+      await expect(
+        User.updateOne({ _id: user._id }, pipeline.User as never, on),
+      ).rejects.toThrow(/ADR 0027/);
+
+      const after = await raw(User as unknown as AnyModel, user._id);
+      expect(after?.password).toBe(before?.password);
+      expect(after?.password).not.toBe('plain-text-pass-9');
+    });
+
+    it('[WR-04] an object update on the same query still works', async () => {
+      const tour = await createTour();
+
+      await Tour.updateOne({ _id: tour._id }, { $set: { price: 12345 } });
+
+      expect((await Tour.findById(tour._id))?.price).toBe(12345);
+    });
+  });
+
+  describe('update validators cannot be switched off (WR-04 follow-up, ADR 0027)', () => {
+    it('[WR-04] Booking.updateOne rejects price 0 with middleware: false', async () => {
+      const stored = await cases[3]!.create();
+
+      await expect(
+        Booking.updateOne({ _id: stored._id }, { $set: { price: 0 } }, {
+          middleware: false,
+        } as never),
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+
+      expect(await raw(Booking as unknown as AnyModel, stored._id)).toEqual(
+        stored,
+      );
+    });
+
+    it('[WR-04] Tour update methods reject price 0 with middleware: false', async () => {
+      const stored = await cases[1]!.create();
+      const off = { middleware: false } as never;
+
+      await expect(
+        Tour.updateOne({ _id: stored._id }, { $set: { price: 0 } }, off),
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+      await expect(
+        Tour.updateMany({ _id: stored._id }, { $set: { price: 0 } }, off),
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+      await expect(
+        Tour.findOneAndUpdate({ _id: stored._id }, { price: 0 }, off),
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+
+      expect(await raw(Tour as unknown as AnyModel, stored._id)).toEqual(
+        stored,
+      );
+    });
+
+    it('[WR-04] a caller passing runValidators: false is still validated', async () => {
+      const stored = await cases[3]!.create();
+
+      await expect(
+        Booking.updateOne({ _id: stored._id }, { $set: { price: 0 } }, {
+          runValidators: false,
+        } as never),
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+
+      expect(await raw(Booking as unknown as AnyModel, stored._id)).toEqual(
+        stored,
+      );
+    });
+
+    it('[WR-04] runValidators: false together with middleware: false is still validated', async () => {
+      const stored = await cases[3]!.create();
+
+      await expect(
+        Booking.updateOne({ _id: stored._id }, { $set: { price: 0 } }, {
+          runValidators: false,
+          middleware: false,
+        } as never),
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+
+      expect(await raw(Booking as unknown as AnyModel, stored._id)).toEqual(
+        stored,
+      );
+    });
+  });
+
   describe('update queries cannot write the password through any operator (B14)', () => {
     const message = /User\.save\(\)/;
 
