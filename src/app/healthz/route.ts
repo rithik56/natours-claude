@@ -1,4 +1,11 @@
-// Throwaway RED stub: answers the wrong body and has no pipeline.
-export async function GET(): Promise<Response> {
-  return Response.json({ status: 'down' });
-}
+import { withApi } from '@/server/api/with-api';
+
+// S2: liveness only. It never touches the database and reveals nothing but the status.
+export const GET = withApi(
+  async () =>
+    Response.json(
+      { status: 'ok' },
+      { headers: { 'cache-control': 'no-store' } },
+    ),
+  { access: 'public' },
+);
