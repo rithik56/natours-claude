@@ -13,9 +13,11 @@
     "knip": "knip",
     "check:client": "node scripts/check-client-boundaries.ts",
     "check:conventions": "node scripts/check-conventions.ts",
+    "check:env": "node scripts/check-env.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "smoke": "node scripts/smoke.ts"
   },
   "dependencies": {
     "mongoose": "9.12.0",

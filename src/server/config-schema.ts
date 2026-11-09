@@ -97,7 +97,9 @@ const configSchema = z
 export type AppConfig = z.infer<typeof configSchema>;
 
 /** Every config key, in schema order. */
-const configKeys: readonly string[] = Object.keys(configSchema.def.shape);
+export const configKeys: readonly string[] = Object.keys(
+  configSchema.def.shape,
+);
 
 export type ConfigIssue = { key: string; message: string };
 
