@@ -218,9 +218,9 @@
   - Every S and B ID has a tagged regression test, written with its feature.
   - Coverage is at least 85% of service lines and 75% of `src/server/**`.
 - [x] **Q7**: Tests are deterministic. No network calls, with fakes for Stripe, SMTP, storage, Redis and map tiles; an in-memory database per test file; and fake timers for expiry.
-- [ ] **Q8**: *(amended)* Commits follow Conventional Commits and cite the requirement IDs they cover and the GSD plan, one plan task per commit where possible.
+- [x] **Q8**: *(amended)* Commits follow Conventional Commits and cite the requirement IDs they cover and the GSD plan, one plan task per commit where possible.
 - [x] **Q9**: Exported service functions have TSDoc covering their parameters, return value and error codes.
-- [ ] **Q10**: Documentation: a README (setup, scripts, architecture, deployment), `docs/contracts.md`, `docs/design/`, and an ADR for every deviation from `plan.md`.
+- [x] **Q10**: Documentation: a README (setup, scripts, architecture, deployment), `docs/contracts.md`, `docs/design/`, and an ADR for every deviation from `plan.md`.
 - [x] **Q11**: No unused dependencies or exports (knip), and the lockfile is committed. New dependencies need a one-line reason in the commit message.
 
 ## v2 Requirements
@@ -461,9 +461,9 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | Q5 | Phase 1 | Complete |
 | Q6 | Phase 1 | Complete |
 | Q7 | Phase 1 | Complete |
-| Q8 | Phase 1 | Pending |
+| Q8 | Phase 1 | Complete |
 | Q9 | Phase 1 | Complete |
-| Q10 | Phase 1 | Pending |
+| Q10 | Phase 1 | Complete |
 | Q11 | Phase 1 | Complete |
 
 **Coverage:**
