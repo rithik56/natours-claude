@@ -147,9 +147,16 @@ describe('proxy request id', () => {
 });
 
 describe('proxy matcher', () => {
+  const SOURCE =
+    '/((?!api|webhooks|healthz|readyz|_next/static|_next/image|favicon.ico).*)';
+  const PAGE_PATHS =
+    /^\/((?!api|webhooks|healthz|readyz|_next\/static|_next\/image|favicon.ico).*)$/;
   const entry = config.matcher[0];
-  const source = typeof entry === 'string' ? entry : entry?.source;
-  const matches = (path: string) => new RegExp(`^${source ?? ''}$`).test(path);
+  const matches = (path: string) => PAGE_PATHS.test(path);
+
+  it('uses the planned source pattern', () => {
+    expect(entry?.source).toBe(SOURCE);
+  });
 
   it('runs on page paths', () => {
     expect(matches('/')).toBe(true);
@@ -167,9 +174,7 @@ describe('proxy matcher', () => {
   });
 
   it('skips router prefetches', () => {
-    const missing = typeof entry === 'string' ? [] : (entry?.missing ?? []);
-
-    expect(missing).toEqual([
+    expect(entry?.missing).toEqual([
       { type: 'header', key: 'next-router-prefetch' },
       { type: 'header', key: 'purpose', value: 'prefetch' },
     ]);
