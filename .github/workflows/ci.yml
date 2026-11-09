@@ -72,3 +72,20 @@ jobs:
           APP_ENV: ci
           APP_URL: http://localhost:3210
           MONGODB_URI: mongodb://127.0.0.1:27017/natours
+      # R9, D-10: the script transfer size of / may not exceed the recorded floor plus 40 KB.
+      # The floor lives in docs/bundle-baseline.json and is recorded locally, never by CI.
+      - name: Check the JavaScript budget
+        run: npm run bundle:check
+        env:
+          APP_ENV: ci
+          APP_URL: http://localhost:3300
+          MONGODB_URI: mongodb://127.0.0.1:27017/natours
+      # Artifacts only: Lighthouse results are never uploaded to public temporary storage.
+      - name: Upload Lighthouse results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lighthouse-results
+          path: .lighthouseci/
+          include-hidden-files: true
+          if-no-files-found: ignore
