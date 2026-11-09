@@ -7,6 +7,7 @@ export type MailMessage = {
   text: string;
 };
 
+/** Sends one rendered email. Later phases add an SMTP implementation behind this. */
 export interface Mailer {
   send(message: MailMessage): Promise<void>;
 }
@@ -14,5 +15,14 @@ export interface Mailer {
 export type FakeMailer = Mailer & { sent: MailMessage[]; reset(): void };
 
 export function createFakeMailer(): FakeMailer {
-  return { sent: [], send: async () => {}, reset: () => {} };
+  const sent: MailMessage[] = [];
+  return {
+    sent,
+    async send(message) {
+      sent.push({ ...message });
+    },
+    reset() {
+      sent.length = 0;
+    },
+  };
 }
