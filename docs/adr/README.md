@@ -30,6 +30,7 @@ Every decision that departs from `plan.md`, and every project-level decision, is
 | 0024 | [Folder and test layout](0024-folder-and-test-layout.md) | Accepted |
 | 0025 | [ActionState carries the wait time for a rate-limited call](0025-action-state-carries-retry-after.md) | Accepted |
 | 0026 | [The CI build job runs MongoDB from the test binary](0026-ci-build-job-uses-the-test-mongod-binary.md) | Accepted |
+| 0027 | [Model operations that skip validators are refused](0027-model-operations-that-skip-validators-are-refused.md) | Accepted |
 
 ## Format
 
