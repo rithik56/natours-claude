@@ -25,3 +25,16 @@ SERVER-121912 is titled "Upgrade tcmalloc to include rseq bug fix". Its Jira tic
 - The `build` job downloads the binary on each run, as `checks` already does.
 - **Not verified:** that the new `build` job works on GitHub. Locally the script was run on port 27018, answered a ping and exited cleanly on SIGTERM and SIGINT with no `mongod` left behind, and `npm run smoke` passed against it. The workflow YAML parses and the step's shell was run locally. Until a GitHub Actions run passes, the step, the background process hand-off between steps and `bundle:check` with Chrome remain unconfirmed.
 - **Revisit** when MongoDB documents a fixed image or the runner kernel changes. Then try a `services: mongo` container again and, if it works, remove `scripts/ci-mongo.ts`, the `ci:mongo` script and this step. That change needs a new ADR that supersedes this one.
+
+## Outcome
+
+9 Nov 2026. The second GitHub Actions run, [42655320866](https://github.com/rithik56/natours-claude/actions/runs/42655320866) on commit `cf7ae39`, finished with conclusion success, and both the `checks` and `build` jobs passed. In the `build` job every step passed:
+
+- "Start MongoDB from the test binary" connected on the second try and printed its readiness line.
+- `build` passed.
+- "Generate a session secret for the smoke run" passed, so the hand-off through `$GITHUB_ENV` works.
+- `smoke` printed `smoke: ok`.
+- `bundle:check` ran three Lighthouse runs and printed `bundle: ok, 138229 bytes of script for / against a limit of 179067 (floor 138107 plus 40960)`, so Chrome works on the runner. The Linux figure is 122 bytes above the floor recorded on a Mac.
+- "Upload Lighthouse results" passed.
+
+So the "Not verified" point above is now confirmed for a `push` run. Still not verified: a run triggered by a pull request, and the `mongo:8.0` service container on a runner, which this decision replaced and did not fix.

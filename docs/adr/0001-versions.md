@@ -39,7 +39,7 @@ These are the versions in `package.json` and the lockfile after plan 01-01.
 | @vitest/coverage-v8 | 5.1.0 |
 | mongodb-memory-server | 11.3.0 |
 
-The mongod that the tests use is 8.0.34, set in `package.json` under `config.mongodbMemoryServer.version`. It is the newest 8.0.x with a macOS arm64 build when probed: 8.0.35 to 8.0.40 returned 403. It matches the `mongo:8.0` Docker image, which is also 8.0.34. This was confirmed on macOS arm64 only. Linux CI is not yet confirmed and is checked when CI is set up in plan 01-03.
+The mongod that the tests use is 8.0.34, set in `package.json` under `config.mongodbMemoryServer.version`. It is the newest 8.0.x with a macOS arm64 build when probed: 8.0.35 to 8.0.40 returned 403. It matches the `mongo:8.0` Docker image, which is also 8.0.34. This was confirmed on macOS arm64 only. Linux CI is not yet confirmed and is checked when CI is set up in plan 01-03. It has since been confirmed on Linux: on 9 Nov 2026 the `checks` job of GitHub Actions run 42652817012 ran `test:coverage` with this binary on `ubuntu-latest` and passed (ADR 0026).
 
 ### Checked now, installed later
 
@@ -83,4 +83,4 @@ MongoDB 8.0 in Docker (`mongo:8.0`), the major that Atlas M0 runs, so the deploy
 - Later phases install the majors above without re-checking them, and only look up the packages listed as checked at first install.
 - Everyone who works on the project needs Node 24. `engine-strict=true` makes `npm ci` fail on any other major, and the README tells macOS users to run `brew install node@24`.
 - Upgrading to TypeScript 7 or ESLint 10 is a separate decision, taken once `typescript-eslint` and `eslint-plugin-react` support them.
-- The 8.0.34 test binary has to be confirmed on Linux CI. If it is unavailable there, the pin changes and this ADR is superseded.
+- The 8.0.34 test binary had to be confirmed on Linux CI. If it were unavailable there, the pin would change and this ADR would be superseded. It was confirmed on 9 Nov 2026 (see above), so the pin stands.
