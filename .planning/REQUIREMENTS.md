@@ -23,7 +23,7 @@
 
 - [ ] **S1**: Every Route Handler, Server Action and protected page declares its access level, and anything undeclared is denied. An access-matrix test checks every API route and action as an anonymous visitor, `user`, `guide` and `admin`.
 - [ ] **S2**: There are no debug endpoints. `/healthz` returns only `{ status: 'ok' }`, and `/styleguide` is a 404 in production.
-- [ ] **S3**: Sensitive fields never leave the server. API responses and Client Component props go through DTO mappers, and queue jobs carry only `{ to, firstName, url }`.
+- [x] **S3**: Sensitive fields never leave the server. API responses and Client Component props go through DTO mappers, and queue jobs carry only `{ to, firstName, url }`.
 - [ ] **S4**: No mass assignment. Strict input schemas list exactly the allowed fields, and admin user updates allow only `name`, `email`, `role` and `active`.
 - [ ] **S5**: Ownership is enforced:
   - Only a review's author edits it; the author or an admin deletes it.
@@ -74,7 +74,7 @@
 - [ ] **B2**: The `top-5-cheap` alias sets the validated query that the query builder reads.
 - [ ] **B3**: Geo endpoints return documents. Coordinates are parsed as numbers and range-checked: latitude −90 to 90, longitude −180 to 180, distance above 0, unit `mi` or `km`.
 - [ ] **B4**: Tour images are updated through their own endpoint, which accepts any subset of the files. A JSON `PATCH /tours/[id]` never touches images.
-- [ ] **B5**: Schema rules match the domain: `duration` isn't unique and `slug` is. Dates come from timestamps, never `default: Date.now()`.
+- [x] **B5**: Schema rules match the domain: `duration` isn't unique and `slug` is. Dates come from timestamps, never `default: Date.now()`.
 - [ ] **B6**: The review service recalculates ratings after create, update and delete:
   - The work is awaited and rounded to one decimal.
   - The cached tour and review data is cleared.
@@ -99,7 +99,7 @@
   - Reviews load through their own paginated query.
   - Bookings populate only the fields they need.
 - [ ] **B13**: Each behaviour lives in one service function, shared by the action and the Route Handler, and there are no dead routes.
-- [ ] **B14**: `passwordChangedAt` is set in exactly one place, the model hook.
+- [x] **B14**: `passwordChangedAt` is set in exactly one place, the model hook.
 - [ ] **B15**: Account updates go only through the validated service, from both `updateMeAction` and `PATCH /api/v1/users/me`.
 - [ ] **B16**: A duplicate email or tour name returns 409 `CONFLICT`, or the matching `ActionState` field error.
 - [x] **B17**: Models and the Mongoose connection survive hot reload: models register as `mongoose.models.X ?? model(...)`, and the connection promise is cached on `globalThis`.
@@ -114,7 +114,7 @@
 - [ ] **R3**: Pages call services directly and never fetch our own `/api`. Independent data loads run in parallel, and repeated lookups are deduplicated with `cache()`.
 - [ ] **R4**: Slower sections stream inside `<Suspense>`, with skeletons the same size as the content (CLS under 0.1). Route segments have `loading.tsx`.
 - [ ] **R5**: *(amended)* Public data is cached with `unstable_cache` tags (`tours`, `tour:<id>`, `reviews:<tourId>`), and `cacheComponents` stays off. Services clear the tags when the data changes. Personal data is never cached, and a two-user Playwright test proves it.
-- [ ] **R6**: Props passed to Client Components are DTOs or plain values. Every file under `src/server/` imports `server-only`.
+- [x] **R6**: Props passed to Client Components are DTOs or plain values. Every file under `src/server/` imports `server-only`.
 - [ ] **R7**: Site forms are `<form action={serverAction}>` and work without JavaScript. With JavaScript, `useActionState` and `useFormStatus` add field errors and a pending state.
 - [ ] **R8**: The route map loads through `next/dynamic` with `ssr: false`, called from a Client Component. Its fallback is the itinerary list at the same size, and Leaflet loads only on tour pages.
 - [ ] **R9**: *(amended)* No page adds more than 40 KB gzipped of JavaScript over its Phase 0 baseline. Lighthouse CI measures this with `resource-summary:script:size` budgets on every page, and the tour page has its own budget that includes the lazily loaded map.
@@ -219,7 +219,7 @@
   - Coverage is at least 85% of service lines and 75% of `src/server/**`.
 - [x] **Q7**: Tests are deterministic. No network calls, with fakes for Stripe, SMTP, storage, Redis and map tiles; an in-memory database per test file; and fake timers for expiry.
 - [ ] **Q8**: *(amended)* Commits follow Conventional Commits and cite the requirement IDs they cover and the GSD plan, one plan task per commit where possible.
-- [ ] **Q9**: Exported service functions have TSDoc covering their parameters, return value and error codes.
+- [x] **Q9**: Exported service functions have TSDoc covering their parameters, return value and error codes.
 - [ ] **Q10**: Documentation: a README (setup, scripts, architecture, deployment), `docs/contracts.md`, `docs/design/`, and an ADR for every deviation from `plan.md`.
 - [x] **Q11**: No unused dependencies or exports (knip), and the lockfile is committed. New dependencies need a one-line reason in the commit message.
 
@@ -361,7 +361,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | F7 | Phase 6 | Pending |
 | S1 | Phase 1 | Pending |
 | S2 | Phase 3 | Pending |
-| S3 | Phase 1 | Pending |
+| S3 | Phase 1 | Complete |
 | S4 | Phase 4 | Pending |
 | S5 | Phase 6 | Pending |
 | S6 | Phase 5 | Pending |
@@ -386,7 +386,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | B2 | Phase 4 | Pending |
 | B3 | Phase 4 | Pending |
 | B4 | Phase 4 | Pending |
-| B5 | Phase 1 | Pending |
+| B5 | Phase 1 | Complete |
 | B6 | Phase 6 | Pending |
 | B7 | Phase 6 | Pending |
 | B8 | Phase 6 | Pending |
@@ -395,7 +395,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | B11 | Phase 4 | Pending |
 | B12 | Phase 4 | Pending |
 | B13 | Phase 1 | Pending |
-| B14 | Phase 1 | Pending |
+| B14 | Phase 1 | Complete |
 | B15 | Phase 5 | Pending |
 | B16 | Phase 5 | Pending |
 | B17 | Phase 1 | Complete |
@@ -407,7 +407,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | R3 | Phase 4 | Pending |
 | R4 | Phase 4 | Pending |
 | R5 | Phase 6 | Pending |
-| R6 | Phase 1 | Pending |
+| R6 | Phase 1 | Complete |
 | R7 | Phase 5 | Pending |
 | R8 | Phase 4 | Pending |
 | R9 | Phase 1 | Pending |
@@ -462,7 +462,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | Q6 | Phase 1 | Pending |
 | Q7 | Phase 1 | Complete |
 | Q8 | Phase 1 | Pending |
-| Q9 | Phase 1 | Pending |
+| Q9 | Phase 1 | Complete |
 | Q10 | Phase 1 | Pending |
 | Q11 | Phase 1 | Complete |
 

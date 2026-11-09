@@ -4,16 +4,16 @@ milestone: v2
 current_phase: 01
 current_phase_name: Foundation and contracts
 status: executing
-stopped_at: Completed 01-06-PLAN.md
-last_updated: "2026-11-09T02:53:44.038Z"
+stopped_at: Completed 01-07-PLAN.md
+last_updated: "2026-11-09T03:05:08.840Z"
 last_activity: 2026-11-09
 last_activity_desc: Phase 01 execution resumed (wave continue)
-state_head: cec54a5188bbcbda1ceb1c4f6fb19d2bc1db153d
+state_head: b4e248beee90bb52eacfc359d91f0a5f8b965d30
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 15
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 8 Nov 2026)
 ## Current Position
 
 Phase: 01 (Foundation and contracts) — EXECUTING
-Plan: 7 of 15
+Plan: 8 of 15
 Status: Ready to execute
 Last activity: 2026-11-09 — Phase 01 execution resumed (wave continue)
 
@@ -63,6 +63,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P04 | 25min | 2 tasks | 14 files |
 | Phase 01 P05 | 40min | 3 tasks | 15 files |
 | Phase 01 P06 | 25min | 2 tasks | 7 files |
+| Phase 01 P07 | 50min | 3 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,7 @@ Recent decisions affecting current work:
 - [Phase 01]: APP_NOW values with no offset are read as IST by now() in clock.ts
 - [Phase 01]: requestLogger takes an optional base logger so tests can capture JSON lines
 - [Phase 01]: 01-06: matcher test uses a literal pattern plus a source-equality assertion because security/detect-non-literal-regexp bars new RegExp from config
+- [Phase 01]: 01-07: passwordChangedAt is stamped with now() (the one clock); findActiveById validates the id shape before connecting
 
 ### Pending Todos
 
@@ -106,6 +108,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-09T02:53:44.021Z
-Stopped at: Completed 01-06-PLAN.md
+Last session: 2026-11-09T03:05:08.822Z
+Stopped at: Completed 01-07-PLAN.md
 Resume file: None
