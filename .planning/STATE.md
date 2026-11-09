@@ -3,17 +3,17 @@ gsd_state_version: "1.0"
 milestone: v2
 current_phase: 01
 current_phase_name: Foundation and contracts
-status: executing
-stopped_at: Completed 01-14-PLAN.md
-last_updated: "2026-11-09T15:41:24.025Z"
+status: verifying
+stopped_at: Completed 01-15-PLAN.md
+last_updated: "2026-11-09T16:34:45.265Z"
 last_activity: 2026-11-09
 last_activity_desc: Phase 01 execution resumed (wave continue)
-state_head: 202e1a68eb596a8ad206cffe5e422093ece06df3
+state_head: 2e59c339ee40fa05b745a9f69d565cf87df05683
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 15
-  completed_plans: 14
+  completed_plans: 15
   percent: 0
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 8 Nov 2026)
 
 Phase: 01 (Foundation and contracts) — EXECUTING
 Plan: 15 of 15
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-11-09 — Phase 01 execution resumed (wave continue)
 
 Progress: [░░░░░░░░░░] 0%
@@ -71,6 +71,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P12 | 12 min | 2 tasks | 6 files |
 | Phase 01 P13 | 9min | 2 tasks | 9 files |
 | Phase 01 P14 | 22min | 3 tasks | 10 files |
+| Phase 1 P15 | n/a | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -101,6 +102,9 @@ Recent decisions affecting current work:
 - [Phase 01]: 01-12: ActionState error gains optional retryAfterSeconds for RATE_LIMITED; action() resolves access before parsing the form and builds the input on a null-prototype object
 - [Phase 01]: Plan 01-13: R9 floor is 138,107 gzipped script bytes for / (Lighthouse CI, mobile, median of 3); budget is floor plus 40,960; basic-ftp overridden to 6.2.6 for npm audit
 - [Phase 01]: Plan 01-14: docs/contracts.md records each difference from plan.md section 4 with its ADR; ADR 0025 records ActionState retryAfterSeconds; AWS, SES and DuckDNS facts that PROJECT.md leaves unconfirmed are stated as unchecked and left to Phase 8
+- [Phase 1]: Push the phase branch only, not main (user decision; main is protected)
+- [Phase 1]: Keep the basic-ftp override at 6.2.6 (user decision, ADR 0018)
+- [Phase 1]: CI build job starts MongoDB from the test binary via ci:mongo instead of a mongo:8.0 service container (ADR 0026)
 
 ### Pending Todos
 
@@ -124,6 +128,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-09T15:41:24.004Z
-Stopped at: Completed 01-14-PLAN.md
+Last session: 2026-11-09T16:34:45.244Z
+Stopped at: Completed 01-15-PLAN.md
 Resume file: None
