@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { afterAll, beforeEach, inject, vi } from 'vitest';
+import { resetFakes } from './helpers/fakes';
 import {
   cookieStore,
   requestHeaders,
@@ -20,6 +21,9 @@ vi.mock('next/headers', () => ({
 }));
 
 beforeEach(resetRequestContext);
+
+// Every test starts with empty mail, queue, storage, Stripe, rate-limit and cache fakes (Q7).
+beforeEach(resetFakes);
 
 afterAll(async () => {
   if (mongoose.connection.readyState === 1) {

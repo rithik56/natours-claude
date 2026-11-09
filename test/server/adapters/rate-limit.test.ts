@@ -1,7 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createFakeRateLimiter } from '@/server/adapters/rate-limit';
+import {
+  createFakeRateLimiter,
+  type RateLimitResult,
+  type RateLimitRule,
+} from '@/server/adapters/rate-limit';
 
-const login = { name: 'login', points: 10, durationSeconds: 900 };
+const login: RateLimitRule = {
+  name: 'login',
+  points: 10,
+  durationSeconds: 900,
+};
 const START = new Date('2026-11-09T09:00:00+05:30');
 
 beforeEach(() => {
@@ -16,7 +24,7 @@ afterEach(() => {
 describe('fake rate limiter', () => {
   it('[S15] allows ten attempts and counts down the remaining points', async () => {
     const limiter = createFakeRateLimiter();
-    const results = [];
+    const results: RateLimitResult[] = [];
     for (let attempt = 0; attempt < 10; attempt += 1) {
       results.push(await limiter.consume('203.0.113.7:anjali', login));
     }

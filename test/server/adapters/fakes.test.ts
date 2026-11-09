@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { createFakeMailer } from '@/server/adapters/mailer';
-import { createFakeEmailQueue, type EmailJob } from '@/server/adapters/queue';
-import { createFakeStorage } from '@/server/adapters/storage';
+import { createFakeMailer, type MailMessage } from '@/server/adapters/mailer';
+import {
+  createFakeEmailQueue,
+  type EmailJob,
+  type EmailTemplate,
+} from '@/server/adapters/queue';
+import { createFakeStorage, type StoredFile } from '@/server/adapters/storage';
 import {
   createFakeStripe,
   StripeSignatureError,
   type CheckoutSessionParams,
+  type StripeEvent,
 } from '@/server/adapters/stripe';
 
 const USER_ID = '54d6406e367b4e8eb85a03ac';
@@ -37,7 +42,7 @@ function checkoutParams(
 describe('fake mailer', () => {
   it('[Q7] records each message it is asked to send', async () => {
     const mailer = createFakeMailer();
-    const message = {
+    const message: MailMessage = {
       to: 'anjali.menon@example.com',
       subject: 'Welcome to Natours',
       html: '<p>Welcome, Anjali.</p>',
@@ -65,6 +70,19 @@ describe('fake email queue', () => {
     const queue = createFakeEmailQueue();
     await queue.enqueue(welcome);
     expect(queue.jobs).toEqual([welcome]);
+  });
+
+  it('[S3] accepts each of the three templates', async () => {
+    const queue = createFakeEmailQueue();
+    const templates: EmailTemplate[] = [
+      'Welcome',
+      'PasswordReset',
+      'BookingConfirmed',
+    ];
+    for (const template of templates) {
+      await queue.enqueue({ ...welcome, template });
+    }
+    expect(queue.jobs.map((job) => job.template)).toEqual(templates);
   });
 
   it('[S3] rejects a job that carries an extra key and records nothing', async () => {
@@ -106,7 +124,8 @@ describe('fake storage', () => {
     const body = Buffer.from([1, 2, 3]);
     await storage.put('users/anjali.jpg', body, 'image/jpeg');
     body[0] = 9;
-    const stored = storage.files.get('users/anjali.jpg');
+    const stored: StoredFile | undefined =
+      storage.files.get('users/anjali.jpg');
     expect(stored?.contentType).toBe('image/jpeg');
     expect([...(stored?.body ?? [])]).toEqual([1, 2, 3]);
   });
@@ -168,7 +187,10 @@ describe('fake Stripe', () => {
       type: 'checkout.session.completed',
       data: { object: { id: 'cs_fake_0001' } },
     });
-    const event = stripe.constructEvent(raw, stripe.signatureFor(raw));
+    const event: StripeEvent = stripe.constructEvent(
+      raw,
+      stripe.signatureFor(raw),
+    );
     expect(event.type).toBe('checkout.session.completed');
     expect(event.id).toBe('evt_fake_0001');
   });
