@@ -7,7 +7,11 @@ import {
 } from 'mongoose';
 import { messages } from '@/lib/messages';
 import { isIstMidnight } from '@/lib/ist';
-import { registerModel, withUpdateValidators } from '@/server/schema-helpers';
+import {
+  refuseValidatorBypass,
+  registerModel,
+  withUpdateValidators,
+} from '@/server/schema-helpers';
 import { slugify } from './slug';
 
 const { validation } = messages;
@@ -246,4 +250,7 @@ schema.pre('findOneAndUpdate', function () {
   if (name !== undefined) this.set({ slug: slugify(name) });
 });
 
-export const Tour = registerModel('Tour', withUpdateValidators(schema));
+export const Tour = registerModel(
+  'Tour',
+  refuseValidatorBypass(withUpdateValidators(schema)),
+);

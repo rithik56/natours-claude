@@ -1,7 +1,11 @@
 import 'server-only';
 import { Schema, type HydratedDocument, type Types } from 'mongoose';
 import { messages } from '@/lib/messages';
-import { registerModel, withUpdateValidators } from '@/server/schema-helpers';
+import {
+  refuseValidatorBypass,
+  registerModel,
+  withUpdateValidators,
+} from '@/server/schema-helpers';
 
 const { validation } = messages;
 
@@ -55,4 +59,7 @@ const schema = new Schema<ReviewFields>(
 schema.index({ tour: 1, user: 1 }, { unique: true });
 
 // Recalculating the tour's rating is the Phase 6 service's job (B6), so no hooks.
-export const Review = registerModel('Review', withUpdateValidators(schema));
+export const Review = registerModel(
+  'Review',
+  refuseValidatorBypass(withUpdateValidators(schema)),
+);

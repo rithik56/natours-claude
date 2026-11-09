@@ -261,6 +261,39 @@ describe('operations that skip validators are refused (WR-04, ADR 0027)', () => 
       );
     });
 
+    it('[WR-04] hashes a single document, and with ordered: false and lean: true', async () => {
+      const [first, second, third] = person();
+
+      await User.insertMany({ ...first!, password: TEST_PASSWORD } as never);
+      await User.insertMany([{ ...second!, password: TEST_PASSWORD }], {
+        ordered: false,
+      });
+      await User.insertMany([{ ...third!, password: TEST_PASSWORD }], {
+        lean: true,
+      });
+
+      for (const entry of [first!, second!, third!]) {
+        const stored = await raw(User as unknown as AnyModel, entry._id);
+        expect(stored?.password).toMatch(/^\$2/);
+      }
+    });
+
+    it('[WR-04] one rejected document stores nothing even with ordered: false', async () => {
+      const [first, second] = person();
+
+      await expect(
+        User.insertMany(
+          [
+            { ...first!, password: TEST_PASSWORD },
+            { ...second!, password: 'short' },
+          ],
+          { ordered: false },
+        ),
+      ).rejects.toMatchObject({ name: 'ValidationError' });
+
+      expect(await User.collection.countDocuments()).toBe(0);
+    });
+
     it('[WR-04] the stored user can sign in as if saved, with the one cost', async () => {
       const [first] = person();
       await User.insertMany([{ ...first!, password: TEST_PASSWORD }]);

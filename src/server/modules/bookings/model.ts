@@ -2,7 +2,11 @@ import 'server-only';
 import { Schema, type HydratedDocument, type Types } from 'mongoose';
 import { messages } from '@/lib/messages';
 import { isIstMidnight } from '@/lib/ist';
-import { registerModel, withUpdateValidators } from '@/server/schema-helpers';
+import {
+  refuseValidatorBypass,
+  registerModel,
+  withUpdateValidators,
+} from '@/server/schema-helpers';
 
 const { validation } = messages;
 
@@ -69,4 +73,7 @@ const schema = new Schema<BookingFields>(
 schema.index({ user: 1 });
 schema.index({ tour: 1 });
 
-export const Booking = registerModel('Booking', withUpdateValidators(schema));
+export const Booking = registerModel(
+  'Booking',
+  refuseValidatorBypass(withUpdateValidators(schema)),
+);
