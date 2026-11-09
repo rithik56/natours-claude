@@ -162,5 +162,25 @@ describe('reviews data layer', () => {
 
       expect(() => toReview(saved)).toThrow(/author/);
     });
+
+    it('[S3] throws the not-populated error, not a TypeError, when the author no longer exists (WR-02)', async () => {
+      const { user } = await createUser();
+      const tour = await createTour();
+      const saved = await createReview({ user, tour });
+      await user.deleteOne();
+      const populated = await Review.findById(saved._id).populate('user');
+      expect(populated!.user).toBeNull();
+
+      let thrown: unknown;
+      try {
+        toReview(populated!);
+      } catch (error) {
+        thrown = error;
+      }
+
+      expect(thrown).toBeInstanceOf(Error);
+      expect(thrown).not.toBeInstanceOf(TypeError);
+      expect((thrown as Error).message).toMatch(/author/);
+    });
   });
 });

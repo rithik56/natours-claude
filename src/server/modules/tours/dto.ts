@@ -90,10 +90,19 @@ export function toTourSummary(tour: SummarySource): TourSummary {
   };
 }
 
+// Mongoose populates a missing reference (a deleted guide) as null when nulls
+// are retained, and typeof null is 'object', so the null check must come
+// before the `in` checks. How a tour with a missing guide is shown is a
+// Phase 4 service decision; until then it fails with the "not populated" error.
 function isGuideRecord(
-  guide: GuideSource | { toString(): string },
+  guide: GuideSource | { toString(): string } | null,
 ): guide is GuideSource {
-  return typeof guide === 'object' && 'name' in guide && 'role' in guide;
+  return (
+    typeof guide === 'object' &&
+    guide !== null &&
+    'name' in guide &&
+    'role' in guide
+  );
 }
 
 /**

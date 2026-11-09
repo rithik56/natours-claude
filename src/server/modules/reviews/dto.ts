@@ -21,10 +21,20 @@ export type ReviewDto = {
   createdAt: string;
 };
 
+// Mongoose populates a missing reference (a deleted user) as null, and
+// typeof null is 'object', so the null check must come before `in`.
+// Whether a review whose author is gone is omitted or shown with a stand-in
+// is a Phase 4 service decision; until then it fails with the same
+// "not populated" error as an unpopulated id.
 function isAuthorRecord(
-  user: AuthorSource | { toString(): string },
+  user: AuthorSource | { toString(): string } | null,
 ): user is AuthorSource {
-  return typeof user === 'object' && 'name' in user && 'role' in user;
+  return (
+    typeof user === 'object' &&
+    user !== null &&
+    'name' in user &&
+    'role' in user
+  );
 }
 
 /**

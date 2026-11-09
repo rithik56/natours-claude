@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { toTourDetail, toTourSummary } from '@/server/modules/tours/dto';
 import { Tour } from '@/server/modules/tours/model';
+import { User } from '@/server/modules/users/model';
 import { useTestDatabase } from '../../../helpers/db';
 import { createTour } from '../../../helpers/factories';
 import { seedTours, seedUsers } from '../../../helpers/seed';
@@ -129,6 +130,27 @@ describe('tour DTOs', () => {
     const tour = await createTour();
 
     expect(() => toTourDetail(tour)).toThrow(/guides/);
+  });
+
+  it('[S3] toTourDetail throws the not-populated error, not a TypeError, when a guide no longer exists (WR-02)', async () => {
+    const tour = await createTour({ withGuides: true });
+    await User.deleteOne({ _id: tour.guides[0] });
+    const populated = await Tour.findById(tour._id).populate({
+      path: 'guides',
+      options: { retainNullValues: true },
+    });
+    expect(populated!.guides).toContain(null);
+
+    let thrown: unknown;
+    try {
+      toTourDetail(populated!);
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(Error);
+    expect(thrown).not.toBeInstanceOf(TypeError);
+    expect((thrown as Error).message).toMatch(/guides/);
   });
 
   it('[S3] toTourDetail output is JSON-stable and carries no email', async () => {
