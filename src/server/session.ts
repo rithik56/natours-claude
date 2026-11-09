@@ -1,6 +1,8 @@
 import 'server-only';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import type { SelfUser } from '@/server/modules/users/dto';
+import type { Role } from '@/server/roles';
 import { getConfig } from './config';
 
 /** The session cookie's name. */
@@ -85,4 +87,24 @@ export function sessionCookie(token: string) {
 /** The cookie object for logging out: the same options with an empty value and `maxAge` 0 (S9). */
 export function expiredSessionCookie() {
   return { ...sessionCookie(''), maxAge: 0 };
+}
+
+// Throwaway stubs for the RED commit: neutral wrong values, replaced at GREEN.
+export async function getCurrentUser(
+  cookieSource?: CookieReader,
+): Promise<SelfUser | null> {
+  return Promise.resolve(cookieSource === undefined ? null : null);
+}
+
+export async function requireUser(options?: {
+  next?: string;
+}): Promise<SelfUser> {
+  return Promise.reject(new Error(options?.next ?? 'stub'));
+}
+
+export async function requireRole(
+  roles: readonly Role[],
+  options?: { next?: string },
+): Promise<SelfUser> {
+  return Promise.reject(new Error(options?.next ?? roles.join()));
 }

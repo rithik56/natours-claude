@@ -1,11 +1,25 @@
 import mongoose from 'mongoose';
-import { afterAll, inject } from 'vitest';
+import { afterAll, beforeEach, inject, vi } from 'vitest';
+import {
+  cookieStore,
+  requestHeaders,
+  resetRequestContext,
+} from './helpers/request-context';
 
 const globals = globalThis as typeof globalThis & { __natoursMongo?: unknown };
 
 // A database name unique to this test file keeps parallel workers apart (Q7).
 const databaseName = `natours-test-${crypto.randomUUID()}`;
 process.env.MONGODB_URI = `${inject('mongoUri').replace(/\/$/, '')}/${databaseName}`;
+
+// Pages and Server Actions read the session cookie and request ID from next/headers.
+// Tests use mockSession() to put a real signed cookie in this store.
+vi.mock('next/headers', () => ({
+  cookies: async () => cookieStore,
+  headers: async () => requestHeaders,
+}));
+
+beforeEach(resetRequestContext);
 
 afterAll(async () => {
   if (mongoose.connection.readyState === 1) {
