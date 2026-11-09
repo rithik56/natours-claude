@@ -17,7 +17,7 @@ findings:
     title: "Password `maxlength: 72` counts characters, but bcrypt truncates at 72 bytes"
   - id: WR-04
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "The \"password is written only by `save()`\" guard has gaps"
   - id: WR-05
     severity: warning
@@ -55,7 +55,7 @@ findings:
     severity: info
     disposition: open
     title: "The `ratingsAverage` setter also rewrites query filters"
-open: 8
+open: 7
 total: 13
 recorded: 2026-11-09T16:44:47.761Z
 ---
@@ -67,7 +67,7 @@ recorded: 2026-11-09T16:44:47.761Z
 | WR-01 | warning | open | orchestrator re-checked against the code on 9 Nov 2026 and confirmed |
 | WR-02 | warning | fixed | commit 8e17cc6 (REVIEW-FIX.md) |
 | WR-03 | warning | fixed | commit 97af577 (REVIEW-FIX.md) |
-| WR-04 | warning | open | - |
+| WR-04 | warning | fixed | commit a8712eb (REVIEW-FIX.md) |
 | WR-05 | warning | open | - |
 | WR-06 | warning | fixed | commit 2be5d5d (REVIEW-FIX.md) |
 | WR-07 | warning | fixed | commit 03014b8 (REVIEW-FIX.md) |

@@ -3,8 +3,8 @@ phase: 01-foundation-and-contracts
 fixed_at: 2026-11-09T17:10:00Z
 review_path: .planning/phases/01-foundation-and-contracts/01-REVIEW.md
 iteration: 1
-findings_in_scope: 5
-fixed: 5
+findings_in_scope: 6
+fixed: 6
 skipped: 0
 status: all_fixed
 ---
@@ -17,11 +17,11 @@ status: all_fixed
 
 **Summary:**
 
-- Findings in scope: 5 (WR-02, WR-03, WR-06, WR-07, WR-08, as chosen by the user)
-- Fixed: 5
+- Findings in scope: 6 (WR-02, WR-03, WR-06, WR-07, WR-08, as chosen by the user, and WR-04, added later by the user together with security threats T-01-24 and T-01-25)
+- Fixed: 6
 - Skipped: 0
 
-Not in scope, left open on purpose: WR-01, WR-04, WR-05, WR-09 and IN-01 to IN-04.
+Not in scope, left open on purpose: WR-01, WR-05, WR-09 and IN-01 to IN-04.
 
 **Where verification ran:** the main checkout on branch `gsd/phase-01-foundation-and-contracts`, with no worktree (the orchestrator runs this phase sequentially on the main tree). Every number below is reproducible from that tree. Nothing was run on GitHub Actions and nothing was pushed.
 
@@ -77,9 +77,22 @@ Not in scope, left open on purpose: WR-01, WR-04, WR-05, WR-09 and IN-01 to IN-0
 **Verified:** full gate suite exit 0. Mutation check: restoring `session.ts` to its pre-fix version makes all six new tests fail.
 **Status:** fixed: requires human verification (clock logic).
 
+### WR-04: The "password is written only by `save()`" guard has gaps
+
+**Files modified:** `src/server/schema-helpers.ts`, `src/server/modules/users/model.ts`, `src/server/modules/tours/model.ts`, `src/server/modules/reviews/model.ts`, `src/server/modules/bookings/model.ts`, `test/server/schema-helpers.test.ts` (new), `docs/adr/0027-model-operations-that-skip-validators-are-refused.md` (new), `docs/adr/README.md`, `docs/contracts.md`
+**Commits:** RED 5d5d076, fix a8712eb, docs 767d9f2
+**Applied fix:** `refuseValidatorBypass(schema)` makes `replaceOne`, `findOneAndReplace` and `bulkWrite` throw on all four models, with an error that names the operation and the model, points at ADR 0027 and carries no document data. `User` gained a `pre('insertMany')` hook that builds each document, refuses `passwordChangedAt`, validates the plain password (so the 72-byte rule still applies) and then hashes it with the same `hashPassword` the save hook uses. The password guard on update queries now also finds `$rename` (source or target), pipeline `$replaceRoot` and pipeline `$unset`. Beyond the review text, I found by running it that a per-call `{ middleware: false }` skipped every user-defined hook, the old guard and the password hash included (`User.create([...], { middleware: false })` stored a plain-text password). The security hooks now carry Mongoose's built-in marker (`Symbol.for('mongoose:built-in-middleware')`) through `alwaysRuns`, so that call no longer skips them.
+**Mongoose behaviour read in `node_modules/mongoose` 9.12.0:** model hooks for `insertMany` run before Mongoose validates (`lib/model.js` `_insertMany`), `bulkWrite` is a model hook, `replaceOne` and `findOneAndReplace` are query hooks (`lib/constants.js`), and `lib/helpers/buildMiddlewareFilter.js` is where `middleware: false` keeps only hooks with the built-in marker.
+**Decision for the reader:** `passwordResetToken` and `passwordResetExpires` are not protected, because the reset flow in a later phase has to write them. `ordered: false` no longer inserts the valid part of a batch that has an invalid document, because the hook rejects the whole batch first.
+**Regression tests:** 42 in `test/server/schema-helpers.test.ts`, on the real in-memory MongoDB and seed people: for each of the four models `replaceOne`, `findOneAndReplace` and `bulkWrite` are refused and the raw collection is unchanged; for `User`, `insertMany` stores a bcrypt hash (read from the raw collection and checked with `bcrypt.compare`, cost 4), refuses `passwordChangedAt`, rejects 25 Devanagari characters and a short password, accepts 24 Devanagari characters, hashes a single document and `lean: true`, and stores nothing from a rejected batch even with `ordered: false`; `updateOne` refuses `$rename` into `password` and `passwordChangedAt`, `$set`, `$setOnInsert` (and an upsert), `$unset`, and pipeline `$set`, `$replaceRoot`, `$replaceWith` and `$unset`; and `{ middleware: false }` does not skip the guards.
+**Red:** 30 of 42 failed on the planned assertions before the fix (`expected null to be an instance of Error` when a refused operation succeeded, `promise resolved ... instead of rejecting` for `$rename`, `expected 'Test-only-passphrase-2026' to match /^\$2/` for the plain-text `insertMany`, and `expected '<Model> validation failed...' to contain '<Model>.bulkWrite'` where only a validator error stopped the call). The other 12 pin behaviour that already held and still holds. The RED commit needed no stub. Format: vitest default reporter, so `gsd_run check tdd-red-evidence` was not run.
+**Verified:** full gate suite exit 0 and `npm audit --audit-level=high` exit 0 (moderate advisories only). Mutation checks, each restored with `git checkout -- <file>`: removing `refuseValidatorBypass` from `User` fails 4 tests, from `Booking` 5; disabling the `insertMany` hook fails 7; making `alwaysRuns` a no-op fails 4; reverting the `$rename` and pipeline `$unset` handling fails 5.
+**Not covered:** code that reaches the driver directly (`Model.collection...`), which the test factories do on purpose. The marker Mongoose reads is not documented public API, so a Mongoose upgrade could stop honouring it; the `middleware: false` tests would fail then.
+**Status:** fixed: requires human verification (security logic).
+
 ## Verification
 
-Run in the main checkout after the last commit (11336ae), each as its own command:
+Run in the main checkout after the WR-04 fix (a8712eb), each as its own command:
 
 | Gate | Exit |
 |------|------|
@@ -91,13 +104,13 @@ Run in the main checkout after the last commit (11336ae), each as its own comman
 | `npm run check:conventions` | 0 |
 | `npm run check:env` | 0 |
 | `npm run knip` | 0 |
-| `npm run test:coverage` | 0 (45 files, 614 tests passed) |
+| `npm run test:coverage` | 0 (46 files, 656 tests passed) |
 | `npm run build` | 0 |
 | `npm audit --audit-level=high` | 0 (only moderate advisories, which are not in scope) |
 
-The same ten gates also passed after each of the five fixes before its commit.
+The same ten gates also passed after each of the six fixes before its commit.
 
-Not run: GitHub Actions. All five fixes are verified locally only, and WR-07 in particular cannot be confirmed until GitHub runs the workflow.
+Not run: GitHub Actions. All six fixes are verified locally only, and WR-07 in particular cannot be confirmed until GitHub runs the workflow.
 
 ---
 
