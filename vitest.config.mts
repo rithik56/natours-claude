@@ -14,7 +14,13 @@ export default defineConfig({
   },
   test: {
     // TZ=UTC makes the IST date tests meaningful: the server must not rely on the local zone.
-    env: { TZ: 'UTC', APP_ENV: 'test' },
+    env: {
+      TZ: 'UTC',
+      APP_ENV: 'test',
+      APP_URL: 'http://localhost:3000',
+      // Test-only value, 32 or more characters, never used outside the test run.
+      SESSION_SECRET: 'test-run-session-secret-0123456789abcdef',
+    },
     globalSetup: ['test/global-setup.ts'],
     setupFiles: ['test/setup.ts'],
     coverage: {
