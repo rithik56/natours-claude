@@ -3,12 +3,21 @@ import { join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 // D4: the built app refuses to start on bad configuration and serves on good configuration.
+// S11, D7: the built app also gives every script tag the nonce from its own CSP.
 // Run `npm run build` first and keep MongoDB reachable at MONGODB_URI.
 
 const ROOT = join(import.meta.dirname, '..');
 const PORT = '3210';
 const ORIGIN = `http://localhost:${PORT}`;
 const LIMIT_MS = 30_000;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const SECURITY_HEADERS = [
+  'x-content-type-options',
+  'x-frame-options',
+  'referrer-policy',
+  'strict-transport-security',
+  'permissions-policy',
+];
 
 type Started = { child: ChildProcess; output: () => string };
 
@@ -89,6 +98,63 @@ async function waitForOk(app: Started, path: string): Promise<Response> {
   throw new Error(`${path} did not answer 200 within 30 seconds`);
 }
 
+function requireSecurityHeaders(response: Response, label: string): void {
+  for (const name of SECURITY_HEADERS) {
+    if (!response.headers.has(name)) {
+      throw new Error(`${label} is missing the ${name} header`);
+    }
+  }
+  if (response.headers.has('x-powered-by')) {
+    throw new Error(`${label} still sends the x-powered-by header`);
+  }
+}
+
+function nonceFrom(policy: string): string {
+  const match = /'nonce-([^']+)'/.exec(policy);
+  if (!match?.[1]) throw new Error('the CSP carries no nonce');
+  return match[1];
+}
+
+/** GET / must carry a nonce CSP, and every script tag must carry that nonce. */
+async function checkPage(): Promise<string> {
+  const response = await fetch(`${ORIGIN}/`);
+  const html = await response.text();
+  const policy = response.headers.get('content-security-policy');
+  if (policy === null) throw new Error('GET / has no content-security-policy');
+  if (!policy.includes("'strict-dynamic'")) {
+    throw new Error("the CSP lacks 'strict-dynamic'");
+  }
+  const scriptSrc = policy
+    .split('; ')
+    .find((part) => part.startsWith('script-src '));
+  if (scriptSrc === undefined || scriptSrc.includes("'unsafe-inline'")) {
+    throw new Error("the CSP script-src is missing or allows 'unsafe-inline'");
+  }
+  const nonce = nonceFrom(policy);
+  const tags = html.match(/<script\b[^>]*>/g) ?? [];
+  if (tags.length === 0) throw new Error('GET / has no script tags to check');
+  const bare = tags.filter((tag) => !tag.includes(`nonce="${nonce}"`));
+  if (bare.length > 0) {
+    throw new Error(
+      `${String(bare.length)} of ${String(tags.length)} script tags lack the CSP nonce`,
+    );
+  }
+  const requestId = response.headers.get('x-request-id') ?? '';
+  if (!UUID.test(requestId))
+    throw new Error('x-request-id on GET / is not a UUID');
+  requireSecurityHeaders(response, 'GET /');
+  return nonce;
+}
+
+/** The probe routes sit outside the proxy, so they get the static headers and no CSP. */
+async function checkProbeHeaders(): Promise<void> {
+  const response = await fetch(`${ORIGIN}/readyz`);
+  requireSecurityHeaders(response, 'GET /readyz');
+  if (response.headers.has('content-security-policy')) {
+    throw new Error('GET /readyz carries a CSP although the proxy skips it');
+  }
+}
+
 /** A start with the inherited environment must serve the home page and /readyz. */
 async function checkServesGoodEnv(): Promise<void> {
   const app = startApp({ ...process.env });
@@ -99,6 +165,10 @@ async function checkServesGoodEnv(): Promise<void> {
       throw new Error('the home page does not declare lang="en-IN"');
     }
     await waitForOk(app, '/readyz');
+    const first = await checkPage();
+    const second = await checkPage();
+    if (first === second) throw new Error('two requests to / shared one nonce');
+    await checkProbeHeaders();
   } finally {
     await stopApp(app);
   }
