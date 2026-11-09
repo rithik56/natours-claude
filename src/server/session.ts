@@ -8,6 +8,7 @@ import { toSelf, type SelfUser } from '@/server/modules/users/dto';
 import { findActiveById } from '@/server/modules/users/service';
 import { safeNext } from '@/server/redirects';
 import type { Role } from '@/server/roles';
+import { now } from './clock';
 import { getConfig } from './config';
 
 /** The session cookie's name. */
@@ -47,11 +48,15 @@ export function sessionCookieOptions() {
  * @returns The compact HS256 JWT, valid for 7 days.
  */
 export async function signSession(userId: string): Promise<string> {
+  // The one clock: `passwordChangedAt` is stamped from `now()`, so `iat` and
+  // `exp` must come from it too. jose's string and no-argument forms read the
+  // real clock, so both are given as whole seconds.
+  const issuedAt = Math.floor(now().getTime() / 1000);
   return new SignJWT({})
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(userId)
-    .setIssuedAt()
-    .setExpirationTime('7d')
+    .setIssuedAt(issuedAt)
+    .setExpirationTime(issuedAt + SESSION_MAX_AGE_SECONDS)
     .sign(secretKey());
 }
 
@@ -74,6 +79,7 @@ export async function getSession(
     const { payload } = await jwtVerify(token, secretKey(), {
       algorithms: ['HS256'],
       requiredClaims: ['exp', 'iat', 'sub'],
+      currentDate: now(),
     });
     if (typeof payload.sub !== 'string' || typeof payload.iat !== 'number') {
       return null;
