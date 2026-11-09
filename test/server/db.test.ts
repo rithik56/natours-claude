@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { connectDb, disconnectDb, isDbUnavailableError } from '@/server/db';
 import { AppError } from '@/server/errors';
 import { registerModel, withUpdateValidators } from '@/server/schema-helpers';
+import { clearDatabase, useTestDatabase } from '../helpers/db';
 
 type MongoCache = { __natoursMongo?: unknown };
 const cache = globalThis as MongoCache;
@@ -140,8 +141,10 @@ describe('isDbUnavailableError', () => {
   });
 });
 
-describe('registerModel', () => {
-  it('[B17] returns the same model when called twice for one name', () => {
+describe('model helpers on a connected database', () => {
+  useTestDatabase();
+
+  it('[B17] registerModel returns the same model when called twice for one name', () => {
     const schema = new Schema({ label: String });
 
     const first = registerModel('RegisterTwice', schema);
@@ -153,11 +156,8 @@ describe('registerModel', () => {
     expect(second).toBe(first);
     expect(first.modelName).toBe('RegisterTwice');
   });
-});
 
-describe('withUpdateValidators', () => {
-  it('runs validators on findOneAndUpdate', async () => {
-    await connectDb();
+  it('withUpdateValidators runs validators on findOneAndUpdate, updateOne and updateMany', async () => {
     const schema = withUpdateValidators(
       new Schema({ label: { type: String, minlength: 3 } }),
     );
@@ -174,7 +174,19 @@ describe('withUpdateValidators', () => {
     await expect(
       Sample.updateMany({ _id: created._id }, { label: 'ab' }),
     ).rejects.toMatchObject({ name: 'ValidationError' });
+  });
 
-    await disconnectDb();
+  it('clearDatabase deletes every document in every collection', async () => {
+    const Sample = registerModel(
+      'ClearedSample',
+      new Schema({ label: String }),
+    );
+    await Sample.init();
+    await Sample.create({ label: 'first' });
+    await Sample.create({ label: 'second' });
+
+    await clearDatabase();
+
+    expect(await Sample.countDocuments()).toBe(0);
   });
 });
