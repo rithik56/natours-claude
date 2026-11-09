@@ -1,8 +1,9 @@
 import { fromIstDay } from '@/lib/ist';
+import { Review, type ReviewDoc } from '@/server/modules/reviews/model';
 import { Tour, type TourDoc } from '@/server/modules/tours/model';
 import { User, type UserDoc } from '@/server/modules/users/model';
 import type { Role } from '@/server/roles';
-import { seedTours, seedUsers, type SeedUser } from './seed';
+import { seedReviews, seedTours, seedUsers, type SeedUser } from './seed';
 
 /** A test-only password, used for every factory user. It is never shown to a person. */
 export const TEST_PASSWORD = 'Test-only-passphrase-2026';
@@ -166,5 +167,34 @@ export async function createTour(
     ...rest,
     startDates: startDates.map(fromIstDay),
     ...options.overrides,
+  });
+}
+
+type CreateReviewOptions = {
+  user: UserDoc;
+  tour: TourDoc;
+  rating?: number;
+  review?: string;
+};
+
+/**
+ * Creates a review for a seed tour. The text and rating default to the first
+ * review in seed/data/reviews.json for that tour (D-08, QA-17).
+ */
+export async function createReview(
+  options: CreateReviewOptions,
+): Promise<ReviewDoc> {
+  const tourId = String(options.tour._id);
+  const record = seedReviews().find((entry) => entry.tour === tourId);
+  if (!record) {
+    throw new Error(
+      `createReview: no review for tour ${tourId} in seed/data/reviews.json`,
+    );
+  }
+  return Review.create({
+    tour: options.tour._id,
+    user: options.user._id,
+    review: options.review ?? record.review,
+    rating: options.rating ?? record.rating,
   });
 }
