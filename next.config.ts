@@ -2,6 +2,8 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // next dev otherwise writes an untracked AGENTS.md when it detects an AI agent.
+  agentRules: false,
   async headers() {
     return [
       {

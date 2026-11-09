@@ -24,4 +24,8 @@ describe('next.config security headers', () => {
   it('[S11] switches off the x-powered-by header', () => {
     expect(nextConfig.poweredByHeader).toBe(false);
   });
+
+  it('[D9] stops next dev writing an AGENTS.md into the repository', () => {
+    expect(nextConfig.agentRules).toBe(false);
+  });
 });
