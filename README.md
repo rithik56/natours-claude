@@ -50,6 +50,7 @@ If a key is missing or invalid, the app exits at start-up and names the key. It 
 | `test` | `npm test` | Runs the Vitest suite once. |
 | `test:coverage` | `npm run test:coverage` | Runs it with coverage and the thresholds. |
 | `smoke` | `npm run smoke` | Starts the built app twice, once with a bad `SESSION_SECRET` and once with a good environment, and checks the exit, the headers and the CSP nonce. |
+| `ci:mongo` | `npm run ci:mongo` | Starts MongoDB from the test binary on `127.0.0.1`, port `CI_MONGO_PORT` (default 27017), until stopped. CI's `build` job uses it (ADR 0026). |
 | `lhci:collect` | `npm run lhci:collect` | Runs Lighthouse CI three times against `next start` on port 3300. |
 | `bundle:record` | `npm run bundle:record` | Collects, then rewrites `docs/bundle-baseline.json`. Run it locally and commit the result (ADR 0018). |
 | `bundle:check` | `npm run bundle:check` | Collects, then fails if the script size of `/` is over the recorded floor plus 40 KB. CI runs this one. |
@@ -124,13 +125,13 @@ Configuration comes from environment variables, validated at start-up by `src/se
 
 ## Quality gates
 
-CI (`.github/workflows/ci.yml`) runs on every push and pull request. The `checks` job runs `npm ci`, `typecheck`, `lint`, `lint:css`, `format:check`, `check:client`, `check:conventions`, `check:env`, `knip`, `npm audit --audit-level=high` and `test:coverage`. The `build` job, with a MongoDB service, runs `build` with no environment, generates a session secret for the run, then `smoke` and `bundle:check`, and keeps the Lighthouse results as a workflow artifact. Dependabot checks npm and GitHub Actions weekly.
+CI (`.github/workflows/ci.yml`) runs on every push and pull request. The `checks` job runs `npm ci`, `typecheck`, `lint`, `lint:css`, `format:check`, `check:client`, `check:conventions`, `check:env`, `knip`, `npm audit --audit-level=high` and `test:coverage`. The `build` job runs `build` with no environment, starts MongoDB from the same downloaded binary the tests use (`npm run ci:mongo`, ADR 0026), generates a session secret for the run, then `smoke` and `bundle:check`, and keeps the Lighthouse results as a workflow artifact. Dependabot checks npm and GitHub Actions weekly.
 
 To run the same checks locally, run each script above in that order. They all need to exit 0.
 
 What has not been verified:
 
-- **GitHub Actions has never run.** The workflow was parsed and its commands were run locally, but no push has happened yet. Unconfirmed on a runner: the workflow itself, the hand-off of the generated `SESSION_SECRET` through `$GITHUB_ENV`, Google Chrome for Lighthouse, and the pinned test `mongod` 8.0.34 on Linux.
+- **The `build` job has not yet passed on GitHub Actions.** The first run failed because the `mongo:8.0` service container would not start on the runner kernel (ADR 0026), and the `checks` job passed. The fix has been run locally only. Unconfirmed on a runner: the `build` job's MongoDB started by `ci:mongo`, the hand-off of the generated `SESSION_SECRET` through `$GITHUB_ENV`, and Google Chrome for Lighthouse.
 - **`basic-ftp` is overridden to 6.2.6** in `package.json`. `@lhci/cli` pulls in an older release with a high-severity advisory that would fail the audit step. The override can go once the dependency that needs it moves on (ADR 0018).
 
 ## Commits
