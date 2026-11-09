@@ -4,16 +4,16 @@ milestone: v2
 current_phase: 01
 current_phase_name: Foundation and contracts
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-11-09T02:19:21.455Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-11-09T02:27:54.883Z"
 last_activity: 2026-11-09
 last_activity_desc: Phase 01 execution resumed (wave continue)
-state_head: 0d406e2fbb86db251915f45a7d08a38a685f11c8
+state_head: b8deb70e20389392e9ba50ea5df1eb0952ec7e85
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 15
-  completed_plans: 2
+  completed_plans: 3
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 8 Nov 2026)
 ## Current Position
 
 Phase: 01 (Foundation and contracts) — EXECUTING
-Plan: 3 of 15
+Plan: 4 of 15
 Status: Ready to execute
 Last activity: 2026-11-09 — Phase 01 execution resumed (wave continue)
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 |------|----------|-------|-------|
 | Phase 01 P01 | 15min | 3 tasks | 22 files |
 | Phase 01 P02 | 20 min | 3 tasks | 16 files |
+| Phase 01 P03 | 25min | 3 tasks | 25 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,8 @@ Recent decisions affecting current work:
 - [Roadmap]: AWS is used only in Phase 8. Every earlier phase runs locally on `docker compose` with fakes for Stripe, storage and mail.
 - [Phase 01]: 01-01: test mongod pinned to 8.0.34 (matches mongo:8.0 image); setup.ts always overwrites MONGODB_URI so tests never touch a developer database
 - [Phase 01]: ADRs 0001 to 0008 recorded: versions, GSD replaces agent team, plan.md as spec, install when first used, contracts per phase, home page only, regression tests with features, review findings per phase
+- [Phase 01]: package.json type module and vitest.config.mts: scripts run as ES modules without Node warning (ADR 0009)
+- [Phase 01]: CI gates npm audit at --audit-level=high; moderate minimatch advisory via eslint-config-next tolerated
 
 ### Pending Todos
 
@@ -96,6 +99,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-09T02:19:21.438Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-11-09T02:27:54.866Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None

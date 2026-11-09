@@ -58,13 +58,13 @@
   - The price comes from the database, and the currency is always `inr`.
   - A booking is created only from a verified webhook, which finds the user by `metadata.userId`.
   - Processing is idempotent by `stripeSessionId`, and the signature is checked against the raw body.
-- [ ] **S18**: Secrets are never committed:
+- [x] **S18**: Secrets are never committed:
   - `.env.example` lists every key.
   - No secret goes in a `NEXT_PUBLIC_*` variable, and CI checks this.
   - CI runs `npm audit --audit-level=high`, and Dependabot is on.
 - [ ] **S19**: Production errors never show stack traces. `error.tsx` shows a generic message and the digest, API errors use the §4.1 format, and unknown errors are logged with the request ID.
 - [ ] **S20**: Passwords are 8–72 characters. Login runs a compare against a dummy hash when the user isn't found, so response time doesn't reveal which emails exist.
-- [ ] **S21**: No `dangerouslySetInnerHTML` (`react/no-danger` is an error). User content renders as text.
+- [x] **S21**: No `dangerouslySetInnerHTML` (`react/no-danger` is an error). User content renders as text.
 - [ ] **S22**: Post-login redirects go through `safeNext()`, which accepts only same-site paths starting with a single `/`.
 - [ ] **S23**: `proxy.ts` is never the only auth check. Every protected page, action and Route Handler calls `requireUser()` or `requireRole()` itself, and a test sending `x-middleware-subrequest` proves it.
 
@@ -110,7 +110,7 @@
 ### Rendering (R)
 
 - [x] **R1**: Server Components by default. A component is a Client Component only if it needs event handlers, state or effects, browser-only APIs, or updates after the page loads.
-- [ ] **R2**: In every client file, the line after `'use client'` is `// client: <reason>`, and `check-client-boundaries.ts` fails CI without it. Client boundaries sit as low in the tree as possible.
+- [x] **R2**: In every client file, the line after `'use client'` is `// client: <reason>`, and `check-client-boundaries.ts` fails CI without it. Client boundaries sit as low in the tree as possible.
 - [ ] **R3**: Pages call services directly and never fetch our own `/api`. Independent data loads run in parallel, and repeated lookups are deduplicated with `cache()`.
 - [ ] **R4**: Slower sections stream inside `<Suspense>`, with skeletons the same size as the content (CLS under 0.1). Route segments have `loading.tsx`.
 - [ ] **R5**: *(amended)* Public data is cached with `unstable_cache` tags (`tours`, `tour:<id>`, `reviews:<tourId>`), and `cacheComponents` stays off. Services clear the tags when the data changes. Personal data is never cached, and a two-user Playwright test proves it.
@@ -203,16 +203,16 @@
 ### Code quality (Q)
 
 - [x] **Q1**: TypeScript `strict` with `noUncheckedIndexedAccess`, no `any` without a comment explaining why, and `tsc --noEmit` passing in CI.
-- [ ] **Q2**: ESLint flat config with zero warnings:
+- [x] **Q2**: ESLint flat config with zero warnings:
   - `eslint-config-next`, `typescript-eslint` and `eslint-plugin-security`.
   - `no-console`, `react/no-danger` and restricted imports.
   - Plus stylelint and Prettier.
-- [ ] **Q3**: Naming:
+- [x] **Q3**: Naming:
   - Files are kebab-case, components PascalCase, and hooks start with `use`.
   - Server Actions end in `Action`, and error codes are UPPER_SNAKE.
   - CSS Module classes are camelCase.
-- [ ] **Q4**: The module boundaries from §3.2 and UI boundaries from §4.6 hold.
-- [ ] **Q5**: No commented-out code, no `TODO` without an issue link, and no leftover debugging logs.
+- [x] **Q4**: The module boundaries from §3.2 and UI boundaries from §4.6 hold.
+- [x] **Q5**: No commented-out code, no `TODO` without an issue link, and no leftover debugging logs.
 - [ ] **Q6**: *(amended)* Testing and coverage:
   - Every Route Handler and action has happy-path, validation and authorisation tests.
   - Every S and B ID has a tagged regression test, written with its feature.
@@ -376,10 +376,10 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | S15 | Phase 5 | Pending |
 | S16 | Phase 4 | Pending |
 | S17 | Phase 6 | Pending |
-| S18 | Phase 1 | Pending |
+| S18 | Phase 1 | Complete |
 | S19 | Phase 3 | Pending |
 | S20 | Phase 5 | Pending |
-| S21 | Phase 1 | Pending |
+| S21 | Phase 1 | Complete |
 | S22 | Phase 5 | Pending |
 | S23 | Phase 5 | Pending |
 | B1 | Phase 4 | Pending |
@@ -403,7 +403,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | B19 | Phase 1 | Pending |
 | B20 | Phase 1 | Pending |
 | R1 | Phase 1 | Complete |
-| R2 | Phase 1 | Pending |
+| R2 | Phase 1 | Complete |
 | R3 | Phase 4 | Pending |
 | R4 | Phase 4 | Pending |
 | R5 | Phase 6 | Pending |
@@ -455,10 +455,10 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | U26 | Phase 7 | Pending |
 | U27 | Phase 4 | Pending |
 | Q1 | Phase 1 | Complete |
-| Q2 | Phase 1 | Pending |
-| Q3 | Phase 1 | Pending |
-| Q4 | Phase 1 | Pending |
-| Q5 | Phase 1 | Pending |
+| Q2 | Phase 1 | Complete |
+| Q3 | Phase 1 | Complete |
+| Q4 | Phase 1 | Complete |
+| Q5 | Phase 1 | Complete |
 | Q6 | Phase 1 | Pending |
 | Q7 | Phase 1 | Complete |
 | Q8 | Phase 1 | Pending |

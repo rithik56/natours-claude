@@ -37,7 +37,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Every push and pull request runs the quality gates in GitHub Actions and they pass: strict typecheck with `noUncheckedIndexedAccess`, ESLint (including `react/no-danger`), stylelint and Prettier with zero warnings, the client-boundary check (a `'use client'` file without a `// client: <reason>` line fails), the `NEXT_PUBLIC_` secret check, `.env.example` completeness, `npm audit`, knip, tests with the coverage thresholds, and a build that records the per-route bundle baseline in `docs/bundle-baseline.json`. (Q1, Q2, Q3, Q4, Q5, Q6, Q11, S18, S21, R1, R2, R9)
   5. The repository holds what later phases rely on: `docs/contracts.md` with exact TypeScript signatures, an ADR for every Key Decision in PROJECT.md (ADR 0001 records the versions used), fakes for Stripe, mail, storage, queue and rate limiting, the test helpers (`createUser`, `callRoute`, `mockSession`) with one example test each for a Route Handler, a Server Action and a page data function, a README with setup and scripts, and the commit convention that cites requirement IDs. (Q7, Q8, Q9, Q10)
 **Review findings:** ARC-02, ARC-03, ARC-04, ARC-07, ARC-08, ARC-13, ARC-17, ARC-18, ARC-20 (m), ARC-22 (m), ARC-23 (m), ARC-24 (m), ARC-26 (m), DEL-20, DEL-23 (m), DEL-24 (m), DEL-26 (m), DES-08, DES-11, DES-12, DES-13 (m), DES-14 (m), QA-04, QA-05, QA-10, QA-14 (m), QA-16, QA-17, QA-19, QA-20, QA-21, QA-23 (m), QA-24 (m), SEC-01, SEC-08, SEC-09, SEC-10, SEC-11, SEC-12, SEC-14, SEC-15, SEC-17, SEC-18, SEC-22 (m), SEC-26 (m)
-**Plans:** 2/15 plans executed in 12 waves (walking skeleton: `01-foundation-and-contracts/SKELETON.md`)
+**Plans:** 3/15 plans executed in 12 waves (walking skeleton: `01-foundation-and-contracts/SKELETON.md`)
 
 Plans:
 **Wave 1**
@@ -45,7 +45,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 01-02-PLAN.md — CLAUDE.md for GSD, plan review committed, README quick start, ADRs 0001–0008
-- [ ] 01-03-PLAN.md — ESLint, Prettier, stylelint, knip, client-boundary and conventions checks, CI workflow, Dependabot
+- [x] 01-03-PLAN.md — ESLint, Prettier, stylelint, knip, client-boundary and conventions checks, CI workflow, Dependabot
 
 **Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 01-04-PLAN.md — Config validated at startup (exits naming bad keys), check-env, smoke script in CI
@@ -208,7 +208,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation and contracts | 2/15 | In Progress | - |
+| 1. Foundation and contracts | 3/15 | In Progress | - |
 | 2. Design direction and approval gate | 0/0 | Not started | - |
 | 3. Design system and app shell | 0/0 | Not started | - |
 | 4. Browse tours | 0/0 | Not started | - |
