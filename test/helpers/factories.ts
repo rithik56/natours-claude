@@ -1,4 +1,5 @@
 import { fromIstDay } from '@/lib/ist';
+import { Booking, type BookingDoc } from '@/server/modules/bookings/model';
 import { Review, type ReviewDoc } from '@/server/modules/reviews/model';
 import { Tour, type TourDoc } from '@/server/modules/tours/model';
 import { User, type UserDoc } from '@/server/modules/users/model';
@@ -196,5 +197,37 @@ export async function createReview(
     user: options.user._id,
     review: options.review ?? record.review,
     rating: options.rating ?? record.rating,
+  });
+}
+
+type CreateBookingOptions = {
+  user: UserDoc;
+  tour: TourDoc;
+  /** Defaults to the tour's first start date. */
+  startDate?: Date;
+  status?: 'paid' | 'refunded';
+  /** Whole rupees. Defaults to the tour's price. */
+  price?: number;
+  stripeSessionId?: string;
+};
+
+/**
+ * Creates a paid booking for a tour and user already in the database (QA-17).
+ * The start date and price default to the tour's first start date and its price.
+ */
+export async function createBooking(
+  options: CreateBookingOptions,
+): Promise<BookingDoc> {
+  const startDate = options.startDate ?? options.tour.startDates[0];
+  if (startDate === undefined) {
+    throw new Error('createBooking: the tour has no start date to book');
+  }
+  return Booking.create({
+    tour: options.tour._id,
+    user: options.user._id,
+    price: options.price ?? options.tour.price,
+    startDate,
+    status: options.status,
+    stripeSessionId: options.stripeSessionId,
   });
 }
