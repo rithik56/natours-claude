@@ -90,7 +90,7 @@
   - `withApi` maps CastError, duplicate keys (409), ValidationError, ZodError, JWT errors and Stripe signature errors.
   - Actions return expected errors as `ActionState`.
   - Pages use `notFound()` for missing data.
-- [ ] **B10**: The app never hangs without a database. Server selection times out after 5 seconds, requests then fail with 503, and `/readyz` reports it.
+- [x] **B10**: The app never hangs without a database. Server selection times out after 5 seconds, requests then fail with 503, and `/readyz` reports it.
 - [ ] **B11**: Pagination:
   - `page` is at least 1, and `limit` runs from 1 to 100 (default 20).
   - Responses include `meta.total`, and pages show a pagination control.
@@ -102,14 +102,14 @@
 - [ ] **B14**: `passwordChangedAt` is set in exactly one place, the model hook.
 - [ ] **B15**: Account updates go only through the validated service, from both `updateMeAction` and `PATCH /api/v1/users/me`.
 - [ ] **B16**: A duplicate email or tour name returns 409 `CONFLICT`, or the matching `ActionState` field error.
-- [ ] **B17**: Models and the Mongoose connection survive hot reload: models register as `mongoose.models.X ?? model(...)`, and the connection promise is cached on `globalThis`.
+- [x] **B17**: Models and the Mongoose connection survive hot reload: models register as `mongoose.models.X ?? model(...)`, and the connection promise is cached on `globalThis`.
 - [ ] **B18**: `redirect()` and `notFound()` are never swallowed by a `try/catch`; `action()` re-throws them.
 - [ ] **B19**: Start dates are IST calendar days, stored as 00:00 IST, compared by IST day and always shown with `Asia/Kolkata`. A test with the server on UTC shows a 1 January departure as 1 January.
 - [ ] **B20**: Money is whole rupees everywhere, and Stripe gets paise (`price * 100`). Prices are always shown through `formatPrice`: ₹ with Indian digit grouping and no decimals.
 
 ### Rendering (R)
 
-- [ ] **R1**: Server Components by default. A component is a Client Component only if it needs event handlers, state or effects, browser-only APIs, or updates after the page loads.
+- [x] **R1**: Server Components by default. A component is a Client Component only if it needs event handlers, state or effects, browser-only APIs, or updates after the page loads.
 - [ ] **R2**: In every client file, the line after `'use client'` is `// client: <reason>`, and `check-client-boundaries.ts` fails CI without it. Client boundaries sit as low in the tree as possible.
 - [ ] **R3**: Pages call services directly and never fetch our own `/api`. Independent data loads run in parallel, and repeated lookups are deduplicated with `cache()`.
 - [ ] **R4**: Slower sections stream inside `<Suspense>`, with skeletons the same size as the content (CLS under 0.1). Route segments have `loading.tsx`.
@@ -137,7 +137,7 @@
 - [ ] **D6**: `/healthz` is the liveness check and `/readyz` checks Mongo and Redis. The Docker `HEALTHCHECK` uses `/healthz`.
 - [ ] **D7**: Logs are structured JSON (pino) in production and pretty-printed in development. Every log line and error response carries the request ID.
 - [ ] **D8**: A multi-stage Dockerfile on `node:24-slim` runs as a non-root user, with standalone output and the worker bundled by esbuild. `docker-compose.yml` runs `mongo`, `redis`, `mailpit`, `web` and `worker`.
-- [ ] **D9**: Build output (`.next`, `dist`, `coverage`, Playwright reports) is gitignored.
+- [x] **D9**: Build output (`.next`, `dist`, `coverage`, Playwright reports) is gitignored.
 - [ ] **D10**: *(amended)* `npm run seed`:
   - Loads `seed/` idempotently, has a `--reset` flag and refuses to run in production.
   - Sets every password from `SEED_USER_PASSWORD` and uploads the photos.
@@ -202,7 +202,7 @@
 
 ### Code quality (Q)
 
-- [ ] **Q1**: TypeScript `strict` with `noUncheckedIndexedAccess`, no `any` without a comment explaining why, and `tsc --noEmit` passing in CI.
+- [x] **Q1**: TypeScript `strict` with `noUncheckedIndexedAccess`, no `any` without a comment explaining why, and `tsc --noEmit` passing in CI.
 - [ ] **Q2**: ESLint flat config with zero warnings:
   - `eslint-config-next`, `typescript-eslint` and `eslint-plugin-security`.
   - `no-console`, `react/no-danger` and restricted imports.
@@ -217,11 +217,11 @@
   - Every Route Handler and action has happy-path, validation and authorisation tests.
   - Every S and B ID has a tagged regression test, written with its feature.
   - Coverage is at least 85% of service lines and 75% of `src/server/**`.
-- [ ] **Q7**: Tests are deterministic. No network calls, with fakes for Stripe, SMTP, storage, Redis and map tiles; an in-memory database per test file; and fake timers for expiry.
+- [x] **Q7**: Tests are deterministic. No network calls, with fakes for Stripe, SMTP, storage, Redis and map tiles; an in-memory database per test file; and fake timers for expiry.
 - [ ] **Q8**: *(amended)* Commits follow Conventional Commits and cite the requirement IDs they cover and the GSD plan, one plan task per commit where possible.
 - [ ] **Q9**: Exported service functions have TSDoc covering their parameters, return value and error codes.
 - [ ] **Q10**: Documentation: a README (setup, scripts, architecture, deployment), `docs/contracts.md`, `docs/design/`, and an ADR for every deviation from `plan.md`.
-- [ ] **Q11**: No unused dependencies or exports (knip), and the lockfile is committed. New dependencies need a one-line reason in the commit message.
+- [x] **Q11**: No unused dependencies or exports (knip), and the lockfile is committed. New dependencies need a one-line reason in the commit message.
 
 ## v2 Requirements
 
@@ -391,18 +391,18 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | B7 | Phase 6 | Pending |
 | B8 | Phase 6 | Pending |
 | B9 | Phase 1 | Pending |
-| B10 | Phase 1 | Pending |
+| B10 | Phase 1 | Complete |
 | B11 | Phase 4 | Pending |
 | B12 | Phase 4 | Pending |
 | B13 | Phase 1 | Pending |
 | B14 | Phase 1 | Pending |
 | B15 | Phase 5 | Pending |
 | B16 | Phase 5 | Pending |
-| B17 | Phase 1 | Pending |
+| B17 | Phase 1 | Complete |
 | B18 | Phase 1 | Pending |
 | B19 | Phase 1 | Pending |
 | B20 | Phase 1 | Pending |
-| R1 | Phase 1 | Pending |
+| R1 | Phase 1 | Complete |
 | R2 | Phase 1 | Pending |
 | R3 | Phase 4 | Pending |
 | R4 | Phase 4 | Pending |
@@ -421,7 +421,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | D6 | Phase 5 | Pending |
 | D7 | Phase 1 | Pending |
 | D8 | Phase 5 | Pending |
-| D9 | Phase 1 | Pending |
+| D9 | Phase 1 | Complete |
 | D10 | Phase 4 | Pending |
 | D11 | Phase 7 | Pending |
 | D12 | Phase 8 | Pending |
@@ -454,17 +454,17 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | U25 | Phase 3 | Pending |
 | U26 | Phase 7 | Pending |
 | U27 | Phase 4 | Pending |
-| Q1 | Phase 1 | Pending |
+| Q1 | Phase 1 | Complete |
 | Q2 | Phase 1 | Pending |
 | Q3 | Phase 1 | Pending |
 | Q4 | Phase 1 | Pending |
 | Q5 | Phase 1 | Pending |
 | Q6 | Phase 1 | Pending |
-| Q7 | Phase 1 | Pending |
+| Q7 | Phase 1 | Complete |
 | Q8 | Phase 1 | Pending |
 | Q9 | Phase 1 | Pending |
 | Q10 | Phase 1 | Pending |
-| Q11 | Phase 1 | Pending |
+| Q11 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 113 total (F 7, S 23, B 20, R 11, D 14, U 27, Q 11)
