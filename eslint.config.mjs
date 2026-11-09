@@ -63,6 +63,8 @@ const eslintConfig = defineConfig([
     files: ['test/**', 'scripts/**'],
     rules: {
       'no-restricted-imports': 'off',
+      // Build-time tools and tests read repository files they chose themselves (ADR 0009).
+      'security/detect-non-literal-fs-filename': 'off',
     },
   },
   globalIgnores([
