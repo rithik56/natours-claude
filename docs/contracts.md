@@ -692,7 +692,7 @@ export type UserRecord = Omit<
 | `email` | required, unique, lower-cased, trimmed, a valid email |
 | `photo` | optional storage key |
 | `role` | one of `ROLES`, default `user` |
-| `password` | required, 8 to 72 characters of plain text before hashing, `select: false` |
+| `password` | required, 8 to 72 characters and at most 72 bytes in UTF-8 (bcrypt reads only 72 bytes) of plain text before hashing, `select: false` |
 | `passwordChangedAt` | set only by the model hook |
 | `passwordResetToken`, `passwordResetExpires` | `select: false` |
 | `active` | default `true`, `select: false` |

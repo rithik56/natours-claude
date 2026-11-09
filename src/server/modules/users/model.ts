@@ -69,6 +69,12 @@ const schema = new Schema<UserFields>(
       required: [true, validation.required],
       minlength: [8, validation.tooShort(8)],
       maxlength: [72, validation.tooLong(72)],
+      // bcrypt reads only the first 72 bytes, and a letter can take up to
+      // four, so the character limit alone lets a long password be cut short.
+      validate: {
+        validator: (value: string) => !bcrypt.truncates(value),
+        message: validation.passwordTooLong,
+      },
       select: false,
     },
     passwordChangedAt: { type: Date },
@@ -80,7 +86,8 @@ const schema = new Schema<UserFields>(
 );
 
 // B14: the only writer of passwordChangedAt. Validation has already checked the
-// plain password's length by the time this runs, so the hash is never measured.
+// plain password's length in characters and bytes by the time this runs, so the
+// hash is never measured.
 schema.pre('save', async function () {
   if (!this.isModified('password')) return;
   const cost = getConfig().APP_ENV === 'test' ? BCRYPT_COST_TEST : BCRYPT_COST;

@@ -37,6 +37,8 @@ export const messages = {
     tooShort: (min: number) =>
       `Use at least ${grouped.format(min)} characters.`,
     tooLong: (max: number) => `Use at most ${grouped.format(max)} characters.`,
+    passwordTooLong:
+      'That password is too long. Use a shorter one, or fewer accented or non-English letters.',
     tooSmall: (min: number) =>
       `Enter a number that is at least ${grouped.format(min)}.`,
     tooBig: (max: number) =>

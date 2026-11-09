@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { describe, expect, it, vi } from 'vitest';
+import { messages } from '@/lib/messages';
 import { User, type UserRecord } from '@/server/modules/users/model';
 import { ROLES } from '@/server/roles';
 import { useTestDatabase } from '../../../helpers/db';
@@ -79,6 +80,57 @@ describe('users data layer', () => {
         expect(
           await bcrypt.compare(TEST_PASSWORD, stored?.password ?? ''),
         ).toBe(true);
+      });
+
+      describe('password length is measured in bytes (WR-03)', () => {
+        // Devanagari letters take 3 bytes each in UTF-8, so 24 fill bcrypt's 72 bytes.
+        const devanagari = (count: number) => 'क'.repeat(count);
+
+        it('[B14] accepts 24 Devanagari characters (72 bytes)', async () => {
+          const { user } = await createUser({ password: devanagari(24) });
+
+          const stored = await User.findById(user._id).select('+password');
+          expect(
+            await bcrypt.compare(devanagari(24), stored?.password ?? ''),
+          ).toBe(true);
+        });
+
+        it('[B14] rejects 25 Devanagari characters (75 bytes) with the friendly message', async () => {
+          await expect(
+            createUser({ password: devanagari(25) }),
+          ).rejects.toMatchObject({
+            name: 'ValidationError',
+            errors: {
+              password: {
+                message: messages.validation.passwordTooLong,
+              },
+            },
+          });
+        });
+
+        it('[B14] accepts 72 ASCII characters and rejects 73', async () => {
+          const { user } = await createUser({ password: 'a'.repeat(72) });
+          expect(await User.exists({ _id: user._id })).not.toBeNull();
+
+          await expect(
+            createUser({ role: 'admin', password: 'a'.repeat(73) }),
+          ).rejects.toMatchObject({ name: 'ValidationError' });
+        });
+
+        it('[B14] save() does not silently accept a changed password past 72 bytes', async () => {
+          const { user } = await createUser();
+          const loaded = await User.findById(user._id).select('+password');
+          loaded!.password = devanagari(25);
+
+          await expect(loaded!.save()).rejects.toMatchObject({
+            name: 'ValidationError',
+          });
+
+          const stored = await User.findById(user._id).select('+password');
+          expect(
+            await bcrypt.compare(TEST_PASSWORD, stored?.password ?? ''),
+          ).toBe(true);
+        });
       });
     });
 
