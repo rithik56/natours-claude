@@ -40,20 +40,43 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 15 plans in 12 waves (walking skeleton: `01-foundation-and-contracts/SKELETON.md`)
 
 Plans:
+**Wave 1**
 - [ ] 01-01-PLAN.md — Walking skeleton: package gate, Next.js 16 scaffold, `/`, `/readyz` on MongoDB, Vitest with in-memory MongoDB
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 01-02-PLAN.md — CLAUDE.md for GSD, plan review committed, README quick start, ADRs 0001–0008
 - [ ] 01-03-PLAN.md — ESLint, Prettier, stylelint, knip, client-boundary and conventions checks, CI workflow, Dependabot
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 01-04-PLAN.md — Config validated at startup (exits naming bad keys), check-env, smoke script in CI
+
+**Wave 4** *(blocked on Wave 3 completion)*
 - [ ] 01-05-PLAN.md — formatPrice, formatDate, IST day helpers, clock, messages, AppError, Zod error map, pino logger
 - [ ] 01-06-PLAN.md — proxy.ts request ID and nonce CSP, security headers, nonce proven on the built app
+
+**Wave 5** *(blocked on Wave 4 completion)*
 - [ ] 01-07-PLAN.md — Fail-fast DB connection, User model, user DTOs, findActiveById, createUser
+
+**Wave 6** *(blocked on Wave 5 completion)*
 - [ ] 01-08-PLAN.md — Tour, Review and Booking models, DTOs and seed-based factories
 - [ ] 01-09-PLAN.md — HS256 sessions, getCurrentUser with a DB read per request, requireUser/Role, safeNext, mockSession
+
+**Wave 7** *(blocked on Wave 6 completion)*
 - [ ] 01-10-PLAN.md — Adapters and fakes (mail, queue, storage, Stripe, rate limit, cache), deps.ts by APP_ENV
+
+**Wave 8** *(blocked on Wave 7 completion)*
 - [ ] 01-11-PLAN.md — withApi (default deny, origin, CORS, validation, error mapping), /healthz, /readyz, callRoute
+
+**Wave 9** *(blocked on Wave 8 completion)*
 - [ ] 01-12-PLAN.md — action() with ActionState, redirect pass-through, example tests
+
+**Wave 10** *(blocked on Wave 9 completion)*
 - [ ] 01-13-PLAN.md — R9 JavaScript floor with Lighthouse CI, enforced in CI
+
+**Wave 11** *(blocked on Wave 10 completion)*
 - [ ] 01-14-PLAN.md — docs/contracts.md, ADRs 0019–0024 and index, full README
+
+**Wave 12** *(blocked on Wave 11 completion)*
 - [ ] 01-15-PLAN.md — Phase gate: clean-clone check, all gates, push authorisation, green CI run
 
 ### Phase 2: Design direction and approval gate
