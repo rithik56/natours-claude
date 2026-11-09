@@ -9,11 +9,11 @@ findings:
     title: "`withApi` reads an unbounded JSON body, and `PAYLOAD_TOO_LARGE` is never produced"
   - id: WR-02
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "`toReview` throws a `TypeError` instead of the intended error when the author is `null`"
   - id: WR-03
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Password `maxlength: 72` counts characters, but bcrypt truncates at 72 bytes"
   - id: WR-04
     severity: warning
@@ -25,15 +25,15 @@ findings:
     title: "Tour slug can go stale, be empty, or collide as a misleading CONFLICT"
   - id: WR-06
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "`isDbUnavailableError` misses common driver outage errors, so they surface as 500"
   - id: WR-07
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "CI jobs have no `timeout-minutes`"
   - id: WR-08
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "The password-change cut-off uses the pinned clock, but the JWT `iat` uses the wall clock"
   - id: WR-09
     severity: warning
@@ -55,7 +55,7 @@ findings:
     severity: info
     disposition: open
     title: "The `ratingsAverage` setter also rewrites query filters"
-open: 13
+open: 8
 total: 13
 recorded: 2026-11-09T16:44:47.761Z
 ---
@@ -65,13 +65,13 @@ recorded: 2026-11-09T16:44:47.761Z
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
 | WR-01 | warning | open | orchestrator re-checked against the code on 9 Nov 2026 and confirmed |
-| WR-02 | warning | open | orchestrator re-checked against the code on 9 Nov 2026 and confirmed |
-| WR-03 | warning | open | orchestrator re-checked against the code on 9 Nov 2026 and confirmed |
+| WR-02 | warning | fixed | commit 8e17cc6 (REVIEW-FIX.md) |
+| WR-03 | warning | fixed | commit 97af577 (REVIEW-FIX.md) |
 | WR-04 | warning | open | - |
 | WR-05 | warning | open | - |
-| WR-06 | warning | open | orchestrator re-checked against the code on 9 Nov 2026 and confirmed |
-| WR-07 | warning | open | orchestrator re-checked against the code on 9 Nov 2026 and confirmed |
-| WR-08 | warning | open | orchestrator re-checked against the code on 9 Nov 2026 and confirmed |
+| WR-06 | warning | fixed | commit 2be5d5d (REVIEW-FIX.md) |
+| WR-07 | warning | fixed | commit 03014b8 (REVIEW-FIX.md) |
+| WR-08 | warning | fixed | commit 11336ae (REVIEW-FIX.md) |
 | WR-09 | warning | open | - |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
