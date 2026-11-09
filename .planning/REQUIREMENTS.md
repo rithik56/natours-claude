@@ -117,7 +117,7 @@
 - [x] **R6**: Props passed to Client Components are DTOs or plain values. Every file under `src/server/` imports `server-only`.
 - [ ] **R7**: Site forms are `<form action={serverAction}>` and work without JavaScript. With JavaScript, `useActionState` and `useFormStatus` add field errors and a pending state.
 - [ ] **R8**: The route map loads through `next/dynamic` with `ssr: false`, called from a Client Component. Its fallback is the itinerary list at the same size, and Leaflet loads only on tour pages.
-- [ ] **R9**: *(amended)* No page adds more than 40 KB gzipped of JavaScript over its Phase 0 baseline. Lighthouse CI measures this with `resource-summary:script:size` budgets on every page, and the tour page has its own budget that includes the lazily loaded map.
+- [x] **R9**: *(amended)* No page adds more than 40 KB gzipped of JavaScript over its Phase 0 baseline. Lighthouse CI measures this with `resource-summary:script:size` budgets on every page, and the tour page has its own budget that includes the lazily loaded map.
 - [ ] **R10**: Metadata and search:
   - Every page has `generateMetadata` (title, description, canonical URL), and tour pages use the cover photo for Open Graph.
   - `sitemap.ts` lists every tour.
@@ -410,7 +410,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | R6 | Phase 1 | Complete |
 | R7 | Phase 5 | Pending |
 | R8 | Phase 4 | Pending |
-| R9 | Phase 1 | Pending |
+| R9 | Phase 1 | Complete |
 | R10 | Phase 4 | Pending |
 | R11 | Phase 7 | Pending |
 | D1 | Phase 5 | Pending |

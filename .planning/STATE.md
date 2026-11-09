@@ -4,16 +4,16 @@ milestone: v2
 current_phase: 01
 current_phase_name: Foundation and contracts
 status: executing
-stopped_at: Completed 01-12-PLAN.md
-last_updated: "2026-11-09T15:07:53.851Z"
+stopped_at: Completed 01-13-PLAN.md
+last_updated: "2026-11-09T15:18:14.513Z"
 last_activity: 2026-11-09
 last_activity_desc: Phase 01 execution resumed (wave continue)
-state_head: 3830af9bce71f6d98fc7fc7d7ffb9f371bed358b
+state_head: b8ce217e610f7db50e9a48dfb4c58ca0460eef94
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 15
-  completed_plans: 12
+  completed_plans: 13
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 8 Nov 2026)
 ## Current Position
 
 Phase: 01 (Foundation and contracts) — EXECUTING
-Plan: 13 of 15
+Plan: 14 of 15
 Status: Ready to execute
 Last activity: 2026-11-09 — Phase 01 execution resumed (wave continue)
 
@@ -69,6 +69,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P10 | 15min | 3 tasks | 15 files |
 | Phase 01 P11 | 11min | 3 tasks | 19 files |
 | Phase 01 P12 | 12 min | 2 tasks | 6 files |
+| Phase 01 P13 | 9min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,7 @@ Recent decisions affecting current work:
 - [Phase 01]: 01-10: The fake rate limiter reads now() from the clock so APP_NOW pins freeze its window in development
 - [Phase 01]: withApi requires an access declaration and fails closed with 403; resolveAccess reads the user through getCurrentUser(request.cookies) (ADR 0017)
 - [Phase 01]: 01-12: ActionState error gains optional retryAfterSeconds for RATE_LIMITED; action() resolves access before parsing the form and builds the input on a null-prototype object
+- [Phase 01]: Plan 01-13: R9 floor is 138,107 gzipped script bytes for / (Lighthouse CI, mobile, median of 3); budget is floor plus 40,960; basic-ftp overridden to 6.2.6 for npm audit
 
 ### Pending Todos
 
@@ -120,6 +122,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-09T15:07:53.829Z
-Stopped at: Completed 01-12-PLAN.md
+Last session: 2026-11-09T15:18:14.492Z
+Stopped at: Completed 01-13-PLAN.md
 Resume file: None
