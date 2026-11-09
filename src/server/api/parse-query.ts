@@ -22,6 +22,16 @@ function normalise(input: SearchParamsInput): Map<string, string | string[]> {
 }
 
 /**
+ * A query string as a plain object for strict validation: a repeated key
+ * becomes an array. A key such as __proto__ stays an ordinary own property.
+ */
+export function searchParamsToRecord(
+  searchParams: SearchParamsInput,
+): Record<string, string | string[]> {
+  return Object.fromEntries(normalise(searchParams));
+}
+
+/**
  * Reads a page's query string leniently (plan.md 4.3): a field that fails its
  * schema falls back to its default, or is left out when optional, and unknown
  * keys are dropped. Route Handlers validate strictly through `withApi` instead.
