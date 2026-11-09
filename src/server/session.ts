@@ -1,7 +1,12 @@
 import 'server-only';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import type { SelfUser } from '@/server/modules/users/dto';
+import { redirect } from 'next/navigation';
+import { cache } from 'react';
+import { AppError } from '@/server/errors';
+import { toSelf, type SelfUser } from '@/server/modules/users/dto';
+import { findActiveById } from '@/server/modules/users/service';
+import { safeNext } from '@/server/redirects';
 import type { Role } from '@/server/roles';
 import { getConfig } from './config';
 
@@ -89,22 +94,73 @@ export function expiredSessionCookie() {
   return { ...sessionCookie(''), maxAge: 0 };
 }
 
-// Throwaway stubs for the RED commit: neutral wrong values, replaced at GREEN.
-export async function getCurrentUser(
-  cookieSource?: CookieReader,
-): Promise<SelfUser | null> {
-  return Promise.resolve(cookieSource === undefined ? null : null);
-}
+/**
+ * The logged-in user, or null. Every call re-reads the user and the role from
+ * the database, so a deactivated account or a changed role takes effect on the
+ * next request (Key Decision 11, S6). The token only says who the user is.
+ *
+ * A token is also refused when it was issued before the user's last password
+ * change. `iat` is whole seconds and `passwordChangedAt` has milliseconds, so
+ * the change is cut to its second first: a token from the same second is
+ * accepted, one from an earlier second is not (SEC-18, ADR 0015).
+ *
+ * @param cookieSource - Route Handlers pass `request.cookies`; pages and actions
+ * pass nothing.
+ * @returns The user as `{ id, name, email, role, photo }`, or null for no
+ * session, an invalid or stale token, or an unknown or deactivated user.
+ * @throws AppError SERVICE_UNAVAILABLE when the database is unreachable. An
+ * outage is not treated as a logged-out visitor.
+ */
+export const getCurrentUser = cache(
+  async (cookieSource?: CookieReader): Promise<SelfUser | null> => {
+    const session = await getSession(cookieSource);
+    if (!session) return null;
+    const record = await findActiveById(session.userId);
+    if (!record) return null;
+    if (
+      record.passwordChangedAt &&
+      session.iat < Math.floor(record.passwordChangedAt.getTime() / 1000)
+    ) {
+      return null;
+    }
+    return toSelf(record);
+  },
+);
 
+/**
+ * The logged-in user, or a refusal.
+ *
+ * @param options - `next` is the page to return to after logging in.
+ * @returns The current user.
+ * @throws AppError UNAUTHENTICATED with no user and no `next`. With `next`, it
+ * redirects to `/login?next=...` instead, using a path that passed `safeNext`.
+ */
 export async function requireUser(options?: {
   next?: string;
 }): Promise<SelfUser> {
-  return Promise.reject(new Error(options?.next ?? 'stub'));
+  const user = await getCurrentUser();
+  if (user) return user;
+  if (options?.next !== undefined) {
+    redirect(`/login?next=${encodeURIComponent(safeNext(options.next))}`);
+  }
+  throw new AppError('UNAUTHENTICATED');
 }
 
+/**
+ * The logged-in user, who must hold one of the listed roles. There is no role
+ * hierarchy: an admin is refused unless `admin` is in the list (S6).
+ *
+ * @param roles - Every role that may pass.
+ * @param options - As for `requireUser`.
+ * @returns The current user.
+ * @throws AppError FORBIDDEN when the user's role is not listed; the errors of
+ * `requireUser` when nobody is logged in.
+ */
 export async function requireRole(
   roles: readonly Role[],
   options?: { next?: string },
 ): Promise<SelfUser> {
-  return Promise.reject(new Error(options?.next ?? roles.join()));
+  const user = await requireUser(options);
+  if (!roles.includes(user.role)) throw new AppError('FORBIDDEN');
+  return user;
 }

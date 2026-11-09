@@ -259,7 +259,7 @@ describe('current user', () => {
     });
 
     it('[S14] rejects a token issued long before the password change', async () => {
-      clockAt('2026-11-01T10:00:00+05:30');
+      clockAt('2026-11-05T10:00:00+05:30');
       const { user } = await createUser();
       await mockSession(user);
       expect(await getCurrentUser()).not.toBeNull();
