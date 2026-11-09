@@ -98,12 +98,12 @@
   - The tour page populates guides (name, photo, role).
   - Reviews load through their own paginated query.
   - Bookings populate only the fields they need.
-- [ ] **B13**: Each behaviour lives in one service function, shared by the action and the Route Handler, and there are no dead routes.
+- [x] **B13**: Each behaviour lives in one service function, shared by the action and the Route Handler, and there are no dead routes.
 - [x] **B14**: `passwordChangedAt` is set in exactly one place, the model hook.
 - [ ] **B15**: Account updates go only through the validated service, from both `updateMeAction` and `PATCH /api/v1/users/me`.
 - [ ] **B16**: A duplicate email or tour name returns 409 `CONFLICT`, or the matching `ActionState` field error.
 - [x] **B17**: Models and the Mongoose connection survive hot reload: models register as `mongoose.models.X ?? model(...)`, and the connection promise is cached on `globalThis`.
-- [ ] **B18**: `redirect()` and `notFound()` are never swallowed by a `try/catch`; `action()` re-throws them.
+- [x] **B18**: `redirect()` and `notFound()` are never swallowed by a `try/catch`; `action()` re-throws them.
 - [x] **B19**: Start dates are IST calendar days, stored as 00:00 IST, compared by IST day and always shown with `Asia/Kolkata`. A test with the server on UTC shows a 1 January departure as 1 January.
 - [x] **B20**: Money is whole rupees everywhere, and Stripe gets paise (`price * 100`). Prices are always shown through `formatPrice`: ₹ with Indian digit grouping and no decimals.
 
@@ -394,12 +394,12 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | B10 | Phase 1 | Complete |
 | B11 | Phase 4 | Pending |
 | B12 | Phase 4 | Pending |
-| B13 | Phase 1 | Pending |
+| B13 | Phase 1 | Complete |
 | B14 | Phase 1 | Complete |
 | B15 | Phase 5 | Pending |
 | B16 | Phase 5 | Pending |
 | B17 | Phase 1 | Complete |
-| B18 | Phase 1 | Pending |
+| B18 | Phase 1 | Complete |
 | B19 | Phase 1 | Complete |
 | B20 | Phase 1 | Complete |
 | R1 | Phase 1 | Complete |

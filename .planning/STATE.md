@@ -4,16 +4,16 @@ milestone: v2
 current_phase: 01
 current_phase_name: Foundation and contracts
 status: executing
-stopped_at: Completed 01-11-PLAN.md
-last_updated: "2026-11-09T14:56:03.906Z"
+stopped_at: Completed 01-12-PLAN.md
+last_updated: "2026-11-09T15:07:53.851Z"
 last_activity: 2026-11-09
 last_activity_desc: Phase 01 execution resumed (wave continue)
-state_head: d7fb719d5460425b3e5d14cf1ad93fac08724ac2
+state_head: 3830af9bce71f6d98fc7fc7d7ffb9f371bed358b
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 15
-  completed_plans: 11
+  completed_plans: 12
   percent: 0
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 8 Nov 2026)
 ## Current Position
 
 Phase: 01 (Foundation and contracts) — EXECUTING
-Plan: 12 of 15
+Plan: 13 of 15
 Status: Ready to execute
 Last activity: 2026-11-09 — Phase 01 execution resumed (wave continue)
 
@@ -68,6 +68,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 01 P09 | 80min | 2 tasks | 11 files |
 | Phase 01 P10 | 15min | 3 tasks | 15 files |
 | Phase 01 P11 | 11min | 3 tasks | 19 files |
+| Phase 01 P12 | 12 min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,7 @@ Recent decisions affecting current work:
 - [Phase 01]: 01-10: Staging and production getDeps getters throw a plain Error naming the missing adapter and phase (ADR 0016); the cache is the fake only under APP_ENV test
 - [Phase 01]: 01-10: The fake rate limiter reads now() from the clock so APP_NOW pins freeze its window in development
 - [Phase 01]: withApi requires an access declaration and fails closed with 403; resolveAccess reads the user through getCurrentUser(request.cookies) (ADR 0017)
+- [Phase 01]: 01-12: ActionState error gains optional retryAfterSeconds for RATE_LIMITED; action() resolves access before parsing the form and builds the input on a null-prototype object
 
 ### Pending Todos
 
@@ -118,6 +120,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-09T14:56:03.888Z
-Stopped at: Completed 01-11-PLAN.md
+Last session: 2026-11-09T15:07:53.829Z
+Stopped at: Completed 01-12-PLAN.md
 Resume file: None
