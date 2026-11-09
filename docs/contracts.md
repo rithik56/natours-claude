@@ -651,7 +651,7 @@ The throwing getters name the phase that adds each real adapter: mailer, queue a
 
 ## 6. Data model
 
-All four models are built in Phase 1. Money is whole rupees (B20). Every date field is 00:00 IST on its day (B19) and checked with `isIstMidnight`. Every model is registered through `registerModel` (B17) and runs validators on updates through `withUpdateValidators` (QA-04) and refuses `replaceOne`, `findOneAndReplace` and `bulkWrite` through `refuseValidatorBypass` (ADR 0027).
+All four models are built in Phase 1. Money is whole rupees (B20). Every date field is 00:00 IST on its day (B19) and checked with `isIstMidnight`. Every model is registered through `registerModel` (B17) and runs validators on updates through `withUpdateValidators` (QA-04) and refuses `replaceOne`, `findOneAndReplace`, `bulkWrite` and any pipeline (array) update through `refuseValidatorBypass` (ADR 0027). `withUpdateValidators` cannot be switched off by `{ middleware: false }` or `runValidators: false`.
 
 ```ts
 // src/server/schema-helpers.ts
@@ -659,7 +659,7 @@ export function registerModel<T>(name: string, schema: Schema<T>): Model<T>;
 
 export function withUpdateValidators<T>(schema: Schema<T>): Schema<T>;
 
-// Refuses replaceOne, findOneAndReplace and bulkWrite (ADR 0027).
+// Refuses replaceOne, findOneAndReplace, bulkWrite and pipeline (array) updates (ADR 0027).
 export function refuseValidatorBypass<T>(schema: Schema<T>): Schema<T>;
 
 // Marks a hook so a call with { middleware: false } still runs it.
@@ -704,7 +704,7 @@ export type UserRecord = Omit<
 | `active` | default `true`, `select: false` |
 
 - **Hooks.** A `pre('save')` hook hashes the password with bcrypt, at cost 4 under `APP_ENV=test` and 12 otherwise, and sets `passwordChangedAt` when an existing document's password changes. It is the only writer of `passwordChangedAt` (B14). A `pre('insertMany')` hook validates each plain password, then hashes it with the same function and cost, and refuses a document that supplies `passwordChangedAt`; one rejected document rejects the whole batch (ADR 0027). A query hook refuses `findOneAndUpdate`, `updateOne` and `updateMany` that write `password` or `passwordChangedAt` through any operator: as a key at any depth, as the source or target of `$rename`, or in a pipeline `$unset` stage. Password writes belong in `save()`. These hooks carry `alwaysRuns`, so `{ middleware: false }` does not skip them.
-- **Refused.** `replaceOne`, `findOneAndReplace` and `bulkWrite` throw on all four models, because they skip the validators (ADR 0027). Services use `create`, `save`, `insertMany` (on `User` it hashes) or the three guarded update methods. A later phase that needs one of the refused operations adds a narrow, reviewed allowance with a test.
+- **Refused.** `replaceOne`, `findOneAndReplace` and `bulkWrite` throw on all four models, because they skip the validators, and so does any pipeline (array) `updateOne`, `updateMany` or `findOneAndUpdate`, because a pipeline can write any field (ADR 0027). Services use `create`, `save`, `insertMany` (on `User` it hashes) or the three guarded update methods. A later phase that needs one of the refused operations adds a narrow, reviewed allowance with a test.
 - **Index.** `email` unique.
 
 ```ts
