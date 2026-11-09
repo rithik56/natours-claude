@@ -129,9 +129,13 @@ CI (`.github/workflows/ci.yml`) runs on every push and pull request. The `checks
 
 To run the same checks locally, run each script above in that order. They all need to exit 0.
 
+What has been verified on GitHub Actions: on 9 Nov 2026, run [42655320866](https://github.com/rithik56/natours-claude/actions/runs/42655320866) on the `gsd/phase-01-foundation-and-contracts` branch at commit `cf7ae39` finished with conclusion success, and both the `checks` and `build` jobs passed. In the `build` job, MongoDB started from the test binary, `build` and `smoke` passed, the generated `SESSION_SECRET` reached the later steps through `$GITHUB_ENV`, and `bundle:check` ran its three Lighthouse runs in Chrome on the runner and reported 138,229 bytes of script for `/` against a limit of 179,067 bytes (the runner figure is 122 bytes above the 138,107 floor recorded on a Mac). The `checks` job also confirmed the pinned test `mongod` 8.0.34 on Linux. An earlier run, on commit `028ff19`, failed because the `mongo:8.0` service container would not start on the runner kernel (ADR 0026).
+
 What has not been verified:
 
-- **The `build` job has not yet passed on GitHub Actions.** The first run failed because the `mongo:8.0` service container would not start on the runner kernel (ADR 0026), and the `checks` job passed. The fix has been run locally only. Unconfirmed on a runner: the `build` job's MongoDB started by `ci:mongo`, the hand-off of the generated `SESSION_SECRET` through `$GITHUB_ENV`, and Google Chrome for Lighthouse.
+- **The `mongo:8.0` service container on a runner.** The `build` job no longer uses it (ADR 0026), so it was replaced, not fixed.
+- **Branch protection and the pull request flow.** Nothing has been merged to `main`, and only a `push` run has been seen. A run triggered by a pull request has not.
+- **`npm run dev` in a plain terminal.** `next dev` was checked for writing `AGENTS.md` only with an agent detected, and only with `agentRules: false` set (plan 01-15). Behaviour with no agent detected, and through `npm run dev`, was not checked.
 - **`basic-ftp` is overridden to 6.2.6** in `package.json`. `@lhci/cli` pulls in an older release with a high-severity advisory that would fail the audit step. The override can go once the dependency that needs it moves on (ADR 0018).
 
 ## Commits
