@@ -187,7 +187,7 @@
 - [ ] **U17**: Every submit button shows a pending state and is disabled until the action finishes. Alerts and toasts use a live region.
 - [ ] **U18**: `not-found.tsx` and `error.tsx` are in the new design, with a way back to the tours and no stack traces.
 - [ ] **U19**: The header has Tours, My tours, and either an account menu or "Log in" and "Sign up". On mobile it's a menu button with `aria-expanded`; without JavaScript, a plain list of links.
-- [ ] **U20**: `docs/design/copy.md` holds the glossary, the button and message wording, and the Indian English rules. Pages use exactly that wording.
+- [x] **U20**: `docs/design/copy.md` holds the glossary, the button and message wording, and the Indian English rules. Pages use exactly that wording.
 - [ ] **U21**: Works without JavaScript, as R11 defines.
 - [ ] **U22**: WCAG 2.2 AA:
   - Contrast of 4.5:1 for text (3:1 for large text), and 3:1 for interface parts and focus indicators.
@@ -446,7 +446,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | U17 | Phase 5 | Pending |
 | U18 | Phase 3 | Pending |
 | U19 | Phase 3 | Pending |
-| U20 | Phase 2 | Pending |
+| U20 | Phase 2 | Complete |
 | U21 | Phase 7 | Pending |
 | U22 | Phase 7 | Pending |
 | U23 | Phase 7 | Pending |
