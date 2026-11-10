@@ -115,7 +115,24 @@ Plans:
   4. An unknown URL or a thrown error shows the new-design `not-found` and `error` pages with a way back to the tours. In a production build the error page shows only a generic message and the digest, never a stack trace. (U18, S19)
   5. The route line draws itself once in at most 1.2 seconds, every other motion responds to the user, lasts at most 200 ms and never runs on scroll, and all of it respects `prefers-reduced-motion`. (U25)
 **Review findings:** ARC-10, DEL-12, DEL-16, DES-05, DES-09, DES-10, DES-13 (m), DES-15 (m), DES-19 (m), DES-20 (m), QA-21, SEC-11, SEC-16
-**Plans:** TBD
+**Plans:** 10 plans
+
+Plans:
+**Wave 1**
+- [ ] 03-01-PLAN.md — Tokens, reset/base CSS, cascade layers, fonts, stylelint U1/U3 rules, Button, gated `/styleguide`, Playwright app harness (tracer-led)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 03-02-PLAN.md — App shell: skip link, header + mobile menu, footer, wired into the root layout
+- [ ] 03-03-PLAN.md — `not-found.tsx`, `error.tsx`, `global-error.tsx` in the new design, digest-only in production
+- [ ] 03-04-PLAN.md — Form primitives: link, text field, checkbox, select
+- [ ] 03-05-PLAN.md — File input with preview, start-date select, star rating (display + keyboard input)
+- [ ] 03-06-PLAN.md — Price, difficulty symbol, avatar, alert, toast
+- [ ] 03-07-PLAN.md — Tour row, facts strip, itinerary, pagination, photo credits
+- [ ] 03-08-PLAN.md — Map frame (signature route-line motion), booking panel, confirm dialog
+- [ ] 03-09-PLAN.md — Review item, review form, guide item, empty state, skeleton
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 03-10-PLAN.md — Assemble every section into `/styleguide` with in-page nav; full-tree stylelint sweep; both-themes/both-widths screenshots; phase-level acceptance of all five success criteria
 **UI hint**: yes
 
 ### Phase 4: Browse tours
@@ -219,7 +236,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 |-------|----------------|--------|-----------|
 | 1. Foundation and contracts | 15/15 | Complete    | 2026-11-10 |
 | 2. Design direction and approval gate | 4/4 | Complete    | 2026-11-10 |
-| 3. Design system and app shell | 0/0 | Not started | - |
+| 3. Design system and app shell | 0/10 | Not started | - |
 | 4. Browse tours | 0/0 | Not started | - |
 | 5. Accounts | 0/0 | Not started | - |
 | 6. Bookings, My tours and reviews | 0/0 | Not started | - |
