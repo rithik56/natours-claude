@@ -16,6 +16,8 @@ actuals:
   tokens: 2500
   tasks: 2
   commits: 1
+  plan_head_before: 986f214ab23db9cb94871e57ed1fd50987d3ad5a
+  plan_head_after: 3f93aca8af1c44717e8e633d81e9a83ea4126701
 
 tech-stack:
   added: []
@@ -77,7 +79,7 @@ status: complete
 
 This plan produced no code changes (Task 1 was a human checkpoint already resolved by the orchestrator; Task 2 was a no-op completion marker since the answer was a plain approval). No per-task commits were needed.
 
-**Plan metadata:** recorded in the final docs commit (SUMMARY.md, STATE.md, ROADMAP.md, REQUIREMENTS.md).
+**Plan metadata:** `3f93aca` (docs: complete design gate approval plan — SUMMARY.md, STATE.md, ROADMAP.md)
 
 ## Files Created/Modified
 - `.planning/phases/02-design-direction-and-approval-gate/02-04-SUMMARY.md` - this summary, recording the verbatim gate decision
