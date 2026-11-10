@@ -23,6 +23,8 @@ export default defineConfig({
     },
     globalSetup: ['test/global-setup.ts'],
     setupFiles: ['test/setup.ts'],
+    // test/design/*.spec.ts runs under @playwright/test, not Vitest (02-01-PLAN.md).
+    exclude: ['**/node_modules/**', 'test/design/**'],
     coverage: {
       provider: 'v8',
       include: ['src/server/**/*.ts'],
