@@ -91,7 +91,7 @@ Plans:
   4. An ADR compares map-tile providers on how they draw India's boundaries (the Ladakh tour runs close to them) against keeping every tour map zoomed in to its route, with each provider's terms and pricing checked, and names the chosen provider and the CSP hosts that follow from it. (D14)
   5. **Human checkpoint (design gate):** the user has reviewed `direction.md`, the mockups and the screenshots and approved them, or asked for changes that are recorded as an ADR and shown again. No token, component or page styling exists until the user approves. (Design gate, plan.md §9.7, PROJECT.md Constraints)
 **Review findings:** DEL-17, DES-08, DES-12, DES-14 (m)
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans executed
 
 Plans:
 **Wave 1**
@@ -100,7 +100,7 @@ Plans:
 - [x] 02-03-PLAN.md — D14: map-tile option checkpoint, ADR 0028 and the CSP seam
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 02-04-PLAN.md — The design gate: present direction.md + mockups + screenshots for approval
+- [x] 02-04-PLAN.md — The design gate: present direction.md + mockups + screenshots for approval
 **UI hint**: yes
 
 ### Phase 3: Design system and app shell
@@ -218,7 +218,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and contracts | 15/15 | Complete    | 2026-11-10 |
-| 2. Design direction and approval gate | 3/4 | In Progress | - |
+| 2. Design direction and approval gate | 4/4 | In Progress | - |
 | 3. Design system and app shell | 0/0 | Not started | - |
 | 4. Browse tours | 0/0 | Not started | - |
 | 5. Accounts | 0/0 | Not started | - |
