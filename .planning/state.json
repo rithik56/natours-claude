@@ -1,0 +1,53 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": "v2",
+  "phases": [
+    {
+      "number": "1",
+      "name": "Foundation and contracts",
+      "status": "complete"
+    },
+    {
+      "number": "2",
+      "name": "Design direction and approval gate",
+      "status": "pending"
+    },
+    {
+      "number": "3",
+      "name": "Design system and app shell",
+      "status": "pending"
+    },
+    {
+      "number": "4",
+      "name": "Browse tours",
+      "status": "pending"
+    },
+    {
+      "number": "5",
+      "name": "Accounts",
+      "status": "pending"
+    },
+    {
+      "number": "6",
+      "name": "Bookings, My tours and reviews",
+      "status": "pending"
+    },
+    {
+      "number": "7",
+      "name": "Hardening and quality gates",
+      "status": "pending"
+    },
+    {
+      "number": "8",
+      "name": "Deployment to AWS",
+      "status": "pending"
+    }
+  ],
+  "next": {
+    "command": "/gsd-progress --next",
+    "label": "Advance to the next step (plan phase 2)",
+    "reason": "Phase 2 of 8 — needs a plan"
+  },
+  "updated_at": "2026-11-10T06:26:05.375Z"
+}
