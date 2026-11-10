@@ -6,12 +6,19 @@ import { pathToFileURL } from 'node:url';
 const KEBAB_WORD = /^[a-z0-9]+$/;
 const GROUP_FOLDER = /^\(([a-z0-9-]+)\)$/;
 const PARAM_FOLDER = /^\[(?:\.\.\.)?[A-Za-z][A-Za-z0-9]*\]$/;
-const COMPOUND_EXTENSIONS = ['.d.ts', '.module.css', '.test.tsx', '.test.ts'];
+const COMPOUND_EXTENSIONS = [
+  '.d.ts',
+  '.module.css',
+  '.test.tsx',
+  '.test.ts',
+  '.spec.tsx',
+  '.spec.ts',
+];
 const ISSUE_REFERENCE = /\(#\d+\)|github\.com\/\S+\/issues\/\d+/;
 const CODE_START =
   /^(?:import |export |const |let |var |return |await |if \(|for \()/;
 const COMMENT_EXEMPT = /^(?:client:|eslint-|@ts-)/;
-const FIRST_IMPORT = /^[ \t]*import\b[^'"]*?(['"])([^'"]+)\1/m;
+const FIRST_IMPORT = /^[ \t]*import\b[^'\"]*?(['\"])([^'\"]+)\1/m;
 const EXPORTED_NAME =
   /\bexport\s+(?:async\s+function\s+|function\s+|const\s+|let\s+|var\s+)(\w+)/g;
 
