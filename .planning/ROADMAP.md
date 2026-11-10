@@ -15,7 +15,7 @@ Every v1 requirement (113 in all) maps to exactly one phase. Cross-cutting rules
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation and contracts** - Scaffold, data layer, sessions, request pipeline, test kit, CI baseline and ADRs (completed 2026-11-10)
-- [ ] **Phase 2: Design direction and approval gate** - Direction, copy, map-tile decision and mockups from seed content, ending with the user's approval
+- [x] **Phase 2: Design direction and approval gate** - Direction, copy, map-tile decision and mockups from seed content, ending with the user's approval (completed 2026-11-10)
 - [ ] **Phase 3: Design system and app shell** - Tokens, themes, fonts, `ui/` components, `/styleguide`, header, footer and error pages
 - [ ] **Phase 4: Browse tours** - Seed data, overview with filters, tour page with route map, photo credits and the catalogue API
 - [ ] **Phase 5: Accounts** - Sign up, log in, password reset and change, account page, background email and the local container stack
@@ -91,7 +91,7 @@ Plans:
   4. An ADR compares map-tile providers on how they draw India's boundaries (the Ladakh tour runs close to them) against keeping every tour map zoomed in to its route, with each provider's terms and pricing checked, and names the chosen provider and the CSP hosts that follow from it. (D14)
   5. **Human checkpoint (design gate):** the user has reviewed `direction.md`, the mockups and the screenshots and approved them, or asked for changes that are recorded as an ADR and shown again. No token, component or page styling exists until the user approves. (Design gate, plan.md §9.7, PROJECT.md Constraints)
 **Review findings:** DEL-17, DES-08, DES-12, DES-14 (m)
-**Plans:** 4/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 **Wave 1**
@@ -218,7 +218,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation and contracts | 15/15 | Complete    | 2026-11-10 |
-| 2. Design direction and approval gate | 4/4 | In Progress | - |
+| 2. Design direction and approval gate | 4/4 | Complete    | 2026-11-10 |
 | 3. Design system and app shell | 0/0 | Not started | - |
 | 4. Browse tours | 0/0 | Not started | - |
 | 5. Accounts | 0/0 | Not started | - |
