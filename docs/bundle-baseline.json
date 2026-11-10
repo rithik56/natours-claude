@@ -1,0 +1,14 @@
+{
+  "floorBytes": 138107,
+  "budgetDeltaBytes": 40960,
+  "route": "/",
+  "measuredAt": "2026-11-09T15:15:36.044Z",
+  "preset": "mobile",
+  "lighthouse": "13.6.0",
+  "chrome": "156.0.0.0",
+  "next": "16.4.5",
+  "runs": 3,
+  "statistic": "median",
+  "runBytes": [138107, 138107, 138107],
+  "command": "npm run bundle:record"
+}

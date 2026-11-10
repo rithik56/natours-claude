@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Lint CSS
+        run: npm run lint:css
+      - name: Check formatting
+        run: npm run format:check
+      - name: Check client boundaries
+        run: npm run check:client
+      - name: Check conventions
+        run: npm run check:conventions
+      - name: Check environment template
+        run: npm run check:env
+      - name: Find unused code and dependencies
+        run: npm run knip
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+      - name: Test with coverage
+        run: npm run test:coverage
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # ADR 0026: MongoDB runs from the same downloaded binary the tests use, not from a service container.
+      # The mongo:8.0 container failed to start on the runner kernel (SERVER-121912).
+      - name: Start MongoDB from the test binary
+        shell: bash
+        run: |
+          nohup npm run ci:mongo > "$RUNNER_TEMP/ci-mongo.log" 2>&1 < /dev/null &
+          for attempt in $(seq 1 60); do
+            if (echo > /dev/tcp/127.0.0.1/27017) 2>/dev/null; then
+              echo "MongoDB accepted a connection on 127.0.0.1:27017 after $attempt tries"
+              cat "$RUNNER_TEMP/ci-mongo.log"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "MongoDB did not accept a connection on 127.0.0.1:27017 within 60 seconds" >&2
+          cat "$RUNNER_TEMP/ci-mongo.log" >&2
+          exit 1
+      # No env block on purpose: a build that needs no secrets proves ARC-07.
+      - name: Build
+        run: npm run build
+      - name: Generate a session secret for the smoke run
+        run: echo "SESSION_SECRET=$(openssl rand -base64 48)" >> "$GITHUB_ENV"
+      - name: Smoke test the built app
+        run: npm run smoke
+        env:
+          APP_ENV: ci
+          APP_URL: http://localhost:3210
+          MONGODB_URI: mongodb://127.0.0.1:27017/natours
+      # R9, D-10: the script transfer size of / may not exceed the recorded floor plus 40 KB.
+      # The floor lives in docs/bundle-baseline.json and is recorded locally, never by CI.
+      - name: Check the JavaScript budget
+        run: npm run bundle:check
+        env:
+          APP_ENV: ci
+          APP_URL: http://localhost:3300
+          MONGODB_URI: mongodb://127.0.0.1:27017/natours
+      # Artifacts only: Lighthouse results are never uploaded to public temporary storage.
+      - name: Upload Lighthouse results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lighthouse-results
+          path: .lighthouseci/
+          include-hidden-files: true
+          if-no-files-found: ignore
