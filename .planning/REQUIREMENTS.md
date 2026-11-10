@@ -152,7 +152,7 @@
   - It uses MongoDB Atlas M0, S3 for images, SES for email, and the Stripe test-mode webhook at `/webhooks/stripe`.
   - The README covers deploying, rotating secrets and rolling back.
 - [ ] **D13**: The API is versioned under `/api/v1`. `docs/openapi/openapi.yaml` matches the Route Handlers, and CI checks it with `redocly lint`.
-- [ ] **D14**: The map-tile provider is chosen for how it shows India's boundaries, with its terms and pricing checked, and the choice is recorded in an ADR. The CSP's map hosts follow it.
+- [x] **D14**: The map-tile provider is chosen for how it shows India's boundaries, with its terms and pricing checked, and the choice is recorded in an ADR. The CSP's map hosts follow it.
 
 ### Design, UI and UX (U)
 
@@ -426,7 +426,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | D11 | Phase 7 | Pending |
 | D12 | Phase 8 | Pending |
 | D13 | Phase 7 | Pending |
-| D14 | Phase 2 | Pending |
+| D14 | Phase 2 | Complete |
 | U1 | Phase 3 | Pending |
 | U2 | Phase 3 | Pending |
 | U3 | Phase 3 | Pending |

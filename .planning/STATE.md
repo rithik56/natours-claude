@@ -3,18 +3,18 @@ gsd_state_version: "1.0"
 milestone: v2
 current_phase: 02
 current_phase_name: Design direction and approval gate
-current_plan: 3
+current_plan: 4
 status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-11-10T08:05:19.362Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-11-10T08:08:48.076Z"
 last_activity: 2026-11-10
 last_activity_desc: Phase 01 complete, transitioned to Phase 2
-state_head: 58d45f28be649d99a24feb3c79f82dccd9c98a3d
+state_head: 3a4af37355dd25875049220981ff0ab2fa6a82ee
 progress:
   total_phases: 8
   completed_phases: 1
   total_plans: 19
-  completed_plans: 17
+  completed_plans: 18
   percent: 13
 ---
 
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 8 Nov 2026)
 ## Current Position
 
 Phase: 02 (Design direction and approval gate) — EXECUTING
-Current Plan: 3
+Current Plan: 4
 Total Plans in Phase: 4
 Status: Ready to execute
 Last activity: 2026-11-10 — Phase 2 Plan 01 complete (overview + tour mockups, 375/1280px, 4 screenshots)
@@ -76,6 +76,7 @@ Progress: [█░░░░░░░░░] 13%
 | Phase 1 P15 | n/a | 3 tasks | 11 files |
 | Phase 02 P01 | 35min | 2 tasks | 8 files |
 | Phase 02 P02 | 25min | 2 tasks | 2 files |
+| Phase 02 P03 | 10min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -111,6 +112,7 @@ Recent decisions affecting current work:
 - [Phase 1]: CI build job starts MongoDB from the test binary via ci:mongo instead of a mongo:8.0 service container (ADR 0026)
 - [Phase 02]: 02-02: dark theme and a new caution/error status colour derived by HSL hue-preserving lightness adjustment, cross-checked against §9.2's own published contrast ratios
 - [Phase 02]: 02-02: copy.md wording is specific per error cause (e.g. CONFLICT names email vs tour name) rather than generic, per DES-12
+- [Phase 02]: 02-03: D14 resolved — user chose Option B (no third-party tile host, Leaflet + datameet/maps' india-soi.geojson); src/proxy.ts CSP left unchanged, ADR 0028 recorded
 
 ### Pending Todos
 
@@ -134,6 +136,6 @@ Items acknowledged and deferred at milestone close, most recent first:
 
 ## Session Continuity
 
-Last session: 2026-11-10T08:05:19.265Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-11-10T08:08:47.982Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
