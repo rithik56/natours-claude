@@ -1,268 +1,323 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en-IN">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Natours — Find your next trip (Milestone direction mockup)</title>
-  <link rel="stylesheet" href="mockup.css" />
-</head>
-<body>
-  <header class="site-header">
-    <div class="site-header__inner">
-      <a class="site-header__brand" href="#">Natours</a>
-      <nav class="site-header__nav" aria-label="Main">
-        <a href="#">Tours</a>
-        <a href="#">My tours</a>
-        <a href="#">Account</a>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Natours — Find your next trip (Milestone direction mockup)</title>
+    <link rel="stylesheet" href="mockup.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="site-header__brand" href="#">Natours</a>
+        <nav class="site-header__nav" aria-label="Main">
+          <a href="#">Tours</a>
+          <a href="#">My tours</a>
+          <a href="#">Account</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="overview">
+      <h1>Find your next trip</h1>
+
+      <form class="filters" aria-label="Filter tours">
+        <label class="filters__field">
+          Difficulty
+          <select name="difficulty">
+            <option value="">Any difficulty</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="difficult">Difficult</option>
+          </select>
+        </label>
+        <label class="filters__field">
+          Length
+          <select name="length">
+            <option value="">Any length</option>
+            <option value="1-4">1–4 days</option>
+            <option value="5-7">5–7 days</option>
+            <option value="8-14">8–14 days</option>
+          </select>
+        </label>
+        <label class="filters__field">
+          Month
+          <select name="month">
+            <option value="">Any month</option>
+            <option value="2026-12">Dec 2026</option>
+            <option value="2027-01">Jan 2027</option>
+            <option value="2027-06">Jun 2027</option>
+            <option value="2027-07">Jul 2027</option>
+          </select>
+        </label>
+        <label class="filters__field">
+          Max price
+          <select name="maxPrice">
+            <option value="">Any price</option>
+            <option value="20000">Up to ₹20,000</option>
+            <option value="30000">Up to ₹30,000</option>
+            <option value="50000">Up to ₹50,000</option>
+          </select>
+        </label>
+        <label class="filters__field">
+          Sort
+          <select name="sort">
+            <option value="start-date">Start date, soonest first</option>
+            <option value="price-asc">Price, low to high</option>
+            <option value="price-desc">Price, high to low</option>
+          </select>
+        </label>
+        <button type="submit" class="button button--primary">Show tours</button>
+        <a class="filters__clear" href="#">Clear filters</a>
+      </form>
+
+      <p class="result-count">13 tours</p>
+
+      <ul class="tour-list">
+        <li class="tour-row">
+          <figure class="tour-row__photo-wrap">
+            <img
+              class="tour-row__photo"
+              src="../../../seed/img/tours/kerala-backwaters-and-hills-cover.jpg"
+              alt="A traditional houseboat on the Kerala backwaters"
+              width="160"
+              height="120"
+            />
+            <figcaption class="photo-credit">
+              Photo:
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Kerala_backwaters,_Houseboats,_India.jpg"
+                >Vyacheslav Argenberg</a
+              >,
+              <a href="https://creativecommons.org/licenses/by/4.0"
+                >CC BY 4.0</a
+              >
+            </figcaption>
+          </figure>
+          <div class="milestone" aria-hidden="true">
+            <span class="milestone__cap">5</span>
+            <span class="milestone__base">days</span>
+          </div>
+          <div class="tour-row__facts">
+            <h2 class="tour-row__name">
+              <a href="#">Kerala Backwaters and Hills</a>
+            </h2>
+            <p class="tour-row__region">Fort Kochi, Kerala</p>
+            <p class="difficulty difficulty--easy">
+              <span class="difficulty__peaks" aria-hidden="true">▲</span> Easy
+            </p>
+          </div>
+          <div class="tour-row__date">5 Dec 2026</div>
+          <div class="tour-row__price">From ₹24,999</div>
+        </li>
+
+        <li class="tour-row">
+          <figure class="tour-row__photo-wrap">
+            <img
+              class="tour-row__photo"
+              src="../../../seed/img/tours/kedarkantha-winter-trek-cover.jpg"
+              alt="Kedarkantha peak above a snow-covered ridge"
+              width="160"
+              height="120"
+            />
+            <figcaption class="photo-credit">
+              Photo:
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Kedarkantha_Peak.jpg"
+                >Kanthi Kiran</a
+              >,
+              <a href="https://creativecommons.org/licenses/by-sa/4.0"
+                >CC BY-SA 4.0</a
+              >
+            </figcaption>
+          </figure>
+          <div class="milestone" aria-hidden="true">
+            <span class="milestone__cap">6</span>
+            <span class="milestone__base">days</span>
+          </div>
+          <div class="tour-row__facts">
+            <h2 class="tour-row__name">
+              <a href="#">Kedarkantha Winter Trek</a>
+            </h2>
+            <p class="tour-row__region">Dehradun, Uttarakhand</p>
+            <p class="difficulty difficulty--medium">
+              <span class="difficulty__peaks" aria-hidden="true">▲▲</span>
+              Medium
+            </p>
+          </div>
+          <div class="tour-row__date">19 Dec 2026</div>
+          <div class="tour-row__price">From ₹14,999</div>
+        </li>
+
+        <li class="tour-row">
+          <figure class="tour-row__photo-wrap">
+            <img
+              class="tour-row__photo"
+              src="../../../seed/img/tours/ranthambore-tiger-safari-cover.jpg"
+              alt="A tiger in Ranthambore National Park"
+              width="160"
+              height="120"
+            />
+            <figcaption class="photo-credit">
+              Photo:
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Tiger_-_Ranthambore_National_Park_2012-06-04.jpg"
+                >Asif N Khan</a
+              >,
+              <a href="https://creativecommons.org/licenses/by/4.0"
+                >CC BY 4.0</a
+              >
+            </figcaption>
+          </figure>
+          <div class="milestone" aria-hidden="true">
+            <span class="milestone__cap">3</span>
+            <span class="milestone__base">days</span>
+          </div>
+          <div class="tour-row__facts">
+            <h2 class="tour-row__name">
+              <a href="#">Ranthambore Tiger Safari</a>
+            </h2>
+            <p class="tour-row__region">Sawai Madhopur, Rajasthan</p>
+            <p class="difficulty difficulty--easy">
+              <span class="difficulty__peaks" aria-hidden="true">▲</span> Easy
+            </p>
+          </div>
+          <div class="tour-row__date">17 Dec 2026</div>
+          <div class="tour-row__price">From ₹21,999</div>
+        </li>
+
+        <li class="tour-row">
+          <figure class="tour-row__photo-wrap">
+            <img
+              class="tour-row__photo"
+              src="../../../seed/img/tours/valley-of-flowers-trek-cover.jpg"
+              alt="Wildflowers in bloom at the Valley of Flowers National Park"
+              width="160"
+              height="120"
+            />
+            <figcaption class="photo-credit">
+              Photo:
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Valley_of_flowers_national_park,_Uttarakhand,_India_03_(edit).jpg"
+                >Rohit Sharma (edited by UnpetitproleX)</a
+              >,
+              <a href="https://creativecommons.org/licenses/by-sa/4.0"
+                >CC BY-SA 4.0</a
+              >
+            </figcaption>
+          </figure>
+          <div class="milestone" aria-hidden="true">
+            <span class="milestone__cap">6</span>
+            <span class="milestone__base">days</span>
+          </div>
+          <div class="tour-row__facts">
+            <h2 class="tour-row__name">
+              <a href="#">Valley of Flowers Trek</a>
+            </h2>
+            <p class="tour-row__region">Rishikesh, Uttarakhand</p>
+            <p class="difficulty difficulty--medium">
+              <span class="difficulty__peaks" aria-hidden="true">▲▲</span>
+              Medium
+            </p>
+          </div>
+          <div class="tour-row__date">10 Jul 2027</div>
+          <div class="tour-row__price">From ₹18,999</div>
+        </li>
+
+        <li class="tour-row">
+          <figure class="tour-row__photo-wrap">
+            <img
+              class="tour-row__photo"
+              src="../../../seed/img/tours/darjeeling-and-sikkim-tea-trails-cover.jpg"
+              alt="Tea plantations on the hills above Darjeeling"
+              width="160"
+              height="120"
+            />
+            <figcaption class="photo-credit">
+              Photo:
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Tea_plantation_Darjeeling.JPG"
+                >Joydeep</a
+              >,
+              <a href="https://creativecommons.org/licenses/by-sa/3.0"
+                >CC BY-SA 3.0</a
+              >
+            </figcaption>
+          </figure>
+          <div class="milestone" aria-hidden="true">
+            <span class="milestone__cap">7</span>
+            <span class="milestone__base">days</span>
+          </div>
+          <div class="tour-row__facts">
+            <h2 class="tour-row__name">
+              <a href="#">Darjeeling and Sikkim Tea Trails</a>
+            </h2>
+            <p class="tour-row__region">Darjeeling, West Bengal</p>
+            <p class="difficulty difficulty--easy">
+              <span class="difficulty__peaks" aria-hidden="true">▲</span> Easy
+            </p>
+          </div>
+          <div class="tour-row__date">20 Mar 2027</div>
+          <div class="tour-row__price">From ₹34,999</div>
+        </li>
+
+        <li class="tour-row">
+          <figure class="tour-row__photo-wrap">
+            <img
+              class="tour-row__photo"
+              src="../../../seed/img/tours/ladakh-high-passes-cover.jpg"
+              alt="Pangong Tso under a clear Ladakh sky"
+              width="160"
+              height="120"
+            />
+            <figcaption class="photo-credit">
+              Photo:
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Pangong_Tso_VM.JPG"
+                >Vishal Akki</a
+              >,
+              <a href="https://creativecommons.org/licenses/by-sa/3.0"
+                >CC BY-SA 3.0</a
+              >
+            </figcaption>
+          </figure>
+          <div class="milestone" aria-hidden="true">
+            <span class="milestone__cap">8</span>
+            <span class="milestone__base">days</span>
+          </div>
+          <div class="tour-row__facts">
+            <h2 class="tour-row__name">
+              <a href="tour.html">Ladakh High Passes</a>
+            </h2>
+            <p class="tour-row__region">Leh, Ladakh</p>
+            <p class="difficulty difficulty--difficult">
+              <span class="difficulty__peaks" aria-hidden="true">▲▲▲</span>
+              Difficult
+            </p>
+          </div>
+          <div class="tour-row__date">12 Jun 2027</div>
+          <div class="tour-row__price">From ₹42,999</div>
+        </li>
+      </ul>
+
+      <nav class="pagination" aria-label="Pagination">
+        <a class="pagination__prev" aria-disabled="true" href="#">Previous</a>
+        <span class="pagination__status">Page 1 of 3</span>
+        <a class="pagination__next" href="#">Next</a>
       </nav>
-    </div>
-  </header>
 
-  <main class="overview">
-    <h1>Find your next trip</h1>
+      <section class="empty-state-example" aria-label="Empty state example">
+        <h2 class="empty-state-example__label">Empty state (example)</h2>
+        <p class="empty-state">
+          No tours match these filters. <a href="#">Clear filters</a>
+        </p>
+      </section>
+    </main>
 
-    <form class="filters" aria-label="Filter tours">
-      <label class="filters__field">
-        Difficulty
-        <select name="difficulty">
-          <option value="">Any difficulty</option>
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="difficult">Difficult</option>
-        </select>
-      </label>
-      <label class="filters__field">
-        Length
-        <select name="length">
-          <option value="">Any length</option>
-          <option value="1-4">1–4 days</option>
-          <option value="5-7">5–7 days</option>
-          <option value="8-14">8–14 days</option>
-        </select>
-      </label>
-      <label class="filters__field">
-        Month
-        <select name="month">
-          <option value="">Any month</option>
-          <option value="2026-12">Dec 2026</option>
-          <option value="2027-01">Jan 2027</option>
-          <option value="2027-06">Jun 2027</option>
-          <option value="2027-07">Jul 2027</option>
-        </select>
-      </label>
-      <label class="filters__field">
-        Max price
-        <select name="maxPrice">
-          <option value="">Any price</option>
-          <option value="20000">Up to ₹20,000</option>
-          <option value="30000">Up to ₹30,000</option>
-          <option value="50000">Up to ₹50,000</option>
-        </select>
-      </label>
-      <label class="filters__field">
-        Sort
-        <select name="sort">
-          <option value="start-date">Start date, soonest first</option>
-          <option value="price-asc">Price, low to high</option>
-          <option value="price-desc">Price, high to low</option>
-        </select>
-      </label>
-      <button type="submit" class="button button--primary">Show tours</button>
-      <a class="filters__clear" href="#">Clear filters</a>
-    </form>
-
-    <p class="result-count">13 tours</p>
-
-    <ul class="tour-list">
-      <li class="tour-row">
-        <figure class="tour-row__photo-wrap">
-          <img
-            class="tour-row__photo"
-            src="../../../seed/img/tours/kerala-backwaters-and-hills-cover.jpg"
-            alt="A traditional houseboat on the Kerala backwaters"
-            width="160"
-            height="120"
-          />
-          <figcaption class="photo-credit">
-            Photo: <a href="https://commons.wikimedia.org/wiki/File:Kerala_backwaters,_Houseboats,_India.jpg">Vyacheslav Argenberg</a>,
-            <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>
-          </figcaption>
-        </figure>
-        <div class="milestone" aria-hidden="true">
-          <span class="milestone__cap">5</span>
-          <span class="milestone__base">days</span>
-        </div>
-        <div class="tour-row__facts">
-          <h2 class="tour-row__name"><a href="#">Kerala Backwaters and Hills</a></h2>
-          <p class="tour-row__region">Fort Kochi, Kerala</p>
-          <p class="difficulty difficulty--easy">
-            <span class="difficulty__peaks" aria-hidden="true">▲</span> Easy
-          </p>
-        </div>
-        <div class="tour-row__date">5 Dec 2026</div>
-        <div class="tour-row__price">From ₹24,999</div>
-      </li>
-
-      <li class="tour-row">
-        <figure class="tour-row__photo-wrap">
-          <img
-            class="tour-row__photo"
-            src="../../../seed/img/tours/kedarkantha-winter-trek-cover.jpg"
-            alt="Kedarkantha peak above a snow-covered ridge"
-            width="160"
-            height="120"
-          />
-          <figcaption class="photo-credit">
-            Photo: <a href="https://commons.wikimedia.org/wiki/File:Kedarkantha_Peak.jpg">Kanthi Kiran</a>,
-            <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>
-          </figcaption>
-        </figure>
-        <div class="milestone" aria-hidden="true">
-          <span class="milestone__cap">6</span>
-          <span class="milestone__base">days</span>
-        </div>
-        <div class="tour-row__facts">
-          <h2 class="tour-row__name"><a href="#">Kedarkantha Winter Trek</a></h2>
-          <p class="tour-row__region">Dehradun, Uttarakhand</p>
-          <p class="difficulty difficulty--medium">
-            <span class="difficulty__peaks" aria-hidden="true">▲▲</span> Medium
-          </p>
-        </div>
-        <div class="tour-row__date">19 Dec 2026</div>
-        <div class="tour-row__price">From ₹14,999</div>
-      </li>
-
-      <li class="tour-row">
-        <figure class="tour-row__photo-wrap">
-          <img
-            class="tour-row__photo"
-            src="../../../seed/img/tours/ranthambore-tiger-safari-cover.jpg"
-            alt="A tiger in Ranthambore National Park"
-            width="160"
-            height="120"
-          />
-          <figcaption class="photo-credit">
-            Photo: <a href="https://commons.wikimedia.org/wiki/File:Tiger_-_Ranthambore_National_Park_2012-06-04.jpg">Asif N Khan</a>,
-            <a href="https://creativecommons.org/licenses/by/4.0">CC BY 4.0</a>
-          </figcaption>
-        </figure>
-        <div class="milestone" aria-hidden="true">
-          <span class="milestone__cap">3</span>
-          <span class="milestone__base">days</span>
-        </div>
-        <div class="tour-row__facts">
-          <h2 class="tour-row__name"><a href="#">Ranthambore Tiger Safari</a></h2>
-          <p class="tour-row__region">Sawai Madhopur, Rajasthan</p>
-          <p class="difficulty difficulty--easy">
-            <span class="difficulty__peaks" aria-hidden="true">▲</span> Easy
-          </p>
-        </div>
-        <div class="tour-row__date">17 Dec 2026</div>
-        <div class="tour-row__price">From ₹21,999</div>
-      </li>
-
-      <li class="tour-row">
-        <figure class="tour-row__photo-wrap">
-          <img
-            class="tour-row__photo"
-            src="../../../seed/img/tours/valley-of-flowers-trek-cover.jpg"
-            alt="Wildflowers in bloom at the Valley of Flowers National Park"
-            width="160"
-            height="120"
-          />
-          <figcaption class="photo-credit">
-            Photo: <a href="https://commons.wikimedia.org/wiki/File:Valley_of_flowers_national_park,_Uttarakhand,_India_03_(edit).jpg">Rohit Sharma (edited by UnpetitproleX)</a>,
-            <a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>
-          </figcaption>
-        </figure>
-        <div class="milestone" aria-hidden="true">
-          <span class="milestone__cap">6</span>
-          <span class="milestone__base">days</span>
-        </div>
-        <div class="tour-row__facts">
-          <h2 class="tour-row__name"><a href="#">Valley of Flowers Trek</a></h2>
-          <p class="tour-row__region">Rishikesh, Uttarakhand</p>
-          <p class="difficulty difficulty--medium">
-            <span class="difficulty__peaks" aria-hidden="true">▲▲</span> Medium
-          </p>
-        </div>
-        <div class="tour-row__date">10 Jul 2027</div>
-        <div class="tour-row__price">From ₹18,999</div>
-      </li>
-
-      <li class="tour-row">
-        <figure class="tour-row__photo-wrap">
-          <img
-            class="tour-row__photo"
-            src="../../../seed/img/tours/darjeeling-and-sikkim-tea-trails-cover.jpg"
-            alt="Tea plantations on the hills above Darjeeling"
-            width="160"
-            height="120"
-          />
-          <figcaption class="photo-credit">
-            Photo: <a href="https://commons.wikimedia.org/wiki/File:Tea_plantation_Darjeeling.JPG">Joydeep</a>,
-            <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a>
-          </figcaption>
-        </figure>
-        <div class="milestone" aria-hidden="true">
-          <span class="milestone__cap">7</span>
-          <span class="milestone__base">days</span>
-        </div>
-        <div class="tour-row__facts">
-          <h2 class="tour-row__name"><a href="#">Darjeeling and Sikkim Tea Trails</a></h2>
-          <p class="tour-row__region">Darjeeling, West Bengal</p>
-          <p class="difficulty difficulty--easy">
-            <span class="difficulty__peaks" aria-hidden="true">▲</span> Easy
-          </p>
-        </div>
-        <div class="tour-row__date">20 Mar 2027</div>
-        <div class="tour-row__price">From ₹34,999</div>
-      </li>
-
-      <li class="tour-row">
-        <figure class="tour-row__photo-wrap">
-          <img
-            class="tour-row__photo"
-            src="../../../seed/img/tours/ladakh-high-passes-cover.jpg"
-            alt="Pangong Tso under a clear Ladakh sky"
-            width="160"
-            height="120"
-          />
-          <figcaption class="photo-credit">
-            Photo: <a href="https://commons.wikimedia.org/wiki/File:Pangong_Tso_VM.JPG">Vishal Akki</a>,
-            <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a>
-          </figcaption>
-        </figure>
-        <div class="milestone" aria-hidden="true">
-          <span class="milestone__cap">8</span>
-          <span class="milestone__base">days</span>
-        </div>
-        <div class="tour-row__facts">
-          <h2 class="tour-row__name"><a href="tour.html">Ladakh High Passes</a></h2>
-          <p class="tour-row__region">Leh, Ladakh</p>
-          <p class="difficulty difficulty--difficult">
-            <span class="difficulty__peaks" aria-hidden="true">▲▲▲</span> Difficult
-          </p>
-        </div>
-        <div class="tour-row__date">12 Jun 2027</div>
-        <div class="tour-row__price">From ₹42,999</div>
-      </li>
-    </ul>
-
-    <nav class="pagination" aria-label="Pagination">
-      <a class="pagination__prev" aria-disabled="true" href="#">Previous</a>
-      <span class="pagination__status">Page 1 of 3</span>
-      <a class="pagination__next" href="#">Next</a>
-    </nav>
-
-    <section class="empty-state-example" aria-label="Empty state example">
-      <h2 class="empty-state-example__label">Empty state (example)</h2>
-      <p class="empty-state">No tours match these filters. <a href="#">Clear filters</a></p>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <p>Prices in ₹, Indian Standard Time. See <a href="#">photo credits</a>.</p>
-  </footer>
-</body>
+    <footer class="site-footer">
+      <p>
+        Prices in ₹, Indian Standard Time. See <a href="#">photo credits</a>.
+      </p>
+    </footer>
+  </body>
 </html>

@@ -1,8 +1,14 @@
 import path from 'node:path';
 import { test } from '@playwright/test';
 
-const mockupsDir = path.resolve(import.meta.dirname, '../../docs/design/mockups');
-const screensDir = path.resolve(import.meta.dirname, '../../docs/design/screens');
+const mockupsDir = path.resolve(
+  import.meta.dirname,
+  '../../docs/design/mockups',
+);
+const screensDir = path.resolve(
+  import.meta.dirname,
+  '../../docs/design/screens',
+);
 
 const overviewUrl = `file://${path.join(mockupsDir, 'overview.html')}`;
 const tourUrl = `file://${path.join(mockupsDir, 'tour.html')}`;
