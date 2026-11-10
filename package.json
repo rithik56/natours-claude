@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:design": "playwright test",
     "smoke": "node scripts/smoke.ts",
     "ci:mongo": "node scripts/ci-mongo.ts",
     "lhci:collect": "lhci collect --config=lighthouserc.cjs",
