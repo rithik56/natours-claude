@@ -1062,7 +1062,7 @@ export function redactUrl(url: string): string;
 
 Logs are structured JSON (pino). `requestLogger(requestId)` puts the request ID on every line (D7). Passwords, tokens, cookies, authorization and `stripe-signature` values are redacted (SEC-11). Pass a URL through `redactUrl` before logging it, because pino's `redact` covers object fields and not URL strings.
 
-`src/proxy.ts` sets a fresh `x-request-id` and the nonce Content-Security-Policy on page and action requests. It replaces any request ID the client sent. Routes under `/api`, `/webhooks`, `/healthz` and `/readyz` bypass it, so `withApi` mints its own ID. The CSP is in ADR 0011. The static security headers are set in `next.config.ts`.
+`src/proxy.ts` sets a fresh `x-request-id` and the nonce Content-Security-Policy on page and action requests. It replaces any request ID the client sent. Routes under `/api`, `/webhooks`, `/healthz` and `/readyz` bypass it, so `withApi` mints its own ID. The CSP is in ADR 0011; ADR 0028 confirms the map-tile decision (D14) adds no host to it. The static security headers are set in `next.config.ts`.
 
 ## 9. Test helpers (plan.md 4.5, amended per QA-17)
 
