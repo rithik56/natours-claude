@@ -11,7 +11,7 @@
     {
       "number": "2",
       "name": "Design direction and approval gate",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "3",
@@ -47,7 +47,7 @@
   "next": {
     "command": "/gsd-progress --next",
     "label": "Advance to the next step",
-    "reason": "Phase 2 of 8 · 13% · executing"
+    "reason": "Phase 3 of 8 · 25% · executing"
   },
-  "updated_at": "2026-11-10T08:05:00.415Z"
+  "updated_at": "2026-11-10T10:21:20.536Z"
 }
