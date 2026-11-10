@@ -170,12 +170,29 @@ a {
   padding: 1rem;
 }
 
-.tour-row__photo {
+.tour-row__photo-wrap {
   grid-row: 1 / 3;
+  margin: 0;
+  width: 7.5rem;
+}
+
+.tour-row__photo {
+  display: block;
   width: 7.5rem;
   height: 5.625rem;
   object-fit: cover;
   border-radius: 4px;
+}
+
+.photo-credit {
+  font-size: 0.6875rem;
+  color: var(--slate);
+  margin-top: 0.25rem;
+  line-height: 1.3;
+}
+
+.photo-credit a {
+  color: inherit;
 }
 
 /* Milestone marker: a small stone shape with a coloured cap, carrying a
@@ -252,6 +269,48 @@ a {
   color: var(--neel);
 }
 
+/* Desktop (64em = the 12-column grid breakpoint, plan.md §9.2 Layout):
+   facts line up in columns — photo, milestone, name/region/difficulty,
+   then date above price in their own column — instead of stacking. */
+@media (min-width: 64em) {
+  .tour-row {
+    grid-template-columns: auto auto 1fr auto;
+    grid-template-rows: auto auto;
+  }
+
+  .tour-row__photo-wrap {
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+
+  .milestone {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+
+  .tour-row__facts {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    align-self: center;
+  }
+
+  .tour-row__date,
+  .tour-row__price {
+    grid-column: 4;
+    text-align: right;
+  }
+
+  .tour-row__date {
+    grid-row: 1;
+    align-self: end;
+  }
+
+  .tour-row__price {
+    grid-row: 2;
+    align-self: start;
+  }
+}
+
 .pagination {
   display: flex;
   align-items: center;
@@ -283,6 +342,271 @@ a {
 
 .empty-state {
   color: var(--slate);
+}
+
+/* Tour page */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.tour {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.tour__cover {
+  margin: 0 0 0.5rem;
+}
+
+.tour__cover-photo {
+  display: block;
+  width: 100%;
+  max-height: 24rem;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.tour__name {
+  margin-bottom: 1rem;
+}
+
+.facts-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 1rem;
+  background: var(--paper);
+  border-radius: 4px;
+}
+
+.facts-strip__item {
+  font-size: 0.9375rem;
+}
+
+.rating {
+  color: var(--neel);
+}
+
+/* Route + itinerary: the design's one bold, self-drawing element (plan.md
+   §9.2 "Signature element"). Stacked on mobile, side by side from 64em. */
+.route {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.route-map {
+  width: 100%;
+  height: auto;
+  background: var(--paper);
+  border-radius: 4px;
+}
+
+.route-map__outline {
+  fill: none;
+  stroke: var(--neel);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.route-map__line {
+  fill: none;
+  stroke: var(--highway-yellow);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.route-map__day circle {
+  fill: var(--highway-yellow);
+  stroke: var(--neel);
+  stroke-width: 2;
+}
+
+.route-map__day text {
+  fill: var(--neel);
+  font-weight: 700;
+  font-size: 11px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.itinerary {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.itinerary li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--whitewash);
+}
+
+.itinerary li:last-child {
+  border-bottom: none;
+}
+
+.itinerary__day {
+  display: inline-block;
+  min-width: 4.5rem;
+  font-weight: 600;
+  color: var(--neel);
+}
+
+@media (min-width: 64em) {
+  .route {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .route-map {
+    flex: 1 1 55%;
+  }
+
+  .itinerary {
+    flex: 1 1 45%;
+  }
+}
+
+.tour__description p {
+  max-width: 42rem;
+}
+
+.tour__guides,
+.tour__reviews,
+.tour__credits {
+  margin-bottom: 1.5rem;
+}
+
+.guides {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.guide {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.guide__role {
+  color: var(--slate);
+  font-size: 0.875rem;
+}
+
+.reviews {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review {
+  background: var(--paper);
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.review__rating {
+  margin: 0;
+  color: var(--highway-yellow);
+  letter-spacing: 0.125em;
+}
+
+.review__author {
+  margin: 0.25rem 0;
+  font-weight: 600;
+  color: var(--neel);
+}
+
+.review__text {
+  margin: 0;
+}
+
+.credits-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+/* Main column + booking panel, two columns from 64em (plan.md §9.2 ASCII
+   wireframe); the booking panel is a bar at the foot of the page on mobile. */
+.tour-layout {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 64em) {
+  .tour-layout {
+    grid-template-columns: 1fr 20rem;
+    align-items: start;
+  }
+}
+
+.booking-panel {
+  background: var(--paper);
+  border-radius: 4px;
+  padding: 1rem;
+  border-top: 1px solid var(--whitewash);
+}
+
+@media (min-width: 64em) {
+  .booking-panel {
+    position: sticky;
+    top: 1.5rem;
+    border-top: none;
+  }
+}
+
+.booking-panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.booking-panel__field select {
+  font: inherit;
+  padding: 0.5em;
+  border: 1px solid var(--slate);
+  border-radius: 4px;
+  background: var(--paper);
+  color: var(--slate);
+}
+
+.booking-panel__price {
+  font-weight: 600;
+  color: var(--neel);
+  margin: 0 0 0.75rem;
+}
+
+.booking-panel__cta {
+  width: 100%;
+  text-align: center;
 }
 
 /* Footer */
