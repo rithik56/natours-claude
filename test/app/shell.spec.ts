@@ -14,7 +14,13 @@ for (const width of [375, 1280]) {
       await expect(page.getByRole('banner')).toHaveCount(1);
       await expect(page.getByRole('main')).toHaveCount(1);
       await expect(page.getByRole('contentinfo')).toHaveCount(1);
-      await expect(page.getByRole('navigation')).toHaveCount(2);
+      // The header nav is collapsed below 64em, so count it with hidden nodes included.
+      await expect(
+        page.getByRole('navigation', { name: 'Main', includeHidden: true }),
+      ).toHaveCount(1);
+      await expect(
+        page.getByRole('navigation', { name: 'Footer' }),
+      ).toHaveCount(1);
     });
 
     test('[U9] the skip link is the first focusable element and moves focus to main', async ({
@@ -36,22 +42,17 @@ for (const width of [375, 1280]) {
     }) => {
       await page.goto('/');
 
-      const nav = page.getByRole('navigation', { name: 'Main' });
-      await expect(
-        nav.getByRole('link', { name: 'Tours', exact: true }),
-      ).toHaveAttribute('href', '/');
-      await expect(nav.getByRole('link', { name: 'My tours' })).toHaveAttribute(
-        'href',
-        '/my-tours',
-      );
-      await expect(nav.getByRole('link', { name: 'Log in' })).toHaveAttribute(
-        'href',
-        '/login',
-      );
-      await expect(nav.getByRole('link', { name: 'Sign up' })).toHaveAttribute(
-        'href',
-        '/signup',
-      );
+      // Hidden nodes are included because the nav is collapsed below 64em.
+      const nav = page.getByRole('navigation', {
+        name: 'Main',
+        includeHidden: true,
+      });
+      const link = (name: string, exact = false) =>
+        nav.getByRole('link', { name, exact, includeHidden: true });
+      await expect(link('Tours', true)).toHaveAttribute('href', '/');
+      await expect(link('My tours')).toHaveAttribute('href', '/my-tours');
+      await expect(link('Log in')).toHaveAttribute('href', '/login');
+      await expect(link('Sign up')).toHaveAttribute('href', '/signup');
     });
 
     test('[U4] the footer repeats the header nav and links to the photo credits', async ({
