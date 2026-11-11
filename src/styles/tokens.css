@@ -34,8 +34,12 @@
     /* Focus ring: Neel on light surfaces. */
     --color-focus: #1f2b4d;
 
-    /* Focus ring on a Neel surface (header, footer), where Neel would be invisible. */
+    /* Focus ring on a Neel surface (header), where Neel would be invisible. */
     --color-focus-on-accent: #f2b705;
+
+    /* Header band: Neel with Whitewash text, in both themes. */
+    --color-header-bg: #1f2b4d;
+    --color-header-text: #eef1f5;
 
     /* Type. Anek Latin comes from fonts.ts; display text sets it narrow. */
     --font-body: var(--font-anek-latin), system-ui, sans-serif;

@@ -1,0 +1,41 @@
+@layer components {
+  .toggle {
+    display: none;
+    align-items: center;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-width-hairline) solid currentcolor;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-header-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .toggle:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-on-accent);
+    outline-offset: var(--space-1);
+  }
+
+  .nav {
+    margin-left: auto;
+  }
+
+  /* Below 64em the nav takes its own line under the brand when it opens. */
+  @media (width < 64em) {
+    .toggle {
+      display: inline-flex;
+    }
+
+    .nav {
+      flex-basis: 100%;
+    }
+
+    /* Only with JavaScript: the list hides until the button opens it. */
+    .enhanced:not(.open) {
+      display: none;
+    }
+  }
+}

@@ -91,10 +91,13 @@ test.describe('themes', () => {
   }) => {
     await page.goto('/styleguide');
 
-    await page.keyboard.press('Tab');
+    // The shell's skip link and header links come before the styleguide's buttons in tab order, so focus the button directly.
+    const primary = page
+      .getByRole('button', { name: 'Book this tour' })
+      .first();
+    await primary.focus();
 
-    await expect(
-      page.getByRole('button', { name: 'Book this tour' }).first(),
-    ).toHaveCSS('outline-style', 'solid');
+    await expect(primary).toBeFocused();
+    await expect(primary).toHaveCSS('outline-style', 'solid');
   });
 });

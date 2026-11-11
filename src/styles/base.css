@@ -11,6 +11,13 @@
     min-height: 100dvh;
   }
 
+  /* The page column: at most 72rem wide, with the header and footer's inner padding. Components may override it. */
+  main {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-4);
+  }
+
   h1,
   h2,
   h3,
@@ -47,6 +54,11 @@
   :focus-visible {
     outline: var(--focus-ring-width) solid var(--color-focus);
     outline-offset: var(--space-1);
+  }
+
+  /* <main> is the skip link's target, not a control, so focus moves there without a ring round the page. */
+  main:focus {
+    outline: none;
   }
 }
 
