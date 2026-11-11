@@ -1,0 +1,86 @@
+@layer components {
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    padding: var(--space-2) var(--space-5);
+    border: var(--border-width-hairline) solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: var(--step-1);
+    font-weight: 600;
+    line-height: var(--line-height-heading);
+    text-align: center;
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--easing-standard),
+      border-color var(--duration-fast) var(--easing-standard);
+  }
+
+  /*
+   * The ring sits outside the button with a gap, so on the primary variant it
+   * never meets the yellow fill: Neel in the light theme, Highway yellow on
+   * the dark page.
+   */
+  .button:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--space-1);
+  }
+
+  .button:disabled {
+    border-color: transparent;
+    background: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
+    cursor: not-allowed;
+  }
+
+  /* Highway yellow is a fill only, and always carries Neel text. */
+  .primary {
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
+  }
+
+  .primary:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+  }
+
+  .primary:active:not(:disabled) {
+    background: var(--color-accent-active);
+  }
+
+  .secondary {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .secondary:hover:not(:disabled) {
+    background: var(--color-bg);
+    border-color: var(--color-text);
+  }
+
+  .secondary:active:not(:disabled) {
+    background: var(--color-bg);
+    border-color: var(--color-text);
+    text-decoration: underline;
+  }
+
+  .quiet {
+    background: transparent;
+    color: var(--color-text);
+    text-decoration: underline;
+  }
+
+  .quiet:disabled {
+    background: transparent;
+  }
+
+  .quiet:hover:not(:disabled) {
+    background: var(--color-surface);
+  }
+
+  .quiet:active:not(:disabled) {
+    background: var(--color-bg);
+  }
+}

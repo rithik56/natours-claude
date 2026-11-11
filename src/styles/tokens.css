@@ -1,0 +1,107 @@
+/*
+ * Design tokens (U1). This is the only file in src/ allowed to hold raw hex
+ * colours or raw px values; stylelint fails every other file that uses them.
+ * Values come from docs/design/direction.md. The dark theme redefines the same
+ * property names inside prefers-color-scheme (U2): no [data-theme] attribute.
+ * The one breakpoint is 64em, documented here only because custom properties
+ * cannot be used inside media queries.
+ */
+@layer tokens {
+  :root {
+    color-scheme: light dark;
+
+    /* Colour, by role. Light theme: Whitewash, Paper, Neel, Slate, Highway yellow, State green. */
+    --color-bg: #eef1f5;
+    --color-surface: #fafbfc;
+
+    /* Neel: headings and primary text. */
+    --color-text: #1f2b4d;
+
+    /* Slate: body text and secondary text. */
+    --color-text-muted: #45505e;
+    --color-border: #45505e;
+    --color-accent: #f2b705;
+    --color-accent-hover: #d9a304;
+    --color-accent-active: #c79400;
+
+    /* Highway yellow never carries text, so a yellow fill always carries Neel. */
+    --color-text-on-accent: #1f2b4d;
+    --color-success: #2f6b4f;
+    --color-error: #7e2c25;
+    --color-disabled-bg: #dde2ea;
+    --color-disabled-text: #6b7686;
+
+    /* Focus ring: Neel on light surfaces. */
+    --color-focus: #1f2b4d;
+
+    /* Focus ring on a Neel surface (header, footer), where Neel would be invisible. */
+    --color-focus-on-accent: #f2b705;
+
+    /* Type. Anek Latin comes from fonts.ts; display text sets it narrow. */
+    --font-body: var(--font-anek-latin), system-ui, sans-serif;
+    --font-display: var(--font-anek-latin), system-ui, sans-serif;
+    --font-stretch-display: 87.5%;
+    --font-weight-display: 600;
+    --line-height-body: 1.55;
+    --line-height-heading: 1.1;
+
+    /* Scale, ratio 1.25 from a 1rem body: step 1 is the body size. */
+    --step-0: 0.8rem;
+    --step-1: 1rem;
+    --step-2: 1.25rem;
+    --step-3: 1.563rem;
+    --step-4: 1.953rem;
+    --step-5: 2.441rem;
+    --step-6: 3.052rem;
+    --step-7: 3.815rem;
+
+    /* Spacing: 4, 8, 12, 16, 24, 32, 48, 64 and 96px at a 16px root. */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.5rem;
+    --space-6: 2rem;
+    --space-7: 3rem;
+    --space-8: 4rem;
+    --space-9: 6rem;
+
+    /* Radius: exactly two, each with one stated use. */
+
+    /* Small: buttons, form fields, rows. */
+    --radius-sm: 0.25rem;
+
+    /* Medium: panels and the confirm dialog. */
+    --radius-md: 0.5rem;
+
+    /* Elevation: the one shadow, for the confirm dialog and the toast only. */
+    --shadow-overlay: 0 0.5rem 1.5rem rgb(13 18 33 / 25%);
+
+    /* Lines and targets, in the same unit as the rest of the scale. */
+    --border-width-hairline: 1px;
+    --focus-ring-width: 0.1875rem;
+    --touch-target: 2.75rem;
+
+    /* Motion: everything is quick except the one signature route draw. */
+    --duration-fast: 150ms;
+    --duration-signature: 1.2s;
+    --easing-standard: ease-out;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-bg: #0d1221;
+      --color-surface: #141d33;
+      --color-text: #eef1f5;
+      --color-text-muted: #adb6c3;
+      --color-border: #adb6c3;
+      --color-success: #5fb98f;
+      --color-error: #d37269;
+      --color-disabled-bg: #1e2842;
+      --color-disabled-text: #7d8798;
+
+      /* Highway yellow on a dark background. The accent fill keeps Neel text. */
+      --color-focus: #f2b705;
+    }
+  }
+}
