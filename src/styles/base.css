@@ -1,0 +1,67 @@
+@layer base {
+  html {
+    background: var(--color-bg);
+    color: var(--color-text-muted);
+    font-family: var(--font-body);
+    font-size: 100%;
+    line-height: var(--line-height-body);
+  }
+
+  body {
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-text);
+    font-family: var(--font-display);
+    font-stretch: var(--font-stretch-display);
+    font-weight: var(--font-weight-display);
+    line-height: var(--line-height-heading);
+  }
+
+  h1 {
+    font-size: var(--step-4);
+  }
+
+  h2 {
+    font-size: var(--step-2);
+  }
+
+  h3 {
+    font-size: var(--step-1);
+  }
+
+  a {
+    color: var(--color-text);
+  }
+
+  /*
+   * Neel everywhere by default. A component on a Neel surface overrides
+   * outline-color with --color-focus-on-accent where it sets that surface.
+   */
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--space-1);
+  }
+}
+
+/*
+ * U25: the baseline every component inherits. It sits in the last layer so it
+ * outranks component animations without !important, which U3 forbids.
+ */
+@layer utilities {
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0s;
+      scroll-behavior: auto;
+      transition-duration: 0s;
+    }
+  }
+}
