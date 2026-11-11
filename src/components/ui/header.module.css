@@ -1,0 +1,54 @@
+@layer components {
+  .header {
+    background: var(--color-header-bg);
+    color: var(--color-header-text);
+  }
+
+  .inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-5);
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .brand {
+    color: var(--color-header-text);
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: var(--space-3) 0 0;
+    list-style: none;
+  }
+
+  .list a {
+    color: var(--color-header-text);
+  }
+
+  /* The ring is Highway yellow, because Neel would vanish against the Neel band (DES-20). */
+  .brand:focus-visible,
+  .list a:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-on-accent);
+    outline-offset: var(--space-1);
+  }
+
+  @media (width >= 64em) {
+    .list {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-5);
+      padding: 0;
+    }
+  }
+}
