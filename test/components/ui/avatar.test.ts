@@ -4,8 +4,11 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { Avatar } from '@/components/ui/avatar';
 
-const render = (props: { name: string; photoUrl?: string; size?: 'sm' | 'md' }) =>
-  renderToStaticMarkup(createElement(Avatar, props));
+const render = (props: {
+  name: string;
+  photoUrl?: string;
+  size?: 'sm' | 'md';
+}) => renderToStaticMarkup(createElement(Avatar, props));
 
 describe('[U4] Avatar', () => {
   it('shows the first letter of the first two words when there is no photo', () => {
@@ -25,7 +28,10 @@ describe('[U4] Avatar', () => {
   });
 
   it('renders the photo through next/image when a photoUrl is given, without initials', () => {
-    const markup = render({ name: 'Gaurav Bisht', photoUrl: '/photos/gaurav-bisht.jpg' });
+    const markup = render({
+      name: 'Gaurav Bisht',
+      photoUrl: '/photos/gaurav-bisht.jpg',
+    });
     expect(markup).toContain('<img');
     expect(markup).toContain('gaurav-bisht.jpg');
     expect(markup).not.toContain('>GB<');
@@ -33,6 +39,8 @@ describe('[U4] Avatar', () => {
 
   it('labels the whole avatar with the person name, so the initials need no name of their own', () => {
     expect(render({ name: 'Anjali Menon' })).toContain('role="img"');
-    expect(render({ name: 'Anjali Menon' })).toContain('aria-label="Anjali Menon"');
+    expect(render({ name: 'Anjali Menon' })).toContain(
+      'aria-label="Anjali Menon"',
+    );
   });
 });

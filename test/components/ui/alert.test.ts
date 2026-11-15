@@ -10,17 +10,20 @@ const render = (props: Parameters<typeof Alert>[0]) =>
 describe('[U4] Alert', () => {
   it('uses role alert for an error, the one urgent variant', () => {
     expect(
-      render({ variant: 'error', children: 'Check the highlighted fields and try again.' }),
+      render({
+        variant: 'error',
+        children: 'Check the highlighted fields and try again.',
+      }),
     ).toContain('role="alert"');
   });
 
   it('uses role status for success and info', () => {
-    expect(render({ variant: 'success', children: 'Your review is posted.' })).toContain(
-      'role="status"',
-    );
-    expect(render({ variant: 'info', children: 'Prices include GST.' })).toContain(
-      'role="status"',
-    );
+    expect(
+      render({ variant: 'success', children: 'Your review is posted.' }),
+    ).toContain('role="status"');
+    expect(
+      render({ variant: 'info', children: 'Prices include GST.' }),
+    ).toContain('role="status"');
   });
 
   it('renders the caller message verbatim as its children', () => {
@@ -32,7 +35,11 @@ describe('[U4] Alert', () => {
   });
 
   it('accepts a role override, so a toast can keep its polite live region', () => {
-    const markup = render({ variant: 'error', role: 'status', children: 'Saved.' });
+    const markup = render({
+      variant: 'error',
+      role: 'status',
+      children: 'Saved.',
+    });
     expect(markup).toContain('role="status"');
     expect(markup).not.toContain('role="alert"');
   });
