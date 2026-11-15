@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef } from 'react';
+import { fieldErrorProps } from './field-error';
 import styles from './text-field.module.css';
 
 type TextFieldProps = {
@@ -14,14 +15,15 @@ export function TextField({
   name,
   errorMessage,
   'aria-describedby': describedBy,
-  'aria-invalid': ariaInvalid,
+  'aria-invalid': invalid,
   ...rest
 }: TextFieldProps) {
-  const errorId = `${name}-error`;
-  const describedByIds =
-    [describedBy, errorMessage ? errorId : undefined]
-      .filter(Boolean)
-      .join(' ') || undefined;
+  const { errorId, ariaInvalid, ariaDescribedBy } = fieldErrorProps({
+    name,
+    errorMessage,
+    describedBy,
+    invalid,
+  });
 
   return (
     <div className={styles.field}>
@@ -33,8 +35,8 @@ export function TextField({
         id={name}
         name={name}
         className={styles.input}
-        aria-invalid={errorMessage ? true : ariaInvalid}
-        aria-describedby={describedByIds}
+        aria-invalid={ariaInvalid}
+        aria-describedby={ariaDescribedBy}
       />
       {errorMessage ? (
         <p id={errorId} role="alert" className={styles.error}>
