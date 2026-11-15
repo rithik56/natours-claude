@@ -79,8 +79,7 @@
     outline-offset: var(--space-1);
   }
 
-  .booked,
-  .empty {
+  .booked {
     margin: 0;
     color: var(--color-text);
     line-height: var(--line-height-body);

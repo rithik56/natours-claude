@@ -11,22 +11,30 @@ for (const width of [375, 1280]) {
       page,
     }) => {
       await page.goto('/styleguide');
+      // The review form section also holds star inputs, so scope to this section.
+      const section = page.getByRole('region', { name: 'Star rating' });
 
       await expect(
-        page.getByRole('radiogroup', { name: 'Rating' }),
+        section.getByRole('radiogroup', { name: 'Rating' }),
       ).toBeVisible();
       for (let stars = 1; stars <= 5; stars += 1) {
         const label = stars === 1 ? '1 star' : `${stars} stars`;
-        await expect(page.getByRole('radio', { name: label })).toHaveCount(1);
+        await expect(section.getByRole('radio', { name: label })).toHaveCount(
+          1,
+        );
       }
-      await expect(page.getByRole('radio', { name: '3 stars' })).toBeChecked();
+      await expect(
+        section.getByRole('radio', { name: '3 stars' }),
+      ).toBeChecked();
     });
 
     test('[U14] Tab leaves and re-enters the group on the checked star', async ({
       page,
     }) => {
       await page.goto('/styleguide');
-      const checked = page.getByRole('radio', { name: '3 stars' });
+      // The review form section also holds star inputs, so scope to this section.
+      const section = page.getByRole('region', { name: 'Star rating' });
+      const checked = section.getByRole('radio', { name: '3 stars' });
 
       await checked.focus();
       await page.keyboard.press('Shift+Tab');
@@ -37,7 +45,9 @@ for (const width of [375, 1280]) {
 
     test('[U14] Space checks the focused star', async ({ page }) => {
       await page.goto('/styleguide');
-      const one = page.getByRole('radio', { name: '1 star' });
+      // The review form section also holds star inputs, so scope to this section.
+      const section = page.getByRole('region', { name: 'Star rating' });
+      const one = section.getByRole('radio', { name: '1 star' });
 
       await one.focus();
       await page.keyboard.press('Space');
@@ -50,9 +60,11 @@ for (const width of [375, 1280]) {
       page,
     }) => {
       await page.goto('/styleguide');
-      const one = page.getByRole('radio', { name: '1 star' });
-      const two = page.getByRole('radio', { name: '2 stars' });
-      const five = page.getByRole('radio', { name: '5 stars' });
+      // The review form section also holds star inputs, so scope to this section.
+      const section = page.getByRole('region', { name: 'Star rating' });
+      const one = section.getByRole('radio', { name: '1 star' });
+      const two = section.getByRole('radio', { name: '2 stars' });
+      const five = section.getByRole('radio', { name: '5 stars' });
 
       await one.focus();
       await page.keyboard.press('ArrowRight');

@@ -64,7 +64,7 @@ for (const width of [375, 1280]) {
       await expect(panel.getByRole('button')).toHaveCount(0);
     });
 
-    test('[U4] state 4: no future dates shows the empty message and nothing else', async ({
+    test('[U4] state 4: no future dates shows the empty state, with a link to other tours and no date or button', async ({
       page,
     }) => {
       await page.goto('/styleguide');
@@ -73,6 +73,10 @@ for (const width of [375, 1280]) {
       await expect(
         panel.getByText('No upcoming start dates for this tour.'),
       ).toBeVisible();
+      // The empty state names the one action that resolves it: a link to the tours, not a button.
+      await expect(
+        panel.getByRole('link', { name: 'See other tours' }),
+      ).toHaveAttribute('href', '/');
       await expect(panel.getByRole('combobox')).toHaveCount(0);
       await expect(panel.getByRole('button')).toHaveCount(0);
     });
