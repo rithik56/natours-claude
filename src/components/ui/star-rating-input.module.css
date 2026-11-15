@@ -1,0 +1,76 @@
+@layer components {
+  .fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .legend {
+    padding: 0;
+    margin-bottom: var(--space-2);
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  .group {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+
+  .option {
+    position: relative;
+    display: inline-flex;
+  }
+
+  /*
+   * The native radio is hidden by size and opacity, not display: none, so it
+   * stays in the tab order and keeps the arrow-key behaviour of the group.
+   */
+  .input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    color: var(--color-border);
+    cursor: pointer;
+  }
+
+  .glyph {
+    font-size: var(--step-3);
+    line-height: 1;
+  }
+
+  /* The text is kept for screen readers and hidden on screen. */
+  .text {
+    position: absolute;
+    width: 0.0625rem;
+    height: 0.0625rem;
+    margin: -0.0625rem;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .input:focus-visible + .label {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--space-1);
+  }
+
+  /* A chosen star and every star before it fill in, with no script. */
+  .option:has(.input:checked) .label,
+  .option:has(~ .option .input:checked) .label {
+    color: var(--color-accent);
+  }
+}
