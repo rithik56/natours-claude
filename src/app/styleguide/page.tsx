@@ -8,9 +8,11 @@ import { CheckboxSection } from './sections/checkbox-section';
 import { ConfirmDialogSection } from './sections/confirm-dialog-section';
 import { DifficultySymbolSection } from './sections/difficulty-symbol-section';
 import { FileInputSection } from './sections/file-input-section';
+import { GuideItemSection } from './sections/guide-item-section';
 import { LinkSection } from './sections/link-section';
 import { MapFrameSection } from './sections/map-frame-section';
 import { PriceSection } from './sections/price-section';
+import { ReviewItemSection } from './sections/review-item-section';
 import { SelectSection } from './sections/select-section';
 import { ShellSection } from './sections/shell-section';
 import { StarRatingSection } from './sections/star-rating-section';
@@ -42,6 +44,8 @@ export default function StyleguidePage() {
       <FileInputSection />
       <StartDateSelectSection />
       <StarRatingSection />
+      <ReviewItemSection />
+      <GuideItemSection />
     </div>
   );
 }
