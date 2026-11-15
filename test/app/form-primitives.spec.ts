@@ -75,8 +75,9 @@ for (const width of [375, 1280]) {
         exact: true,
       });
       await expect(box).not.toBeChecked();
+      // The native input covers the whole label, so a click on the label reaches it.
       await section
-        .getByText('Show only Himalayan tours', { exact: true })
+        .locator('label', { hasText: 'Show only Himalayan tours' })
         .click();
       await expect(box).toBeChecked();
     });

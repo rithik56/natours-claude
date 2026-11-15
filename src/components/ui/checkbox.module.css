@@ -1,0 +1,85 @@
+@layer components {
+  /* The whole label is the target: at least the touch target square, with the text beside the box. */
+  .field {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    padding-inline: var(--space-2);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  /* Covers the label, so a click or tap anywhere on the target reaches the real checkbox. */
+  .input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
+
+  .box {
+    position: relative;
+    flex: none;
+    width: var(--space-5);
+    height: var(--space-5);
+    border: var(--border-width-hairline) solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+  }
+
+  /* The tick is drawn with borders, so it needs no image and no raw colour. */
+  .box::after {
+    content: '';
+    position: absolute;
+    top: var(--space-1);
+    left: var(--space-2);
+    display: none;
+    width: var(--space-2);
+    height: var(--space-3);
+    border: solid var(--color-text);
+    border-width: 0 var(--focus-ring-width) var(--focus-ring-width) 0;
+    transform: rotate(45deg);
+  }
+
+  .input:checked + .box {
+    border-color: var(--color-text);
+    background: var(--color-accent);
+  }
+
+  .input:checked + .box::after {
+    display: block;
+  }
+
+  .input:focus-visible + .box {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--space-1);
+  }
+
+  .label {
+    font-size: var(--step-1);
+    line-height: var(--line-height-body);
+  }
+
+  .input:disabled ~ .label {
+    color: var(--color-disabled-text);
+  }
+
+  .input:disabled + .box {
+    border-color: transparent;
+    background: var(--color-disabled-bg);
+  }
+
+  .input:disabled + .box::after {
+    border-color: var(--color-disabled-text);
+  }
+
+  .field:has(.input:disabled) {
+    cursor: not-allowed;
+  }
+}

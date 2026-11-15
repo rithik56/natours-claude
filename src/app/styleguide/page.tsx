@@ -1,7 +1,9 @@
 import { getConfig } from '@/server/config';
 import { loadStyleguidePage } from './gate';
 import { ButtonSection } from './sections/button-section';
+import { CheckboxSection } from './sections/checkbox-section';
 import { LinkSection } from './sections/link-section';
+import { SelectSection } from './sections/select-section';
 import { ShellSection } from './sections/shell-section';
 import { TextFieldSection } from './sections/text-field-section';
 import styles from './styleguide.module.css';
@@ -15,6 +17,8 @@ export default function StyleguidePage() {
       <ButtonSection />
       <LinkSection />
       <TextFieldSection />
+      <CheckboxSection />
+      <SelectSection />
       <ShellSection />
     </div>
   );
