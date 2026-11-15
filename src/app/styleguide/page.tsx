@@ -1,6 +1,8 @@
 import { getConfig } from '@/server/config';
 import { loadStyleguidePage } from './gate';
 import { ButtonSection } from './sections/button-section';
+import { DifficultySymbolSection } from './sections/difficulty-symbol-section';
+import { PriceSection } from './sections/price-section';
 import { ShellSection } from './sections/shell-section';
 import styles from './styleguide.module.css';
 
@@ -11,6 +13,8 @@ export default function StyleguidePage() {
     <div className={styles.page}>
       <h1>Styleguide</h1>
       <ButtonSection />
+      <PriceSection />
+      <DifficultySymbolSection />
       <ShellSection />
     </div>
   );
