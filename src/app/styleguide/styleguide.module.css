@@ -5,8 +5,75 @@
     padding: var(--space-5) var(--space-4) var(--space-8);
   }
 
+  .title {
+    margin-bottom: var(--space-4);
+  }
+
+  /* Sections stack below 64em with the nav above them; from 64em the nav sits beside them. */
+  .layout {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  .nav {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .link {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--touch-target);
+    color: var(--color-text);
+    text-decoration-line: underline;
+    text-decoration-thickness: var(--border-width-hairline);
+    text-underline-offset: var(--space-1);
+    border-radius: var(--radius-sm);
+  }
+
+  .link:hover {
+    text-decoration-thickness: var(--focus-ring-width);
+  }
+
+  .content {
+    min-inline-size: 0;
+  }
+
   .section {
     margin-top: var(--space-6);
+  }
+
+  .content > .section:first-child {
+    margin-top: 0;
+  }
+
+  @media (width >= 64em) {
+    .layout {
+      grid-template-columns: 14rem minmax(0, 1fr);
+      align-items: start;
+    }
+
+    .nav {
+      position: sticky;
+      top: var(--space-5);
+      max-block-size: calc(100vh - var(--space-7));
+      overflow-y: auto;
+    }
+
+    .links {
+      flex-direction: column;
+      gap: 0;
+    }
   }
 
   .note {
