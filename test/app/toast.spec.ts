@@ -6,7 +6,9 @@ const region = (page: import('@playwright/test').Page) =>
   page.locator('[aria-live="polite"]', { hasText: message });
 
 test.describe('toast', () => {
-  test('[U25] the toast auto-dismisses after its duration', async ({ page }) => {
+  test('[U25] the toast auto-dismisses after its duration', async ({
+    page,
+  }) => {
     await page.goto('/styleguide');
 
     await expect(region(page)).toBeVisible();

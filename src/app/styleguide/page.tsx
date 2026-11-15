@@ -6,6 +6,7 @@ import { ButtonSection } from './sections/button-section';
 import { DifficultySymbolSection } from './sections/difficulty-symbol-section';
 import { PriceSection } from './sections/price-section';
 import { ShellSection } from './sections/shell-section';
+import { ToastSection } from './sections/toast-section';
 import styles from './styleguide.module.css';
 
 export default function StyleguidePage() {
@@ -19,6 +20,7 @@ export default function StyleguidePage() {
       <DifficultySymbolSection />
       <AvatarSection />
       <AlertSection />
+      <ToastSection />
       <ShellSection />
     </div>
   );
