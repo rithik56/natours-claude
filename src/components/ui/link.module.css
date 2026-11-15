@@ -1,0 +1,20 @@
+@layer components {
+  /* Internal and external links share one look, so the two branches never drift apart. */
+  .link {
+    color: var(--color-text);
+    text-decoration-line: underline;
+    text-decoration-thickness: var(--border-width-hairline);
+    text-underline-offset: var(--space-1);
+    border-radius: var(--radius-sm);
+  }
+
+  .link:hover {
+    text-decoration-thickness: var(--focus-ring-width);
+  }
+
+  /* Links mostly sit on light surfaces, so the ring uses the default Neel focus colour. */
+  .link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--space-1);
+  }
+}

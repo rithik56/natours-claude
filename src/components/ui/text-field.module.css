@@ -1,0 +1,48 @@
+@layer components {
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-width: 24rem;
+  }
+
+  .label {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  .input {
+    min-height: var(--touch-target);
+    padding: var(--space-2) var(--space-3);
+    border: var(--border-width-hairline) solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--step-1);
+    line-height: var(--line-height-body);
+  }
+
+  .input:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--space-1);
+  }
+
+  /* An error keeps the input readable and marks it with the error colour, never colour alone: the message is shown too. */
+  .input[aria-invalid='true'] {
+    border-color: var(--color-error);
+  }
+
+  .input:disabled {
+    border-color: transparent;
+    background: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
+    cursor: not-allowed;
+  }
+
+  .error {
+    color: var(--color-error);
+    font-size: var(--step-1);
+    font-weight: 600;
+  }
+}
