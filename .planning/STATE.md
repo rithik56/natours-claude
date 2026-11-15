@@ -6,10 +6,10 @@ current_phase_name: Design system and app shell
 current_plan: Phase verification pending
 status: executing
 stopped_at: Completed plan 03-10; all 10 plans of phase 03 executed, phase verification and design gate pending
-last_updated: "2026-11-15T15:40:02.198Z"
+last_updated: "2026-11-15T16:05:54.814Z"
 last_activity: 2026-11-15
 last_activity_desc: Phase 02 complete, transitioned to Phase 3
-state_head: 46d23e03df52ce2e210785a5909ed6b34d5c35a6
+state_head: ca055e323fcdef6cef55a49699cf86a1b895f801
 progress:
   total_phases: 8
   completed_phases: 2
@@ -33,7 +33,7 @@ Phase: 03 (Design system and app shell) — EXECUTING
 Current Plan: All 10 plans executed; phase verification and design-gate review pending
 Total Plans in Phase: 10
 Status: Plans 03-01 to 03-10 complete
-Last activity: 2026-11-15 — Plan 03-10 merged into main (styleguide assembled, acceptance sweep passed)
+Last activity: 2026-11-15 — Design gate approved; completed quick task 261115-tjm (copy.md additions, facts strip wrapping)
 
 Progress: [███░░░░░░░] 25%
 
@@ -128,6 +128,12 @@ None yet.
 - [Phase 8] D10 makes the seed refuse to run when `NODE_ENV=production`, but the demo needs seeded data. Needs an ADR.
 - [Phase 8] SES SMTP on the AWS Free plan is unconfirmed. Any free-tier SMTP provider is the fallback.
 - [General] Root CLAUDE.md still describes the agent-team rules that GSD replaces (DEL-23). `create-next-app` refuses to run in this repository (DEL-24). Both are handled in Phase 1.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 261115-tjm | Phase 03 design gate follow-ups: add missing product strings to copy.md and fix FactsStrip mobile wrapping | 2026-11-15 | ca055e3 | [261115-tjm-phase-03-design-gate-follow-ups-add-miss](./quick/261115-tjm-phase-03-design-gate-follow-ups-add-miss/) |
 
 ## Deferred Items
 
