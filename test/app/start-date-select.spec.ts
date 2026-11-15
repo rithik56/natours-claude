@@ -9,9 +9,11 @@ for (const width of [375, 1280]) {
       page,
     }) => {
       await page.goto('/styleguide');
-      const select = page.locator('select[name="startDate"]');
+      // The booking panel section also renders a startDate select, so scope to this section.
+      const section = page.getByRole('region', { name: 'Start date select' });
+      const select = section.locator('select[name="startDate"]');
 
-      await expect(page.getByLabel('Start date').first()).toBeVisible();
+      await expect(section.getByLabel('Start date').first()).toBeVisible();
       await expect(select.locator('option')).toHaveText([
         '10 Jul 2027',
         '31 Jul 2027',
