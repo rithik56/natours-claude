@@ -1,0 +1,29 @@
+@layer components {
+  .strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--color-text-muted);
+    font-size: var(--step-1);
+  }
+
+  .fact {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  @media (width >= 64em) {
+    .strip {
+      flex-wrap: nowrap;
+      gap: var(--space-2) var(--space-6);
+    }
+
+    .fact {
+      white-space: nowrap;
+    }
+  }
+}

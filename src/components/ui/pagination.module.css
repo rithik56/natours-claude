@@ -1,0 +1,26 @@
+@layer components {
+  .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-5);
+    margin-top: var(--space-6);
+    color: var(--color-text-muted);
+  }
+
+  /* 44px tall, so each control is a touch target as well as a link. */
+  .control {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    color: var(--color-text);
+  }
+
+  .disabled {
+    color: var(--color-disabled-text);
+  }
+
+  .status {
+    margin-inline-start: auto;
+  }
+}
