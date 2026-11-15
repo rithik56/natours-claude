@@ -12,7 +12,7 @@ export function TourRowSection() {
         One tour in the overview list. The whole row is a link. Below 64em the
         date and price sit under the name; at 64em and up they sit on the right.
       </p>
-      <ul>
+      <ul className={styles.rows}>
         <TourRow
           name="Valley of Flowers Trek"
           location="Rishikesh, Uttarakhand"

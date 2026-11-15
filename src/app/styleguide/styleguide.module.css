@@ -81,6 +81,13 @@
     margin-top: var(--space-2);
   }
 
+  /* A bare list of rows, with the browser's list indent removed so the rows line up with the section heading. */
+  .rows {
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
   .states {
     display: grid;
     gap: var(--space-4);
