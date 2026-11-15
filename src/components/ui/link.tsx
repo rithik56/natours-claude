@@ -13,7 +13,9 @@ type LinkProps = Omit<
 const EXTERNAL = /^https?:\/\//;
 
 // Internal routes go through next/link for client-side navigation; external URLs get a plain anchor.
-export function Link({ href, ...rest }: LinkProps) {
+// The caller's class sits beside the Link's own, so a row or a control can restyle the anchor it renders.
+export function Link({ href, className, ...rest }: LinkProps) {
+  const classes = className ? `${styles.link} ${className}` : styles.link;
   if (EXTERNAL.test(href)) {
     return (
       <a
@@ -21,9 +23,9 @@ export function Link({ href, ...rest }: LinkProps) {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={styles.link}
+        className={classes}
       />
     );
   }
-  return <NextLink {...rest} href={href} className={styles.link} />;
+  return <NextLink {...rest} href={href} className={classes} />;
 }

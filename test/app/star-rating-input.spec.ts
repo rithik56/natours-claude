@@ -85,13 +85,17 @@ for (const width of [375, 1280]) {
     }) => {
       await page.goto('/styleguide');
 
+      // Scoped to the Star rating section: the facts strip section also shows a 4.5 rating.
+      const section = page.getByRole('region', { name: 'Star rating' });
       await expect(
-        page.getByRole('img', { name: 'Rated 4.5 out of 5' }),
+        section.getByRole('img', { name: 'Rated 4.5 out of 5' }),
       ).toBeVisible();
-      await expect(page.getByText('4.5', { exact: true })).toHaveCount(1);
+      await expect(section.getByText('4.5', { exact: true })).toHaveCount(1);
       // The display is not operable, so it contains no radio controls.
       await expect(
-        page.getByRole('img', { name: 'Rated 4.5 out of 5' }).locator('input'),
+        section
+          .getByRole('img', { name: 'Rated 4.5 out of 5' })
+          .locator('input'),
       ).toHaveCount(0);
     });
   });
