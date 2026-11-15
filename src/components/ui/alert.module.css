@@ -1,0 +1,45 @@
+@layer components {
+  /* --tone is set per variant; the message text stays --color-text, so only the edge and glyph carry colour. */
+  .alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    border-inline-start: 0.25rem solid var(--tone);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .success {
+    --tone: var(--color-success);
+  }
+
+  .error {
+    --tone: var(--color-error);
+  }
+
+  .info {
+    --tone: var(--color-text);
+  }
+
+  .glyph {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--step-2);
+    height: var(--step-2);
+    border: var(--border-width-hairline) solid var(--tone);
+    border-radius: 50%;
+    color: var(--tone);
+    font-size: var(--step-0);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .message {
+    min-width: 0;
+    padding-top: 0.125rem;
+  }
+}

@@ -1,0 +1,56 @@
+@layer components {
+  /* The card takes the shadow and corners; the Alert inside keeps its own tone and surface. */
+  .toast {
+    display: flex;
+    align-items: stretch;
+    max-width: 30rem;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-overlay);
+    animation: toast-in var(--duration-fast) var(--easing-standard);
+  }
+
+  .body {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .close {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--touch-target);
+    min-height: var(--touch-target);
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    font-size: var(--step-2);
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .close:hover {
+    background: var(--color-bg);
+  }
+
+  /* The entrance is at most --duration-fast (150ms), inside the 200ms cap (U25). */
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--space-2));
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast {
+      animation: none;
+    }
+  }
+}

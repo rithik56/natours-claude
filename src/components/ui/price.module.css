@@ -1,0 +1,9 @@
+@layer components {
+  /* Tabular figures keep amounts lined up in the tour rows' price column (direction.md). */
+  .price {
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
