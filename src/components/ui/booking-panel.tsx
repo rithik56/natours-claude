@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { formatDate, formatPrice } from '@/lib/format';
 import { Button } from './button';
+import { EmptyState } from './empty-state';
 import styles from './booking-panel.module.css';
 
 // Dates are calendar days in India Standard Time, as YYYY-MM-DD strings from the seed data.
@@ -84,7 +85,10 @@ export function BookingPanel(props: BookingPanelProps) {
         </p>
       ) : null}
       {props.status === 'no-dates' ? (
-        <p className={styles.empty}>No upcoming start dates for this tour.</p>
+        <EmptyState
+          message="No upcoming start dates for this tour."
+          action={{ label: 'See other tours', href: '/' }}
+        />
       ) : null}
     </aside>
   );

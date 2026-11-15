@@ -7,6 +7,7 @@ import { ButtonSection } from './sections/button-section';
 import { CheckboxSection } from './sections/checkbox-section';
 import { ConfirmDialogSection } from './sections/confirm-dialog-section';
 import { DifficultySymbolSection } from './sections/difficulty-symbol-section';
+import { EmptyStateSection } from './sections/empty-state-section';
 import { FileInputSection } from './sections/file-input-section';
 import { GuideItemSection } from './sections/guide-item-section';
 import { LinkSection } from './sections/link-section';
@@ -16,6 +17,7 @@ import { ReviewFormSection } from './sections/review-form-section';
 import { ReviewItemSection } from './sections/review-item-section';
 import { SelectSection } from './sections/select-section';
 import { ShellSection } from './sections/shell-section';
+import { SkeletonSection } from './sections/skeleton-section';
 import { StarRatingSection } from './sections/star-rating-section';
 import { StartDateSelectSection } from './sections/start-date-select-section';
 import { TextFieldSection } from './sections/text-field-section';
@@ -48,6 +50,8 @@ export default function StyleguidePage() {
       <ReviewItemSection />
       <ReviewFormSection />
       <GuideItemSection />
+      <EmptyStateSection />
+      <SkeletonSection />
     </div>
   );
 }
