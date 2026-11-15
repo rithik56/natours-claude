@@ -1,6 +1,7 @@
 import { getConfig } from '@/server/config';
 import { loadStyleguidePage } from './gate';
 import { ButtonSection } from './sections/button-section';
+import { FileInputSection } from './sections/file-input-section';
 import { ShellSection } from './sections/shell-section';
 import styles from './styleguide.module.css';
 
@@ -12,6 +13,7 @@ export default function StyleguidePage() {
       <h1>Styleguide</h1>
       <ButtonSection />
       <ShellSection />
+      <FileInputSection />
     </div>
   );
 }
