@@ -1,0 +1,38 @@
+@layer components {
+  .rating {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .peaks {
+    display: inline-flex;
+    gap: var(--space-1);
+  }
+
+  .peak {
+    color: var(--color-border);
+    font-size: var(--step-2);
+    line-height: 1;
+  }
+
+  .peak[data-fill='full'] {
+    color: var(--color-accent);
+  }
+
+  /* A half star is one glyph filled to the midpoint, clipped to the glyph shape. */
+  .peak[data-fill='half'] {
+    background: linear-gradient(
+      to right,
+      var(--color-accent) 50%,
+      var(--color-border) 50%
+    );
+    background-clip: text;
+    color: transparent;
+  }
+
+  .value {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+}
