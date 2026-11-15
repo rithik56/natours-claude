@@ -54,6 +54,8 @@ These are the specific `fieldErrors` messages for the validation rules plan.md a
 |---|---|
 | Password 8–72 characters | "Password must be 8 to 72 characters." |
 | Required field left blank | "{Field name} is required." — e.g. "Email is required.", "Tour name is required." |
+| Start date not chosen | "Start date is required." |
+| Review comment left blank | "Review is required." |
 | Duplicate email on sign-up | "That email is already registered." |
 | Duplicate tour name | "A tour with that name already exists." |
 | Invalid email format | "Enter a valid email address." |
@@ -62,3 +64,68 @@ These are the specific `fieldErrors` messages for the validation rules plan.md a
 ## Credits (attribution wording)
 
 Seed photos are licensed CC BY, CC BY-SA or similar and require credit (U27). Each tour page's "Photo credits" section and the site-wide `/credits` page use this wording shape for every photo: "Photo by {author}, {licence}" with the author name and licence each linking out — to the photographer's source page and the licence text respectively. This matches the shape already used in the Phase 2 mockups (`docs/design/mockups/tour.html`, `docs/design/mockups/overview.html`), sourced from `seed/CREDITS.md`.
+
+## Component wording
+
+The `ui/` components render the strings below. They were approved at the Phase 3 design gate, and pages use them exactly (U20). A value in braces is filled in by the page: dates by `formatDate()` and prices by `formatPrice()`. The apostrophe in "You’re" is the typographic one (U+2019), as the booking panel renders it.
+
+### Booking panel and price
+
+| Where | Wording |
+|---|---|
+| Booking panel, traveller has booked this start date | "You’re booked for {date}." followed by the link "My tours", for example "You’re booked for 17 Jul 2027." |
+| Booking panel, no upcoming start dates | "No upcoming start dates for this tour." followed by the link "See other tours" |
+| Price beside a tour's start dates | "{price} per person", for example "₹42,999 per person" |
+
+### Empty states
+
+State the fact, then the one action, per the rule above.
+
+| Where | Wording |
+|---|---|
+| My tours, no upcoming tours | "No upcoming tours yet." followed by the link "See all tours" |
+| My tours, no past tours | "No past tours yet." followed by the link "See all tours" |
+
+### Reviews
+
+| Where | Wording |
+|---|---|
+| Star input, group label | "Rate this tour" |
+| Review form, comment label | "Your review" |
+| Review form, submit button | "Post review" |
+| Your own review, edit link | "Edit review" |
+| Your own review, delete button | "Delete review" |
+
+### Guides
+
+| Where | Wording |
+|---|---|
+| The guide who leads the tour | "Lead guide" |
+| Any other guide on the tour | "Guide" |
+
+### Forms and account
+
+| Where | Wording |
+|---|---|
+| File input for a tour photo, label | "Tour photo" |
+| File input, nothing chosen yet | "No photo chosen" |
+| Select, disabled, for a tour the traveller has already booked, label | "Tour already booked" |
+| Account, button that opens the deactivation dialog | "Deactivate account" |
+
+### Alerts and toasts
+
+| Where | Wording |
+|---|---|
+| Success alert | "Your changes are saved." |
+| Info alert about dates | "Start dates are shown in India Standard Time." |
+| Success toast after a review is posted | "Review posted for {tour name}.", for example "Review posted for Kerala Backwaters and Hills." |
+| Toast close button, accessible name (the visible mark is ×) | "Dismiss" |
+
+### Tour page, pagination and footer
+
+| Where | Wording |
+|---|---|
+| Facts strip, group size | "Up to {n} people", for example "Up to 14 people" |
+| Pagination, where the reader is | "Page {n} of {total}", for example "Page 1 of 3" |
+| Footer, copyright line | "© {year} Natours." with the current year, for example "© 2026 Natours." |
+| Link to the credits page | "Read the photo credits" |
