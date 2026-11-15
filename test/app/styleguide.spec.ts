@@ -30,11 +30,16 @@ for (const width of [375, 1280]) {
           ).toBeVisible();
         }
       }
+      // Scoped to the Button section: the booking panel section also has a Book this tour button.
+      const buttonSection = page.getByRole('region', { name: 'Button' });
       await expect(
-        page.getByRole('button', { name: 'Book this tour' }),
+        buttonSection.getByRole('button', { name: 'Book this tour' }),
       ).toHaveCount(5);
       await expect(
-        page.getByRole('button', { name: 'Book this tour', disabled: true }),
+        buttonSection.getByRole('button', {
+          name: 'Book this tour',
+          disabled: true,
+        }),
       ).toHaveCount(1);
     });
 

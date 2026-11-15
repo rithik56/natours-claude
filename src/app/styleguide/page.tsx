@@ -2,11 +2,14 @@ import { getConfig } from '@/server/config';
 import { loadStyleguidePage } from './gate';
 import { AlertSection } from './sections/alert-section';
 import { AvatarSection } from './sections/avatar-section';
+import { BookingPanelSection } from './sections/booking-panel-section';
 import { ButtonSection } from './sections/button-section';
 import { CheckboxSection } from './sections/checkbox-section';
+import { ConfirmDialogSection } from './sections/confirm-dialog-section';
 import { DifficultySymbolSection } from './sections/difficulty-symbol-section';
 import { FileInputSection } from './sections/file-input-section';
 import { LinkSection } from './sections/link-section';
+import { MapFrameSection } from './sections/map-frame-section';
 import { PriceSection } from './sections/price-section';
 import { SelectSection } from './sections/select-section';
 import { ShellSection } from './sections/shell-section';
@@ -32,6 +35,9 @@ export default function StyleguidePage() {
       <AvatarSection />
       <AlertSection />
       <ToastSection />
+      <MapFrameSection />
+      <BookingPanelSection />
+      <ConfirmDialogSection />
       <ShellSection />
       <FileInputSection />
       <StartDateSelectSection />
