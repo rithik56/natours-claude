@@ -12,6 +12,7 @@ import { GuideItemSection } from './sections/guide-item-section';
 import { LinkSection } from './sections/link-section';
 import { MapFrameSection } from './sections/map-frame-section';
 import { PriceSection } from './sections/price-section';
+import { ReviewFormSection } from './sections/review-form-section';
 import { ReviewItemSection } from './sections/review-item-section';
 import { SelectSection } from './sections/select-section';
 import { ShellSection } from './sections/shell-section';
@@ -45,6 +46,7 @@ export default function StyleguidePage() {
       <StartDateSelectSection />
       <StarRatingSection />
       <ReviewItemSection />
+      <ReviewFormSection />
       <GuideItemSection />
     </div>
   );
