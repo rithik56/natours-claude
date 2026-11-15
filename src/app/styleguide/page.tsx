@@ -1,5 +1,6 @@
 import { getConfig } from '@/server/config';
 import { loadStyleguidePage } from './gate';
+import { BookingPanelSection } from './sections/booking-panel-section';
 import { ButtonSection } from './sections/button-section';
 import { MapFrameSection } from './sections/map-frame-section';
 import { ShellSection } from './sections/shell-section';
@@ -13,6 +14,7 @@ export default function StyleguidePage() {
       <h1>Styleguide</h1>
       <ButtonSection />
       <MapFrameSection />
+      <BookingPanelSection />
       <ShellSection />
     </div>
   );
