@@ -71,6 +71,7 @@ for (const width of [360, 375, 414, 768]) {
 
       for (const { items } of strips) {
         const location = items[LOCATION];
+        if (!location) throw new Error('The strip has no location fact');
         const neighbours = items.filter((_, index) => index !== LOCATION);
         expect(
           neighbours.some((item) => overlapsVertically(location, item)),
