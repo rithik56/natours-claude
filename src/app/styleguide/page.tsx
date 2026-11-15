@@ -2,6 +2,7 @@ import { getConfig } from '@/server/config';
 import { loadStyleguidePage } from './gate';
 import { BookingPanelSection } from './sections/booking-panel-section';
 import { ButtonSection } from './sections/button-section';
+import { ConfirmDialogSection } from './sections/confirm-dialog-section';
 import { MapFrameSection } from './sections/map-frame-section';
 import { ShellSection } from './sections/shell-section';
 import styles from './styleguide.module.css';
@@ -15,6 +16,7 @@ export default function StyleguidePage() {
       <ButtonSection />
       <MapFrameSection />
       <BookingPanelSection />
+      <ConfirmDialogSection />
       <ShellSection />
     </div>
   );

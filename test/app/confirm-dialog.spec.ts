@@ -27,6 +27,8 @@ for (const width of [375, 1280]) {
     }) => {
       await page.goto('/styleguide');
       await page.getByRole('button', { name: TRIGGER, exact: true }).click();
+      // Checked first, so the hidden assertion below cannot pass on a dialog that never opened.
+      await expect(page.getByRole('dialog')).toBeVisible();
       await page.keyboard.press('Enter');
 
       await expect(page.getByRole('dialog')).toBeHidden();
@@ -51,6 +53,7 @@ for (const width of [375, 1280]) {
     }) => {
       await page.goto('/styleguide');
       await page.getByRole('button', { name: TRIGGER, exact: true }).click();
+      await expect(page.getByRole('dialog')).toBeVisible();
       await page.keyboard.press('Escape');
 
       await expect(page.getByRole('dialog')).toBeHidden();
