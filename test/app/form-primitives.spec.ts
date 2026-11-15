@@ -60,5 +60,108 @@ for (const width of [375, 1280]) {
       await expect(error).toBeVisible();
       await expect(error).toHaveAttribute('role', 'alert');
     });
+
+    test('[U4] a checkbox is a native checkbox that its label toggles', async ({
+      page,
+    }) => {
+      await page.goto('/styleguide');
+      const section = page.getByRole('region', {
+        name: 'Checkbox',
+        exact: true,
+      });
+
+      const box = section.getByRole('checkbox', {
+        name: 'Show only Himalayan tours',
+        exact: true,
+      });
+      await expect(box).not.toBeChecked();
+      await section
+        .getByText('Show only Himalayan tours', { exact: true })
+        .click();
+      await expect(box).toBeChecked();
+    });
+
+    test('[U4] a checkbox starts checked or disabled as its example shows', async ({
+      page,
+    }) => {
+      await page.goto('/styleguide');
+      const section = page.getByRole('region', {
+        name: 'Checkbox',
+        exact: true,
+      });
+
+      await expect(
+        section.getByRole('checkbox', {
+          name: 'Show tours with seats left',
+          exact: true,
+        }),
+      ).toBeChecked();
+      await expect(
+        section.getByRole('checkbox', {
+          name: 'Show only tours in Ladakh',
+          exact: true,
+        }),
+      ).toBeDisabled();
+    });
+
+    test('[U4] the checkbox label is at least 44 pixels square', async ({
+      page,
+    }) => {
+      await page.goto('/styleguide');
+      const section = page.getByRole('region', {
+        name: 'Checkbox',
+        exact: true,
+      });
+
+      const label = section.locator('label', {
+        hasText: 'Show only Himalayan tours',
+      });
+      const box = await label.boundingBox();
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+      expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
+    });
+
+    test('[U4] a select lists the seed tours and takes a choice', async ({
+      page,
+    }) => {
+      await page.goto('/styleguide');
+      const section = page.getByRole('region', {
+        name: 'Select',
+        exact: true,
+      });
+
+      const select = section.getByLabel('Tour', { exact: true });
+      await expect(select.locator('option')).toHaveText([
+        'Valley of Flowers Trek',
+        'Kedarkantha Winter Trek',
+        'Ladakh High Passes',
+        'Spiti Valley Star Gazer',
+      ]);
+      await select.selectOption({ label: 'Ladakh High Passes' });
+      await expect(select).toHaveValue('ladakh-high-passes');
+    });
+
+    test('[U16] a select with an errorMessage is invalid and described by its visible error', async ({
+      page,
+    }) => {
+      await page.goto('/styleguide');
+      const section = page.getByRole('region', {
+        name: 'Select',
+        exact: true,
+      });
+
+      const select = section.getByLabel('Tour to book', { exact: true });
+      await expect(select).toHaveAttribute('aria-invalid', 'true');
+      await expect(select).toHaveAttribute(
+        'aria-describedby',
+        'booking-tour-error',
+      );
+      await expect(select).toHaveAccessibleDescription('Tour is required.');
+
+      const error = section.locator('#booking-tour-error');
+      await expect(error).toHaveText('Tour is required.');
+      await expect(error).toBeVisible();
+      await expect(error).toHaveAttribute('role', 'alert');
+    });
   });
 }
