@@ -30,7 +30,6 @@ export function FactsStrip({
       <li className={styles.fact}>{location}</li>
       <li className={styles.fact}>
         <StarRating value={rating} />
-        <span>{rating.toFixed(1)}</span>
       </li>
     </ul>
   );
