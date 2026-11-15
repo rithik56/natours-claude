@@ -99,5 +99,15 @@
     "enabled": false
   },
   "mode": "interactive",
-  "granularity": "standard"
+  "granularity": "standard",
+  "dynamic_routing": {
+    "enabled": true,
+    "escalate_on_failure": true,
+    "max_escalations": 1,
+    "tier_models": {
+      "light": "haiku",
+      "standard": "haiku",
+      "heavy": "sonnet"
+    }
+  }
 }
