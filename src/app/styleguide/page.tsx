@@ -3,6 +3,7 @@ import { loadStyleguidePage } from './gate';
 import { ButtonSection } from './sections/button-section';
 import { FileInputSection } from './sections/file-input-section';
 import { ShellSection } from './sections/shell-section';
+import { StartDateSelectSection } from './sections/start-date-select-section';
 import styles from './styleguide.module.css';
 
 export default function StyleguidePage() {
@@ -14,6 +15,7 @@ export default function StyleguidePage() {
       <ButtonSection />
       <ShellSection />
       <FileInputSection />
+      <StartDateSelectSection />
     </div>
   );
 }
