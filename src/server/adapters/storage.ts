@@ -1,9 +1,9 @@
 import 'server-only';
-import { getConfig } from '@/server/config';
 
-/** Keeps uploaded files. Phase 4 decides the real media route (ARC-15). */
+/** Keeps uploaded files. Every adapter serves them from `/media/<key>` (ADR 0029). */
 export interface Storage {
   put(key: string, body: Buffer, contentType: string): Promise<void>;
+  get(key: string): Promise<StoredFile | null>;
   delete(key: string): Promise<void>;
   urlFor(key: string): string;
 }
@@ -15,6 +15,11 @@ export type FakeStorage = Storage & {
   reset(): void;
 };
 
+/** The root-relative path of a stored key, each segment encoded. Same in every adapter. */
+export function mediaUrlFor(key: string): string {
+  return `/media/${key.split('/').map(encodeURIComponent).join('/')}`;
+}
+
 export function createFakeStorage(): FakeStorage {
   const files = new Map<string, StoredFile>();
   return {
@@ -22,12 +27,16 @@ export function createFakeStorage(): FakeStorage {
     async put(key, body, contentType) {
       files.set(key, { body: Buffer.from(body), contentType });
     },
+    async get(key) {
+      const stored = files.get(key);
+      return stored
+        ? { body: Buffer.from(stored.body), contentType: stored.contentType }
+        : null;
+    },
     async delete(key) {
       files.delete(key);
     },
-    urlFor(key) {
-      return `${getConfig().appOrigin}/storage/${encodeURIComponent(key)}`;
-    },
+    urlFor: mediaUrlFor,
     reset() {
       files.clear();
     },

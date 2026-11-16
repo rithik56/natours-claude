@@ -126,7 +126,7 @@ describe.each(['staging', 'production'])(
       ['emailQueue', 'queue', 'Phase 5'],
       ['rateLimiter', 'rate-limit', 'Phase 5'],
       ['stripe', 'Stripe', 'Phase 6'],
-      ['storage', 'storage', 'Phase 4 or 8'],
+      ['storage', 'storage', 'Phase 8'],
     ] as const)(
       '[Q7] using %s throws an error naming the missing adapter',
       async (key, name, phase) => {

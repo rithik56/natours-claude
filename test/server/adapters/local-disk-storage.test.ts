@@ -76,9 +76,9 @@ describe('local disk storage', () => {
     ['an empty key', ''],
   ])('[D2] refuses a key with %s, for every operation', async (_, key) => {
     const storage = createLocalDiskStorage(root);
-    await expect(storage.put(key, Buffer.from('x'), 'image/jpeg')).rejects.toThrow(
-      Error,
-    );
+    await expect(
+      storage.put(key, Buffer.from('x'), 'image/jpeg'),
+    ).rejects.toThrow(Error);
     await expect(storage.get(key)).rejects.toThrow(Error);
     await expect(storage.delete(key)).rejects.toThrow(Error);
   });

@@ -74,6 +74,7 @@ const configSchema = z
         error: 'must be an ISO date or date and time',
       })
       .optional(),
+    STORAGE_DIR: z.string(required('must be a string')).default('.storage'),
   })
   .superRefine((config, ctx) => {
     const productionLike =

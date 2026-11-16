@@ -16,9 +16,7 @@ describe('/media/[...key]', () => {
 
     expect(result.status).toBe(200);
     expect(result.headers.get('content-type')).toBe('image/jpeg');
-    expect(result.headers.get('cache-control')).toBe(
-      'public, max-age=86400',
-    );
+    expect(result.headers.get('cache-control')).toBe('public, max-age=86400');
     expect(result.body).toBe('jpeg-bytes');
   });
 
