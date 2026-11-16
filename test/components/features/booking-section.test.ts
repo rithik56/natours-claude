@@ -1,4 +1,4 @@
-// U11, R5, T-04-20: the streamed booking panel reads the signed-in traveller's own state on every
+// U11, R5, T-04-20: the booking panel reads the signed-in traveller's own state on every
 // request. Two travellers on the same tour see their own state, and a failed read is not caught.
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
