@@ -1,10 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { toTourDetail, toTourSummary } from '@/server/modules/tours/dto';
-import { Tour } from '@/server/modules/tours/model';
+import { Tour, type TourDoc } from '@/server/modules/tours/model';
 import { User } from '@/server/modules/users/model';
 import { useTestDatabase } from '../../../helpers/db';
 import { createTour } from '../../../helpers/factories';
 import { seedTours, seedUsers } from '../../../helpers/seed';
+
+/** Removes every stored credit alt, so the fallback is tested whatever the seed holds. */
+async function clearStoredAlts(tour: TourDoc): Promise<void> {
+  await Tour.collection.updateOne(
+    { _id: tour._id },
+    { $unset: { 'photoCredits.$[].alt': '' } },
+  );
+}
 
 const SUMMARY_KEYS = [
   'difficulty',
@@ -124,6 +132,49 @@ describe('tour DTOs', () => {
     expect(detail.photoCredits.map((credit) => credit.file)).toEqual(
       record.photoCredits.map((credit) => credit.file),
     );
+  });
+
+  it('[U27] toTourDetail returns a stored photo credit alt unchanged', async () => {
+    const tour = await createTour({ withGuides: true });
+    const stored = 'Snow peaks above a glacial lake';
+    tour.photoCredits[1]!.alt = stored;
+    await tour.save();
+    const populated = await Tour.findById(tour._id).populate('guides');
+
+    const detail = toTourDetail(populated!);
+
+    expect(detail.photoCredits[1]!.alt).toBe(stored);
+  });
+
+  it('[U27] toTourDetail gives the cover credit without alt the tour name', async () => {
+    const tour = await createTour({ withGuides: true });
+    await clearStoredAlts(tour);
+    const populated = await Tour.findById(tour._id).populate('guides');
+
+    const detail = toTourDetail(populated!);
+    const cover = detail.photoCredits.find(
+      (credit) => credit.file === detail.imageCover,
+    );
+
+    expect(cover?.alt).toBe(detail.name);
+  });
+
+  it('[U7] toTourDetail gives a gallery credit without alt its cleaned photo title', async () => {
+    const tour = await createTour({ withGuides: true });
+    const gallery = tour.photoCredits.find(
+      (credit) => credit.file !== tour.imageCover,
+    )!;
+    gallery.title = 'Pangong_Tso VM.JPG';
+    await tour.save();
+    await clearStoredAlts(tour);
+    const populated = await Tour.findById(tour._id).populate('guides');
+
+    const detail = toTourDetail(populated!);
+    const credit = detail.photoCredits.find(
+      (entry) => entry.file === gallery.file,
+    );
+
+    expect(credit?.alt).toBe('Pangong Tso VM');
   });
 
   it('[S3] toTourDetail throws when guides are not populated', async () => {

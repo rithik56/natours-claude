@@ -38,7 +38,7 @@ The same information is in each tour's `photoCredits` field in `data/tours.json`
 | `spiti-valley-star-gazer-cover.jpg` | [Key Monastery - Spiti -Himachal Pradesh MG 6796.jpg](https://commons.wikimedia.org/wiki/File:Key_Monastery_-_Spiti_-Himachal_Pradesh_MG_6796.jpg) | Prasad Gaude | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
 | `spiti-valley-star-gazer-1.jpg` | [Chandratal July 2017.jpg](https://commons.wikimedia.org/wiki/File:Chandratal_July_2017.jpg) | Wayfarersonmove | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
 | `spiti-valley-star-gazer-2.jpg` | [Dhankar Gompa, Spiti.jpg](https://commons.wikimedia.org/wiki/File:Dhankar_Gompa,_Spiti.jpg) | Deepank Ranka | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
-| `spiti-valley-star-gazer-3.jpg` | [Spiti River Kaza Himachal Jun18 D72 7232.jpg](https://commons.wikimedia.org/wiki/File:Spiti_River_Kaza_Himachal_Jun18_D72_7232.jpg) | This Photo was taken by Timothy A. Gonsalves. Feel free to use my photos, but please mention me as the author. I would | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| `spiti-valley-star-gazer-3.jpg` | [Spiti River Kaza Himachal Jun18 D72 7232.jpg](https://commons.wikimedia.org/wiki/File:Spiti_River_Kaza_Himachal_Jun18_D72_7232.jpg) | Timothy A. Gonsalves | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
 
 ## Kerala Backwaters and Hills
 
@@ -53,7 +53,7 @@ The same information is in each tour's `photoCredits` field in `data/tours.json`
 
 | File | Photo | Author | Licence |
 |---|---|---|---|
-| `thar-desert-camel-safari-cover.jpg` | [Sunset Sand Dunes Jaisalmer Dec14 DSC 6540.jpg](https://commons.wikimedia.org/wiki/File:Sunset_Sand_Dunes_Jaisalmer_Dec14_DSC_6540.jpg) | This Photo was taken by Timothy A. Gonsalves. Feel free to use my photos, but please mention me as the author. I would | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
+| `thar-desert-camel-safari-cover.jpg` | [Sunset Sand Dunes Jaisalmer Dec14 DSC 6540.jpg](https://commons.wikimedia.org/wiki/File:Sunset_Sand_Dunes_Jaisalmer_Dec14_DSC_6540.jpg) | Timothy A. Gonsalves | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
 | `thar-desert-camel-safari-1.jpg` | [Jaisalmer Fort, India.jpg](https://commons.wikimedia.org/wiki/File:Jaisalmer_Fort,_India.jpg) | Clément Bardot | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
 | `thar-desert-camel-safari-2.jpg` | [Dromedary in Thar desert.jpg](https://commons.wikimedia.org/wiki/File:Dromedary_in_Thar_desert.jpg) | Clément Bardot | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
 | `thar-desert-camel-safari-3.jpg` | [Sam dunes (Jaisalmer).jpg](https://commons.wikimedia.org/wiki/File:Sam_dunes_(Jaisalmer).jpg) | Roshanrajverma | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) |
