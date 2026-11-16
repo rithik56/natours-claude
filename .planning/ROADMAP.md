@@ -148,7 +148,7 @@ Plans:
   5. API clients can list tours with filters, `month`, `sort`, `fields` and pagination (`meta.total`), call `top-5-cheap`, `stats`, and the geo endpoints that return real documents for range-checked coordinates, and guides, lead guides and admins can read the monthly plan. Admins and lead guides can create, update and delete tours (409 if the tour has bookings, otherwise its reviews go too) and replace any subset of images through the separate images endpoint, while a JSON `PATCH` can never touch images or rating fields. Oversized or wrong-type uploads get 413 or 415, and every failure uses the standard error body. (F1, F2, F6, B2, B3, B4, S4, S16)
 **Review findings:** ARC-03, ARC-04, ARC-06, ARC-07, ARC-08, ARC-10, ARC-14, ARC-15, ARC-18, ARC-20 (m), DEL-16, DEL-27 (m), DES-02, DES-03, DES-04, DES-05, DES-06, DES-07, DES-11, DES-15 (m), DES-16 (m), DES-17 (m), DES-18 (m), DES-22 (m), QA-02, QA-03, QA-04, QA-06, QA-07, QA-08, QA-10, QA-11, QA-13 (m), QA-17, QA-18, QA-20, QA-21, SEC-05, SEC-07, SEC-12, SEC-16, SEC-17, SEC-19, SEC-24 (m), SEC-27 (m)
 **Carry-over findings:** ARC-02, QA-12 (cache design for R5, which closes in Phase 6; PROJECT.md Key Decisions says to settle it while planning this phase)
-**Plans:** 12/13 plans executed in 10 waves
+**Plans:** 13/13 plans executed in 10 waves
 
 Plans:
 **Wave 1**
@@ -182,7 +182,7 @@ Plans:
 - [x] 04-12-PLAN.md — Admin JSON create, update, delete; optional cover hidden until added (ADRs 0036, 0037)
 
 **Wave 10** *(blocked on Wave 9 completion)*
-- [ ] 04-13-PLAN.md — Images endpoint: multipart with byte limits, sharp re-encode, slots by position with credits (ADR 0038)
+- [x] 04-13-PLAN.md — Images endpoint: multipart with byte limits, sharp re-encode, slots by position with credits (ADR 0038)
 **UI hint**: yes
 
 ### Phase 5: Accounts
@@ -271,7 +271,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 | 1. Foundation and contracts | 15/15 | Complete    | 2026-11-10 |
 | 2. Design direction and approval gate | 4/4 | Complete    | 2026-11-10 |
 | 3. Design system and app shell | 10/10 | In Progress | - |
-| 4. Browse tours | 12/13 | In Progress | - |
+| 4. Browse tours | 13/13 | In Progress | - |
 | 5. Accounts | 0/0 | Not started | - |
 | 6. Bookings, My tours and reviews | 0/0 | Not started | - |
 | 7. Hardening and quality gates | 0/0 | Not started | - |
