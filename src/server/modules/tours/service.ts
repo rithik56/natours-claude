@@ -165,6 +165,100 @@ export async function getMonthlyPlan(
   }
 }
 
+/** A point in the API's order: latitude and longitude, already range-checked by the route. */
+export type GeoPoint = { lat: number; lng: number };
+
+/** The radius of the Earth in each unit, so a distance becomes radians for $centerSphere (B3). */
+const EARTH_RADIUS: Record<'mi' | 'km', number> = { mi: 3963.2, km: 6378.1 };
+
+/** Metres to each unit, for $geoNear's distanceMultiplier (B3). */
+const METRES_TO: Record<'mi' | 'km', number> = {
+  mi: 0.000621371,
+  km: 0.001,
+};
+
+/**
+ * The tours whose start location lies inside a circle around a point (B3), as
+ * summaries, by name. Not cached: the point comes from the URL (T-04-17). MongoDB
+ * wants longitude first, so the point is passed as [lng, lat].
+ *
+ * @param input - The point, the radius and its unit (mi or km).
+ * @returns The tours inside the radius; an empty array when none is.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function toursWithin(
+  input: GeoPoint & { distance: number; unit: 'mi' | 'km' },
+): Promise<TourSummary[]> {
+  const radius = input.distance / EARTH_RADIUS[input.unit];
+  await connectDb();
+  try {
+    const records = await Tour.find({
+      startLocation: {
+        $geoWithin: { $centerSphere: [[input.lng, input.lat], radius] },
+      },
+    })
+      .sort({ name: 1, _id: 1 })
+      .lean<TourRecord[]>();
+    return records.map(toTourSummary);
+  } catch (error) {
+    if (!isDbUnavailableError(error)) throw error;
+    const unavailable = new AppError('SERVICE_UNAVAILABLE');
+    unavailable.cause = error;
+    throw unavailable;
+  }
+}
+
+/** One tour and its distance from a point (B3). */
+export type TourDistance = {
+  id: string;
+  name: string;
+  slug: string;
+  /** In the requested unit, rounded to 2 decimal places. */
+  distance: number;
+};
+
+/**
+ * Every tour's distance from a point, nearest first (B3), from a `$geoNear` that is the
+ * first stage of the pipeline and uses the startLocation 2dsphere index. It returns
+ * documents, never a query plan (B3). Not cached, for the same reason as toursWithin.
+ *
+ * @param input - The point and the unit the distances come back in (mi or km).
+ * @returns Every tour, sorted by distance ascending.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function distancesFrom(
+  input: GeoPoint & { unit: 'mi' | 'km' },
+): Promise<TourDistance[]> {
+  await connectDb();
+  try {
+    return await Tour.aggregate<TourDistance>([
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [input.lng, input.lat] },
+          key: 'startLocation',
+          distanceField: 'distance',
+          distanceMultiplier: METRES_TO[input.unit],
+          spherical: true,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          id: { $toString: '$_id' },
+          name: 1,
+          slug: 1,
+          distance: { $round: ['$distance', 2] },
+        },
+      },
+    ]);
+  } catch (error) {
+    if (!isDbUnavailableError(error)) throw error;
+    const unavailable = new AppError('SERVICE_UNAVAILABLE');
+    unavailable.cause = error;
+    throw unavailable;
+  }
+}
+
 /**
  * Reads every tour's photos and credits for `/credits`, in seed order: createdAt
  * ascending, then id (U27). Only the fields the credits need are read.
