@@ -14,8 +14,9 @@ const base = {
   href: '/tour/valley-of-flowers-trek',
 };
 
-const render = (props: Partial<typeof base> & { startDate?: string }) =>
-  renderToStaticMarkup(createElement(TourRow, { ...base, ...props }));
+const render = (
+  props: Partial<typeof base> & { startDate?: string; preload?: boolean },
+) => renderToStaticMarkup(createElement(TourRow, { ...base, ...props }));
 
 describe('[U10] TourRow', () => {
   it('shows the next start date through formatDate when one is given', () => {
@@ -38,5 +39,22 @@ describe('[U10] TourRow', () => {
 
     expect(html).toContain('₹18,999');
     expect(html).toContain('href="/tour/valley-of-flowers-trek"');
+  });
+
+  it('[U7] loads the photo eagerly with high fetch priority when preload is set (C2)', () => {
+    const html = render({ preload: true });
+
+    // HTML attribute names are case-insensitive; React's static markup may write fetchPriority in camelCase.
+    expect(html).toContain('loading="eager"');
+    expect(html).toMatch(/fetchpriority="high"/i);
+    expect(html).toContain('rel="preload"');
+  });
+
+  it('[U7] keeps the photo lazy and without high priority when preload is not set', () => {
+    const html = render({});
+
+    expect(html).toContain('loading="lazy"');
+    expect(html).not.toMatch(/fetchpriority="high"/i);
+    expect(html).not.toContain('rel="preload"');
   });
 });

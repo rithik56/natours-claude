@@ -21,6 +21,14 @@ const dateFormat = new Intl.DateTimeFormat('en-IN', {
   timeZone: 'Asia/Kolkata',
 });
 
+const monthFormat = new Intl.DateTimeFormat('en-IN', {
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'Asia/Kolkata',
+});
+
+const MONTH_STRING = /^\d{4}-(0[1-9]|1[0-2])$/;
+
 function assertWholeRupees(rupees: number): void {
   if (!Number.isSafeInteger(rupees) || rupees < 1) {
     throw new RangeError('A price is a whole number of rupees, at least 1');
@@ -59,6 +67,27 @@ export function formatDate(value: Date | string): string {
   // ICU writes September as "Sept"; the product style is three letters (D-01).
   const month = parts.month === 'Sept' ? 'Sep' : parts.month;
   return `${parts.day} ${month} ${parts.year}`;
+}
+
+/**
+ * C5 and D-04: a month and year in IST, such as "Nov 2026". A YYYY-MM string is
+ * that IST month; any other string is an ISO instant. Same wording rule as formatDate.
+ */
+export function formatMonth(value: Date | string): string {
+  const date =
+    typeof value === 'string'
+      ? MONTH_STRING.test(value)
+        ? fromIstDay(`${value}-01`)
+        : new Date(value)
+      : value;
+  if (Number.isNaN(date.getTime())) {
+    throw new RangeError('Cannot format an invalid month');
+  }
+  const parts = Object.fromEntries(
+    monthFormat.formatToParts(date).map((part) => [part.type, part.value]),
+  );
+  const month = parts.month === 'Sept' ? 'Sep' : parts.month;
+  return `${month} ${parts.year}`;
 }
 
 /** Distances are in kilometres, for example "1,234 km". */

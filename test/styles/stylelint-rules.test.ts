@@ -71,6 +71,20 @@ describe('stylelint: design token rules', () => {
     ]);
   });
 
+  it('[U3] fails a feature CSS Module rule written outside a layer', async () => {
+    const code = '.a {\n  color: inherit;\n}\n';
+    expect(
+      await rulesBrokenBy(code, 'src/components/features/example.module.css'),
+    ).toEqual(['rule-nesting-at-rule-required-list']);
+  });
+
+  it('[U3] fails an app CSS Module rule written in a layer other than components', async () => {
+    const code = '@layer base {\n  .a {\n    color: inherit;\n  }\n}\n';
+    expect(await rulesBrokenBy(code, 'src/app/example.module.css')).toEqual([
+      'layer-name-pattern',
+    ]);
+  });
+
   it('[U3] passes a ui rule inside @layer components', async () => {
     const code =
       '@layer components {\n  .a {\n    color: var(--color-text);\n  }\n}\n';

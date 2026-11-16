@@ -11,7 +11,12 @@ const stylelintConfig = {
     {
       // rule-nesting-at-rule-required-list matches the at-rule name ("layer"),
       // so layer-name-pattern is what pins the layer to components.
-      files: ['src/components/ui/**/*.module.css'],
+      // U3: feature and app CSS Modules sit in the same layer, so new page CSS cannot slip outside it.
+      files: [
+        'src/components/ui/**/*.module.css',
+        'src/components/features/**/*.module.css',
+        'src/app/**/*.module.css',
+      ],
       rules: {
         'rule-nesting-at-rule-required-list': ['layer'],
         'layer-name-pattern': '^components$',
