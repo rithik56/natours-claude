@@ -1,9 +1,10 @@
 /*
- * The one place the cascade layer order is declared (U3). Layout imports this
+ * The one place the cascade layer order is declared (U3, ADR 0035). Layout imports this
  * file first, so every later file only opens a layer that already has a rank.
- * Later layers win over earlier ones, whatever the selector specificity.
+ * Later layers win over earlier ones, whatever the selector specificity. Third-party CSS
+ * (Leaflet, in layer vendor) is declared first, so a component rule always beats it without !important.
  */
-@layer reset, tokens, base, components, utilities;
+@layer vendor, reset, tokens, base, components, utilities;
 
 @layer reset {
   *,
