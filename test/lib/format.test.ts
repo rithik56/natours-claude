@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatDate,
   formatDistance,
+  formatMonth,
   formatPrice,
   rupeesToPaise,
 } from '@/lib/format';
@@ -97,6 +98,30 @@ describe('formatDate', () => {
     ];
     expect(run.map((fn) => outcome(fn)).join(',')).toBe(
       'RangeError,RangeError,RangeError',
+    );
+  });
+});
+
+describe('formatMonth', () => {
+  it('[U10] reads a YYYY-MM string as that IST month (D-04)', () => {
+    expect(formatMonth('2026-11')).toBe('Nov 2026');
+    expect(formatMonth('2027-01')).toBe('Jan 2027');
+  });
+
+  it('[U10] reads an instant as its IST month, so 1 January IST is January (C5)', () => {
+    expect(formatMonth(new Date('2027-01-01T00:00:00+05:30'))).toBe(
+      'Jan 2027',
+    );
+    expect(formatMonth(new Date('2026-12-31T18:30:00Z'))).toBe('Jan 2027');
+  });
+
+  it('[U10] writes September as Sep and always shows the year (D-01, D-02)', () => {
+    expect(formatMonth('2027-09')).toBe('Sep 2027');
+  });
+
+  it('[U10] throws RangeError for an invalid date', () => {
+    expect(outcome(() => formatMonth(new Date('not a date')))).toBe(
+      'RangeError',
     );
   });
 });
