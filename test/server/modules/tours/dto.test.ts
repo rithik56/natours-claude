@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { toTourDetail, toTourSummary } from '@/server/modules/tours/dto';
+import {
+  hasCover,
+  toTourDetail,
+  toTourSummary,
+} from '@/server/modules/tours/dto';
 import { Tour, type TourDoc } from '@/server/modules/tours/model';
 import { useTestDatabase } from '../../../helpers/db';
 import { createTour } from '../../../helpers/factories';
@@ -202,5 +206,14 @@ describe('tour DTOs', () => {
 
     expect(JSON.parse(JSON.stringify(detail))).toEqual(detail);
     expect(JSON.stringify(detail)).not.toContain('example.com');
+  });
+});
+
+describe('hasCover (F6, D-13)', () => {
+  it('[F6] is true only for an entry whose imageCover is a storage key', () => {
+    expect(hasCover({ imageCover: 'tours/valley-of-flowers-trek-1.jpg' })).toBe(
+      true,
+    );
+    expect(hasCover({ imageCover: null })).toBe(false);
   });
 });
