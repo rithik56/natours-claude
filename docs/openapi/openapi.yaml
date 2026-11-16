@@ -76,8 +76,71 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+  /tours/{id}:
+    get:
+      operationId: getTour
+      summary: One tour with its public guides.
+      description: >-
+        The tour as its page shows it (B13), with `guides` added: the lead guide
+        first, then the others in the tour's order. Each guide carries only id,
+        name, photo and role (S3). A tour whose guides are all missing has
+        `guides: []`.
+      parameters:
+        - $ref: '#/components/parameters/tourId'
+      responses:
+        '200':
+          description: The tour, with its guides.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TourDetailEnvelope'
+        '400':
+          description: The id is not 24 hexadecimal characters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                status: fail
+                error:
+                  code: VALIDATION_ERROR
+                  message: The request is not valid.
+                  requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a112
+        '404':
+          description: No tour has this id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                status: fail
+                error:
+                  code: NOT_FOUND
+                  message: The tour was not found.
+                  requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a113
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
 components:
   parameters:
+    tourId:
+      name: id
+      in: path
+      required: true
+      description: The 24-character hexadecimal tour id.
+      schema:
+        type: string
+        pattern: '^[0-9a-fA-F]{24}$'
+        example: 92da98fc3b348f5b6de92063
     difficulty:
       name: difficulty
       in: query
@@ -447,3 +510,106 @@ components:
             requestId:
               type: string
               format: uuid
+    PublicUser:
+      type: object
+      description: What guides and review authors look like to anyone. It has no email (S3).
+      required: [id, name, photo, role]
+      properties:
+        id:
+          type: string
+          example: 2edcba4a2bb2e3be057fed4e
+        name:
+          type: string
+          example: Gaurav Bisht
+        photo:
+          type: [string, 'null']
+        role:
+          type: string
+          enum: [user, guide, lead-guide, admin]
+    TourPhotoCredit:
+      type: object
+      description: One photo's credit. `alt` is always text (D-15).
+      required: [file, title, author, license, licenseUrl, sourceUrl, alt]
+      properties:
+        file:
+          type: string
+          description: A storage key, not a URL.
+        title:
+          type: string
+        author:
+          type: string
+        license:
+          type: string
+          example: CC BY-SA 4.0
+        licenseUrl:
+          type: string
+          format: uri
+        sourceUrl:
+          type: string
+          format: uri
+        alt:
+          type: string
+    TourDetail:
+      description: The tour as its detail page shows it, without guide objects (plan 04-06).
+      allOf:
+        - $ref: '#/components/schemas/TourSummary'
+        - type: object
+          required: [description, images, locations, guideIds, photoCredits]
+          properties:
+            description:
+              type: [string, 'null']
+            images:
+              type: array
+              description: Storage keys of the gallery photos, in order.
+              items:
+                type: string
+            locations:
+              type: array
+              items:
+                type: object
+                required: [day, description, coordinates]
+                properties:
+                  day:
+                    type: integer
+                    minimum: 1
+                  description:
+                    type: string
+                  coordinates:
+                    type: array
+                    items:
+                      type: number
+                    minItems: 2
+                    maxItems: 2
+            guideIds:
+              type: array
+              description: The tour's guides in its own order.
+              items:
+                type: string
+            photoCredits:
+              type: array
+              items:
+                $ref: '#/components/schemas/TourPhotoCredit'
+    TourWithGuides:
+      allOf:
+        - $ref: '#/components/schemas/TourDetail'
+        - type: object
+          required: [guides]
+          properties:
+            guides:
+              type: array
+              description: The lead guide first, then the others in the tour's order.
+              items:
+                $ref: '#/components/schemas/PublicUser'
+    TourDetailEnvelope:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: string
+          enum: [success]
+        data:
+          type: object
+          required: [tour]
+          properties:
+            tour:
+              $ref: '#/components/schemas/TourWithGuides'
