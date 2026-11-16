@@ -274,9 +274,15 @@ export type ApiOptions<
   params?: P;
   query?: Q;
   body?: B;
+  /** A multipart upload (ADR 0038): `multipart/form-data` only, counted against `maxBytes`. */
+  upload?: { maxBytes: number };
   rateLimit?: {
     rule: RateLimitRule;
-    key: (input: { request: NextRequest; body: Output<B> }) => string;
+    key: (input: {
+      request: NextRequest;
+      body: Output<B>;
+      user: SelfUser | null;
+    }) => string;
   };
 };
 
@@ -289,6 +295,8 @@ export type ApiContext<
   params: Output<P>;
   query: Output<Q>;
   body: Output<B>;
+  /** The parsed multipart body; present only on a route with `upload` (ADR 0038). */
+  form: FormData | undefined;
   user: SelfUser | null;
   requestId: string;
   log: Logger;
@@ -311,7 +319,16 @@ The pipeline order is fixed (ADR 0017):
 1. **Request ID** (D7). An incoming `x-request-id` is reused only when it is a UUID. Otherwise `crypto.randomUUID()` mints one. The ID is on every response, every error body and every log line of the request.
 2. **Origin check on writes** (S9). A POST, PUT, PATCH or DELETE is refused with 403 unless its Origin equals the origin of `APP_URL` or an entry of `CORS_ORIGINS`, compared exactly. A request with no Origin header is accepted (SEC-26). A GET is never origin-checked.
 3. **Access** (S1) through `resolveAccess(access, request.cookies)`.
-4. **Params, query, then body.** Query validation is strict: unknown keys fail with 400. A body schema needs `Content-Type: application/json`, otherwise 415. Malformed JSON is 400. Bodies are JSON only until Phase 4 adds multipart, and there is no body size limit yet.
+4. **Params, query, then body or upload.** Query validation is strict: unknown keys fail with 400. A body schema needs `Content-Type: application/json`, otherwise 415, and a JSON body is limited to 1,048,576 bytes (413). Malformed JSON is 400. A route with `upload` needs `multipart/form-data`, otherwise 415, and its body is limited to the route's `maxBytes` (413). Both limits are counted before parsing: a declared Content-Length above the limit is refused before any byte is read, and a body without one is counted as it streams (ADR 0038, SEC-17).
+
+```ts
+// src/server/api/body.ts (ADR 0038)
+export async function readBodyLimited(request: Request, maxBytes: number): Promise<Uint8Array<ArrayBuffer>>;
+// Throws PAYLOAD_TOO_LARGE when the body is over maxBytes.
+
+export async function parseMultipart(bytes: Uint8Array<ArrayBuffer>, contentType: string): Promise<FormData>;
+// Throws VALIDATION_ERROR when the bytes are not well-formed multipart.
+```
 5. **Rate limit**, through the adapter in `getDeps()`. A refused call is 429 RATE_LIMITED with a `Retry-After` header of at least 1 second.
 6. **The handler.**
 
@@ -1264,7 +1281,7 @@ Each is written into this file by the phase that builds it (ADR 0005).
 | `toursService.list(query)` returning `{ items, total, page, limit, totalPages }`, cached with a tag (R5); `toursService.getBySlug(slug)`; `toursService.getById(id)` | 4 (`list` and `monthOptions` are done, section 11; `getBySlug` and `getById` follow in later plans) |
 | `reviewsService.listForTour(tourId, page)`, cached with a tag | 4 (done, section 11) |
 | `bookingsService.hasPaidBooking(userId, tourId)`, which the booking panel needs for "already booked", never cached | 4 (done as `findUpcomingPaid`, returning the day, section 11, ADR 0033) |
-| `images.normalize(file, preset)`, and the real storage adapter | 4 (the disk adapter and `/media` are in, ADR 0029; S3 waits for 8) |
+| `images.normalize(file, preset)`, and the real storage adapter | 4 (done: `normalize` and `randomImageKey`, section 11, ADR 0038; the disk adapter and `/media` are in, ADR 0029; S3 waits for 8) |
 | The cache keys and tag names, and the shape of a list response in `data` (section 2.1) | 4 (done: ADR 0031, section 11) |
 | `npm run seed` with `--reset` and `--today=YYYY-MM-DD`: the date roll (`rollStartDates`), and the seed/README.md rules (`checkSeedRules`) that stop a run and name the first broken rule (ADR 0023, ADR 0030) | 4 |
 | `Welcome` and `PasswordReset` email-template props, the mailer's SMTP implementation, the Redis rate limiter and the BullMQ queue | 5 |
@@ -1640,3 +1657,21 @@ Routes and rules:
 - A name or slug that another tour has is a 409 with the approved message. The unique index reports it, and the service maps it, so the generic "That's already in use." wording never reaches a client.
 - A tour with no cover is not published, so it stays out of every public read until a cover is added (ADR 0036). `GET /api/v1/tours/[id]` still answers it, with `imageCover: null`.
 - The Phase 6 check for a tour that a booking can refer to, and the race between the bookings count and the delete, are recorded in ADR 0036.
+
+### Tour images (plan 04-13, S16, B4, U27, D-14, ADR 0038)
+
+The admin and lead guide replace photos over multipart. A file is judged by its bytes, re-encoded to WebP and stored under a random key, and every stored photo keeps exactly one credit.
+
+| Function | Module | What it does |
+|----------|--------|--------------|
+| `normalize(bytes, preset)` | `src/server/images.ts` | Refuses a file over 5 MB (413) or one whose magic bytes are not JPEG, PNG or WebP (415). sharp rotates it by EXIF, caps it at 2,000 px wide for the `tour` preset, encodes WebP at quality 80 and strips the metadata. An image over 40,000,000 input pixels is 413; a file sharp cannot decode is 415. Sets `sharp.concurrency(1)` on first use. |
+| `randomImageKey(prefix)` | `src/server/images.ts` | `<prefix>/<uuid>.webp`. The client's file name never reaches storage. |
+| `parseImagesForm(form)` | tours schemas | Reads the parts: `imageCover` (0 or 1), `images` (0 to 3) and the JSON `credits`. An unknown part, a count that is wrong, a missing or extra credit, or credits that are not JSON is a 400 with a details path. Returns `{ cover?, gallery, credits: { cover?, gallery } }`. |
+| `photoCreditInputSchema` | tours schemas | Strict credit: title, author, licence, and https `licenseUrl` and `sourceUrl` are required; `alt` is optional, up to 150 characters. |
+| `replaceImages(id, input)` | tours service | Normalises every file before anything is stored, stores each under `randomImageKey('tours')`, then sets the cover and gallery by position (file n replaces slot n; a slot past the end is appended). The credits of the keys this upload adds are the new ones; the stored credit of each kept key is kept; the credit of a replaced key is dropped. One `save()`, then clears `tours` and `tour:<id>`, then deletes the replaced keys best effort (a failure is logged and the request still answers 200). A failure before the save deletes what this request stored. |
+
+Routes and rules:
+
+- `PUT /api/v1/tours/[id]/images` declares `access: { roles: ['lead-guide', 'admin'] }` and `upload: { maxBytes: 22_020_096 }`. It is limited by `tour-images`, 20 uploads per hour per signed-in user, keyed by the user's id (SEC-05). The twenty-first answers 429 with `retry-after`.
+- A missing tour is 404 and is checked after the body is parsed. An anonymous caller is 401 before any body is read.
+- Messages come from `messages.tours`: `noImage`, `creditMissing`, `tooManyCovers`, `tooManyGalleryImages` and `creditsNotJson`, from copy.md "Tour API messages". An extra credit and an unknown part use `messages.validation.unknownField`, because copy.md has no approved wording for them yet.

@@ -20,7 +20,7 @@ Every decision that departs from `plan.md`, and every project-level decision, is
 | 0014 | [One price per tour](0014-one-price-per-tour.md) | Accepted |
 | 0015 | [Sessions read the user on every request](0015-sessions-read-the-user-every-request.md) | Accepted |
 | 0016 | [Adapters are selected by APP_ENV](0016-adapters-selected-by-app-env.md) | Accepted |
-| 0017 | [Required access and one error mapping for every route](0017-required-access-and-error-mapping.md) | Accepted |
+| 0017 | [Required access and one error mapping for every route](0017-required-access-and-error-mapping.md) | Accepted; amended by 0038 (bodies and uploads) |
 | 0018 | [The JavaScript budget is measured with Lighthouse CI](0018-javascript-budget-measured-with-lighthouse-ci.md) | Accepted |
 | 0019 | [Deploy on AWS instead of Render](0019-deploy-on-aws-instead-of-render.md) | Accepted |
 | 0020 | [Redis on the private network, without TLS](0020-redis-on-the-private-network-without-tls.md) | Accepted |
@@ -41,12 +41,13 @@ Every decision that departs from `plan.md`, and every project-level decision, is
 | 0035 | [A vendor cascade layer for third-party CSS](0035-vendor-cascade-layer.md) | Accepted |
 | 0036 | [The tour cover is optional, and a tour without one stays out of the public catalogue](0036-tour-cover-optional-and-hidden-until-added.md) | Accepted |
 | 0037 | [Lead guides and admins manage any tour](0037-admins-and-lead-guides-manage-any-tour.md) | Accepted |
+| 0038 | [Uploads are multipart with byte limits, and images are replaced by position](0038-uploads-multipart-limits-and-image-slots.md) | Accepted; amends 0017 |
 | 0039 | [The tour page awaits its booking, guides and reviews instead of streaming them](0039-tour-page-awaits-instead-of-streaming.md) | Accepted |
 | 0040 | [The credits page has no loading.tsx, so it shows with JavaScript off](0040-credits-page-has-no-loading-file.md) | Accepted |
 
 ## Format
 
-One file per decision, named `NNNN-kebab-title.md`, numbered from 0001 in order. The number 0038 is reserved for a later phase 4 plan, so the table has that gap until it is written; no other gap is allowed. Each file starts with its title as `# NNNN. Title`, then these header lines: `Status:`, `Date:` (in India Standard Time, for example 9 Nov 2026), `Requirements:` and `Plan review:`. Then come the sections `## Context`, `## Decision` and `## Consequences`, all of them filled in.
+One file per decision, named `NNNN-kebab-title.md`, numbered from 0001 in order. No gap is allowed in the numbering. Each file starts with its title as `# NNNN. Title`, then these header lines: `Status:`, `Date:` (in India Standard Time, for example 9 Nov 2026), `Requirements:` and `Plan review:`. Then come the sections `## Context`, `## Decision` and `## Consequences`, all of them filled in.
 
 ## Adding an ADR
 

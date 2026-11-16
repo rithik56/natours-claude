@@ -143,7 +143,7 @@ function finish(
  * Wraps a Route Handler in the fixed pipeline (plan.md 4.3, ADR 0017):
  *
  * 1. request ID, 2. Origin check on writes (S9), 3. access (S1), 4. params,
- * query, then body, 5. rate limit, 6. the handler. Any throw becomes the
+ * query, then body or upload (ADR 0038), 5. rate limit, 6. the handler. Any throw becomes the
  * plan.md 4.1 error envelope, logged with the same request ID (B9, D7).
  *
  * @param handler - Receives the validated input, the user and a request logger.
