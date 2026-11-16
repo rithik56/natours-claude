@@ -31,7 +31,11 @@ test('[B1] / shows the heading, twelve tour rows, and a first photo that loads t
 });
 
 test.describe('[U10] with JavaScript off', () => {
-  test.use({ javaScriptEnabled: false });
+  // D-01: at 375px the filters sit in a closed disclosure, so this block opens it first.
+  test.use({
+    javaScriptEnabled: false,
+    viewport: { width: 375, height: 812 },
+  });
 
   test('[U10] filters by difficulty through the GET form and a shareable URL', async ({
     page,

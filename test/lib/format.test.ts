@@ -109,9 +109,7 @@ describe('formatMonth', () => {
   });
 
   it('[U10] reads an instant as its IST month, so 1 January IST is January (C5)', () => {
-    expect(formatMonth(new Date('2027-01-01T00:00:00+05:30'))).toBe(
-      'Jan 2027',
-    );
+    expect(formatMonth(new Date('2027-01-01T00:00:00+05:30'))).toBe('Jan 2027');
     expect(formatMonth(new Date('2026-12-31T18:30:00Z'))).toBe('Jan 2027');
   });
 

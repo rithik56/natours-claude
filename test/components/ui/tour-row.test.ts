@@ -44,14 +44,17 @@ describe('[U10] TourRow', () => {
   it('[U7] loads the photo eagerly with high fetch priority when preload is set (C2)', () => {
     const html = render({ preload: true });
 
+    // HTML attribute names are case-insensitive; React's static markup may write fetchPriority in camelCase.
     expect(html).toContain('loading="eager"');
-    expect(html).toContain('fetchpriority="high"');
+    expect(html).toMatch(/fetchpriority="high"/i);
+    expect(html).toContain('rel="preload"');
   });
 
   it('[U7] keeps the photo lazy and without high priority when preload is not set', () => {
     const html = render({});
 
     expect(html).toContain('loading="lazy"');
-    expect(html).not.toContain('fetchpriority="high"');
+    expect(html).not.toMatch(/fetchpriority="high"/i);
+    expect(html).not.toContain('rel="preload"');
   });
 });

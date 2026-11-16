@@ -15,6 +15,8 @@ type TourRowProps = {
   startDate?: Date | string;
   priceRupees: number;
   href: string;
+  /** C2: the first visible photo on a page is preloaded; every other row stays lazy. */
+  preload?: boolean;
 };
 
 // One tour in the overview list. The whole row is the link; the photo's alt is empty because the name beside it already labels the link.
@@ -27,6 +29,7 @@ export function TourRow({
   startDate,
   priceRupees,
   href,
+  preload = false,
 }: TourRowProps) {
   const days = lengthDays === 1 ? '1 day' : `${lengthDays} days`;
 
@@ -40,6 +43,10 @@ export function TourRow({
             fill
             sizes="(min-width: 64em) 10rem, 7rem"
             className={styles.image}
+            preload={preload}
+            // C2: a preloaded photo is eager and high priority; every other photo stays lazy.
+            loading={preload ? 'eager' : 'lazy'}
+            fetchPriority={preload ? 'high' : undefined}
           />
         </span>
         <div className={styles.body}>

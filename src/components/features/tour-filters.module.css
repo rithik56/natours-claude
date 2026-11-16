@@ -15,9 +15,64 @@
     cursor: pointer;
   }
 
+  /* The count part of "Filters (2 active)" is the one State green use on this page. */
+  .count {
+    color: var(--color-success);
+  }
+
   .form {
     display: grid;
     gap: var(--space-4);
     padding-top: var(--space-4);
+  }
+
+  /* Intrinsic grid: one column at 375px, two or three wider, with no media query. */
+  .fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
+    gap: var(--space-4);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-5);
+  }
+
+  .clear {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch-target);
+    color: var(--color-text);
+  }
+
+  /* From 64em the form is always visible. Where ::details-content is unsupported the summary stays, so the form is never unreachable. */
+  @media (width >= 64em) {
+    @supports selector(details::details-content) {
+      .disclosure {
+        padding: var(--space-5);
+      }
+
+      .disclosure::details-content {
+        content-visibility: visible;
+      }
+
+      .summary {
+        display: none;
+      }
+
+      .form {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: end;
+        gap: var(--space-4) var(--space-5);
+        padding-top: 0;
+      }
+
+      .fields {
+        display: contents;
+      }
+    }
   }
 }
