@@ -16,7 +16,7 @@
 - [ ] **F3**: A visitor can sign up, log in and log out, through the site's forms and through `/api/v1/auth` (§1.4, §1.6)
 - [ ] **F4**: A logged-in user can change their password from `/me` or `PATCH /api/v1/auth/password`, and gets a new session cookie
 - [ ] **F5**: Admins can list, view, update and deactivate users through `/api/v1/users`
-- [ ] **F6**: Admins and lead guides can create, update and delete tours and replace their images through `/api/v1/tours`. Deleting a tour that has bookings returns 409; otherwise its reviews are deleted too.
+- [x] **F6**: Admins and lead guides can create, update and delete tours and replace their images through `/api/v1/tours`. Deleting a tour that has bookings returns 409; otherwise its reviews are deleted too.
 - [ ] **F7**: Admins can list all reviews. Admins and lead guides can list and view bookings, and admins can create, update and delete bookings by hand (§1.4).
 
 ### Security (S)
@@ -50,7 +50,7 @@
 - [ ] **S15**: Rate limits are stored in Redis:
   - 300 requests per 15 minutes per IP on `/api/v1`.
   - 10 per 15 minutes per IP and email on signup, login, forgot, reset and change password, whether through the API or a Server Action.
-- [ ] **S16**: Uploads:
+- [x] **S16**: Uploads:
   - At most 5 MB per file, with fixed file counts.
   - Only JPEG, PNG and WebP, checked with sharp, then re-encoded and stored under random keys.
   - Rejected uploads return 400, 413 or 415.
@@ -73,7 +73,7 @@
 - [ ] **B1**: `sort` is a comma-separated string, checked against an allowlist and defaulting to `-createdAt`.
 - [x] **B2**: The `top-5-cheap` alias sets the validated query that the query builder reads.
 - [x] **B3**: Geo endpoints return documents. Coordinates are parsed as numbers and range-checked: latitude −90 to 90, longitude −180 to 180, distance above 0, unit `mi` or `km`.
-- [ ] **B4**: Tour images are updated through their own endpoint, which accepts any subset of the files. A JSON `PATCH /tours/[id]` never touches images.
+- [x] **B4**: Tour images are updated through their own endpoint, which accepts any subset of the files. A JSON `PATCH /tours/[id]` never touches images.
 - [x] **B5**: Schema rules match the domain: `duration` isn't unique and `slug` is. Dates come from timestamps, never `default: Date.now()`.
 - [ ] **B6**: The review service recalculates ratings after create, update and delete:
   - The work is awaited and rounded to one decimal.
@@ -198,7 +198,7 @@
 - [ ] **U24**: Lighthouse CI (mobile) on the overview and a tour page: Performance at least 90, Accessibility 100, Best Practices at least 95 and SEO at least 95. LCP under 2.5 seconds and CLS under 0.1.
 - [ ] **U25**: One motion plays by itself: the route line, drawing in at most 1.2 seconds. Every other motion responds to the user, lasts at most 200 ms and never runs on scroll, and everything respects `prefers-reduced-motion`.
 - [ ] **U26**: Playwright screenshots of the styleguide, overview, tour page, My tours and account page, at 375 and 1280 px in both themes, with baselines generated in the CI container.
-- [ ] **U27**: Every tour page credits each photo's author and licence, with links. `/credits` lists every photo, and a test checks that every tour photo has a credit.
+- [x] **U27**: Every tour page credits each photo's author and licence, with links. `/credits` lists every photo, and a test checks that every tour photo has a credit.
 
 ### Code quality (Q)
 
@@ -357,7 +357,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | F3 | Phase 5 | Pending |
 | F4 | Phase 5 | Pending |
 | F5 | Phase 5 | Pending |
-| F6 | Phase 4 | Pending |
+| F6 | Phase 4 | Complete |
 | F7 | Phase 6 | Pending |
 | S1 | Phase 1 | Complete |
 | S2 | Phase 3 | Pending |
@@ -374,7 +374,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | S13 | Phase 5 | Pending |
 | S14 | Phase 1 | Complete |
 | S15 | Phase 5 | Pending |
-| S16 | Phase 4 | Pending |
+| S16 | Phase 4 | Complete |
 | S17 | Phase 6 | Pending |
 | S18 | Phase 1 | Complete |
 | S19 | Phase 3 | Pending |
@@ -385,7 +385,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | B1 | Phase 4 | Pending |
 | B2 | Phase 4 | Complete |
 | B3 | Phase 4 | Complete |
-| B4 | Phase 4 | Pending |
+| B4 | Phase 4 | Complete |
 | B5 | Phase 1 | Complete |
 | B6 | Phase 6 | Pending |
 | B7 | Phase 6 | Pending |
@@ -453,7 +453,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | U24 | Phase 7 | Pending |
 | U25 | Phase 3 | Pending |
 | U26 | Phase 7 | Pending |
-| U27 | Phase 4 | Pending |
+| U27 | Phase 4 | Complete |
 | Q1 | Phase 1 | Complete |
 | Q2 | Phase 1 | Complete |
 | Q3 | Phase 1 | Complete |
