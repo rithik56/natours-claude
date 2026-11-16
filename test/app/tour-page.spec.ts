@@ -124,3 +124,121 @@ test('[U27] the photo credits list has all four photos, each with its author and
     credits.getByRole('link', { name: 'Read the photo credits' }),
   ).toHaveAttribute('href', '/credits');
 });
+
+// U11, B12, R4, D-08: the streamed parts of the page with JavaScript off, where the server's HTML is
+// all a visitor gets. OPEN: these are held as test.fixme. Streamed Suspense content is written into a
+// hidden container and only shown by inline script, so with JavaScript off the skeletons stay and the
+// real content never appears. Resolving that needs a decision (see the plan's checkpoint); when it is
+// made, these become plain tests with the same assertions.
+test.describe('[U11] the streamed sections with JavaScript off', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test.fixme('[U11] the booking panel shows the dates, the price and a Log in to book link to this tour', async ({
+    page,
+  }) => {
+    await page.goto('/tour/ladakh-high-passes');
+    const panel = page.getByRole('complementary', { name: 'Book this tour' });
+
+    await expect(
+      panel.getByRole('combobox', { name: 'Start date' }),
+    ).toBeVisible();
+    await expect(panel.getByText('₹42,999 per person')).toBeVisible();
+    await expect(
+      panel.getByRole('link', { name: 'Log in to book' }),
+    ).toHaveAttribute('href', '/login?next=%2Ftour%2Fladakh-high-passes');
+  });
+
+  test.fixme('[B12] Your guides lists two guides, the lead guide first', async ({
+    page,
+  }) => {
+    await page.goto('/tour/ladakh-high-passes');
+    const guides = page.locator('section', {
+      has: page.getByRole('heading', { level: 2, name: 'Your guides' }),
+    });
+
+    const items = guides.getByRole('listitem');
+    await expect(items).toHaveCount(2);
+    await expect(items.nth(0)).toContainText('Tsering Dorjay');
+    await expect(items.nth(0)).toContainText('Lead guide');
+    await expect(items.nth(1)).toContainText('Rigzin Angmo');
+    await expect(items.nth(1)).toContainText('Guide');
+  });
+
+  test.fixme('[D-08] Reviews lists the four reviews, with no Review pagination nav', async ({
+    page,
+  }) => {
+    await page.goto('/tour/ladakh-high-passes');
+    const reviews = page.locator('#reviews');
+
+    for (const name of [
+      'Farhan Siddiqui',
+      'Nandini Reddy',
+      'Vivek Agarwal',
+      'Lakshmi Subramanian',
+    ]) {
+      await expect(reviews.getByText(name)).toBeVisible();
+    }
+    await expect(
+      reviews.getByRole('navigation', { name: 'Review pagination' }),
+    ).toHaveCount(0);
+  });
+});
+
+// R4: the streamed sections do not move the page once they have arrived. The 375px check is held:
+// the site header changes height when its mobile menu hydrates, which shifts the page on every route,
+// including /styleguide with nothing streamed (0.139 there too; see deferred-items.md).
+for (const width of [375, 1280]) {
+  const check = width === 375 ? test.fixme : test;
+  check(
+    `[R4] at ${width}px the layout shift after load is under 0.1`,
+    async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      // Recorded from the first paint, so a shift caused by a streamed section is counted.
+      await page.addInitScript(() => {
+        const shifted = window as Window & { __layoutShift?: number };
+        shifted.__layoutShift = 0;
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            const shift = entry as PerformanceEntry & {
+              value: number;
+              hadRecentInput: boolean;
+            };
+            if (!shift.hadRecentInput) {
+              shifted.__layoutShift =
+                (shifted.__layoutShift ?? 0) + shift.value;
+            }
+          }
+        }).observe({ type: 'layout-shift', buffered: true });
+      });
+
+      await page.goto('/tour/ladakh-high-passes');
+      await page.waitForLoadState('networkidle');
+
+      const total = await page.evaluate(
+        () =>
+          (window as Window & { __layoutShift?: number }).__layoutShift ?? 0,
+      );
+      expect(total).toBeLessThan(0.1);
+    },
+  );
+}
+
+// D-08: a page number past the end is clamped and the Reviews heading still renders (T-04-22).
+test('[D-08] /tour/ladakh-high-passes?reviewPage=999999#reviews renders the Reviews heading with no error', async ({
+  page,
+}) => {
+  const response = await page.goto(
+    '/tour/ladakh-high-passes?reviewPage=999999#reviews',
+  );
+
+  expect(response?.status()).toBe(200);
+  await expect(
+    page.getByRole('heading', { level: 2, name: 'Reviews' }),
+  ).toBeVisible();
+  // The page is clamped to the one page the four reviews fill, so the real review text shows.
+  await expect(
+    page
+      .locator('#reviews')
+      .getByText('Two full days in Leh before going higher'),
+  ).toBeVisible();
+});
