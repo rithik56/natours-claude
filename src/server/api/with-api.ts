@@ -11,12 +11,16 @@ import { toAppError } from '@/server/error-mapper';
 import { redactUrl, requestLogger } from '@/server/logger';
 import type { SelfUser } from '@/server/modules/users/dto';
 import type { z } from '@/server/validation';
+import { readBodyLimited, parseMultipart } from './body';
 import { corsHeaders, isAllowedOrigin } from './origin';
 import { searchParamsToRecord } from './parse-query';
 import { errorResponse } from './responses';
 
 type OptionalSchema = z.ZodType | undefined;
 type Output<S> = S extends z.ZodType ? z.output<S> : undefined;
+
+/** A JSON body is refused past 1 MB (SEC-17). Only uploads have a larger limit. */
+const JSON_BODY_LIMIT = 1_048_576;
 
 export type ApiOptions<
   P extends OptionalSchema = undefined,
@@ -28,9 +32,18 @@ export type ApiOptions<
   params?: P;
   query?: Q;
   body?: B;
+  /**
+   * A multipart upload (S16, SEC-17): the body must be `multipart/form-data`, is byte-counted
+   * against `maxBytes`, and reaches the handler as `form`.
+   */
+  upload?: { maxBytes: number };
   rateLimit?: {
     rule: RateLimitRule;
-    key: (input: { request: NextRequest; body: Output<B> }) => string;
+    key: (input: {
+      request: NextRequest;
+      body: Output<B>;
+      user: SelfUser | null;
+    }) => string;
   };
 };
 
@@ -43,6 +56,8 @@ export type ApiContext<
   params: Output<P>;
   query: Output<Q>;
   body: Output<B>;
+  /** The parsed multipart body, present only on a route with the `upload` option. */
+  form: FormData | undefined;
   user: SelfUser | null;
   requestId: string;
   log: Logger;
@@ -53,6 +68,7 @@ type RouteContext = { params: Promise<Record<string, string | string[]>> };
 const REQUEST_ID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const JSON_CONTENT_TYPE = /^application\/json\s*(;|$)/i;
+const MULTIPART_CONTENT_TYPE = /^multipart\/form-data\s*(;|$)/i;
 const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 // A client-supplied ID is reused only when it is a UUID, so a header can never
@@ -64,6 +80,7 @@ function requestIdFor(request: NextRequest): string {
     : crypto.randomUUID();
 }
 
+// The content type is checked before any byte is read, and the size is counted while reading (SEC-17).
 async function readBody(
   request: NextRequest,
   schema: z.ZodType,
@@ -71,13 +88,26 @@ async function readBody(
   if (!JSON_CONTENT_TYPE.test(request.headers.get('content-type') ?? '')) {
     throw new AppError('UNSUPPORTED_MEDIA_TYPE');
   }
+  const bytes = await readBodyLimited(request, JSON_BODY_LIMIT);
   let raw: unknown;
   try {
-    raw = await request.json();
+    raw = JSON.parse(new TextDecoder().decode(bytes));
   } catch {
     throw new AppError('VALIDATION_ERROR', messages.validation.invalidJson);
   }
   return schema.parse(raw);
+}
+
+async function readUpload(
+  request: NextRequest,
+  maxBytes: number,
+): Promise<FormData> {
+  const contentType = request.headers.get('content-type') ?? '';
+  if (!MULTIPART_CONTENT_TYPE.test(contentType)) {
+    throw new AppError('UNSUPPORTED_MEDIA_TYPE');
+  }
+  const bytes = await readBodyLimited(request, maxBytes);
+  return parseMultipart(bytes, contentType);
 }
 
 function applyHeaders(target: Headers, extra: Record<string, string>): void {
@@ -156,9 +186,12 @@ export function withApi<
       const body = options.body
         ? ((await readBody(request, options.body)) as Output<B>)
         : (undefined as Output<B>);
+      const form = options.upload
+        ? await readUpload(request, options.upload.maxBytes)
+        : undefined;
 
       if (options.rateLimit) {
-        const key = options.rateLimit.key({ request, body });
+        const key = options.rateLimit.key({ request, body, user });
         const result = await getDeps().rateLimiter.consume(
           key,
           options.rateLimit.rule,
@@ -174,6 +207,7 @@ export function withApi<
         params,
         query,
         body,
+        form,
         user,
         requestId,
         log,
