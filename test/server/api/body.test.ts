@@ -5,7 +5,7 @@ import { parseMultipart, readBodyLimited } from '@/server/api/body';
 
 /** A body stream that counts how many chunks were pulled from it. */
 function countedStream(chunks: Uint8Array[]) {
-  const counter = { pulled: 0, cancelled: false };
+  const counter = { pulled: 0 };
   let index = 0;
   const stream = new ReadableStream<Uint8Array>(
     {
@@ -18,9 +18,6 @@ function countedStream(chunks: Uint8Array[]) {
           controller.close();
         }
       },
-      cancel() {
-        counter.cancelled = true;
-      },
       // Zero high-water mark: a stream pulls ahead by default, which would count a read nobody made.
     },
     { highWaterMark: 0 },
@@ -28,7 +25,7 @@ function countedStream(chunks: Uint8Array[]) {
   return { stream, counter };
 }
 
-function bytes(length: number): Uint8Array {
+function bytes(length: number): Uint8Array<ArrayBuffer> {
   return new Uint8Array(length).fill(7);
 }
 
@@ -82,7 +79,8 @@ describe('readBodyLimited (S16, SEC-17)', () => {
     await expect(readBodyLimited(request, 4096)).rejects.toMatchObject({
       code: 'PAYLOAD_TOO_LARGE',
     });
-    expect(counter.cancelled).toBe(true);
+    // Two chunks take the count past 4,096 bytes, so the third is never read.
+    expect(counter.pulled).toBe(2);
   });
 });
 

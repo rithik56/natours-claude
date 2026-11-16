@@ -152,7 +152,10 @@ describe('PUT /api/v1/tours/[id]/images (one database for the file)', () => {
   /** A cover and its credit, as one upload form. */
   function coverForm(bytes: Uint8Array, file: string, type = 'image/jpeg') {
     const form = new FormData();
-    form.append('imageCover', new File([bytes], file, { type }));
+    form.append(
+      'imageCover',
+      new File([new Uint8Array(bytes)], file, { type }),
+    );
     form.append('credits', JSON.stringify({ imageCover: creditFor(file) }));
     return form;
   }
@@ -403,7 +406,7 @@ describe('PUT /api/v1/tours/[id]/images (one database for the file)', () => {
           },
           body,
           duplex: 'half',
-        } as RequestInit,
+        } as never,
       );
 
       const response = await route.PUT(request, {

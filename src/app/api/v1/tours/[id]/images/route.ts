@@ -25,5 +25,10 @@ export const PUT = withApi(
     params: tourParams,
     query: z.strictObject({}),
     upload: { maxBytes: IMAGES_UPLOAD_LIMIT },
+    // 20 uploads per signed-in user per hour (SEC-05). Each user has a window of their own.
+    rateLimit: {
+      rule: { name: 'tour-images', points: 20, durationSeconds: 3600 },
+      key: ({ user }) => `tour-images:${user?.id ?? ''}`,
+    },
   },
 );

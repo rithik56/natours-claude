@@ -385,20 +385,37 @@ function creditsIn(
   return imageCreditsSchema.parse(json);
 }
 
+/** The only parts an images upload may carry (S16). Any other part is refused by name. */
+const IMAGE_PARTS: ReadonlySet<string> = new Set([
+  'imageCover',
+  'images',
+  'credits',
+]);
+
+/** A tour has at most three gallery photos (B4, D-14). */
+const MAX_GALLERY_IMAGES = 3;
+
 /**
- * Reads an images upload (S16, B4, D-14) into its files and credits. Rules for this step: at
- * least one file, at most one `imageCover`, and exactly one credit for each uploaded file, with
- * no extra credit (U27). A bad part, missing credit or unreadable credits part is a 400 with a
- * details path.
+ * Reads an images upload (S16, B4, D-14) into its files and credits. Rules: only the known parts,
+ * at least one file, at most one `imageCover`, at most three `images`, and exactly one credit for
+ * each uploaded file with no extra credit (U27). A bad part, count, missing credit or unreadable
+ * credits part is a 400 with a details path.
  *
  * @param form - The parsed multipart body.
  * @returns The cover and gallery bytes, with the credit for each file.
- * @throws AppError VALIDATION_ERROR for a count, part or credit that does not match the files.
+ * @throws AppError VALIDATION_ERROR for a part, count or credit that does not match the files.
  */
 export async function parseImagesForm(form: FormData): Promise<ImagesInput> {
+  for (const part of new Set(form.keys())) {
+    if (!IMAGE_PARTS.has(part)) refuse(messages.validation.unknownField, part);
+  }
+
   const covers = form.getAll('imageCover');
   const gallery = form.getAll('images');
   if (covers.length > 1) refuse(messages.tours.tooManyCovers, 'imageCover');
+  if (gallery.length > MAX_GALLERY_IMAGES) {
+    refuse(messages.tours.tooManyGalleryImages, 'images');
+  }
   if (covers.length + gallery.length === 0) {
     refuse(messages.tours.noImage, 'imageCover');
   }

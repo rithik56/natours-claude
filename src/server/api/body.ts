@@ -4,7 +4,7 @@ import { AppError } from '@/server/errors';
 /**
  * Reads a request body into memory, refusing it past `maxBytes` (S16, SEC-17). A declared
  * Content-Length above the limit is refused before any byte is read. A body with no length
- * is counted while it streams, and the stream is cancelled the moment it passes the limit.
+ * is counted while it streams, and reading stops the moment it passes the limit.
  *
  * @param request - The request whose body is read.
  * @param maxBytes - The most bytes the body may have.
@@ -29,7 +29,9 @@ export async function readBodyLimited(
     if (done) break;
     total += value.byteLength;
     if (total > maxBytes) {
-      await reader.cancel().catch(() => undefined);
+      // Release the reader rather than cancel the stream: on Node 24, cancelling a FormData-backed
+      // body makes undici raise an unhandled rejection. Nothing more is buffered either way.
+      reader.releaseLock();
       throw new AppError('PAYLOAD_TOO_LARGE');
     }
     chunks.push(value);

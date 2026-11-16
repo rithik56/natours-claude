@@ -3,7 +3,10 @@ import { crc32 } from 'node:zlib';
 import sharp from 'sharp';
 
 /** A small JPEG, for tests that upload many photos and need each one to be quick. */
-export async function smallJpeg(width = 64, height = 48): Promise<Uint8Array> {
+export async function smallJpeg(
+  width = 64,
+  height = 48,
+): Promise<Uint8Array<ArrayBuffer>> {
   return new Uint8Array(
     await sharp({
       create: { width, height, channels: 3, background: '#2f6b4f' },
@@ -18,7 +21,7 @@ export async function smallJpeg(width = 64, height = 48): Promise<Uint8Array> {
  * width and height rewritten, and the IHDR CRC recomputed over the chunk type and data (bytes 12 to 28),
  * so the declared size is the only thing wrong with it.
  */
-export async function pixelBombPng(): Promise<Uint8Array> {
+export async function pixelBombPng(): Promise<Uint8Array<ArrayBuffer>> {
   const small = await sharp({
     create: { width: 8, height: 8, channels: 3, background: '#000000' },
   })
