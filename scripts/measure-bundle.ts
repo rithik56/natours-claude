@@ -7,8 +7,8 @@ import { gzipSync } from 'node:zlib';
 // JavaScript budget. The eager budget is the gzipped script transfer size that Lighthouse CI
 // measures against `next start` (the mobile preset): the route's floor plus its delta. A route with
 // a lazy allowance also has the gzipped size of the production chunks that carry its lazy marker
-// checked against that allowance. The tour page's Leaflet map loads on scroll, so Lighthouse never
-// sees it.
+// checked against that allowance. Each marked chunk Lighthouse loaded is taken out of the eager
+// bytes first, so it is budgeted once, under the lazy allowance (ADR 0034).
 //   --record [--route <path>]  re-measures one route's floor from the reports in .lighthouseci and
 //                              rewrites only that route's entry (default route "/")
 //   --check                    checks every route's eager script and lazy allowance (run in CI)
@@ -31,6 +31,7 @@ export type Baseline = { routes: RouteBaseline[] };
 export type BudgetResult = { ok: boolean; limit: number; measured: number };
 
 type Json = Record<string, unknown>;
+type ScriptRequest = { url: string; transferSize: number };
 type Paths = { reportsDir: string; baselinePath: string; staticDir: string };
 type Line = { ok: boolean; message: string };
 
@@ -98,6 +99,62 @@ export function lazyChunkBytes(staticDir: string, marker: string): number {
     if (bytes.includes(marker)) total += gzipSync(bytes).length;
   }
   return total;
+}
+
+const STATIC_PREFIX = '/_next/static/';
+
+/** The Script requests of a report's network-requests audit, with their transfer sizes. */
+function scriptRequests(lhr: unknown): ScriptRequest[] {
+  const items = field(
+    field(field(lhr, 'audits'), 'network-requests'),
+    'details',
+  );
+  const list = field(items, 'items');
+  if (!Array.isArray(list)) {
+    throw new Error('the report has no network-requests audit with items');
+  }
+  return list.flatMap((item: unknown) => {
+    if (field(item, 'resourceType') !== 'Script') return [];
+    const url = field(item, 'url');
+    const transferSize = field(item, 'transferSize');
+    if (typeof url !== 'string' || typeof transferSize !== 'number') {
+      throw new Error('a script request in the report has no url or size');
+    }
+    return [{ url, transferSize }];
+  });
+}
+
+/** The file under staticDir that a /_next/static URL is served from, if it exists. */
+function staticFileOf(url: string, staticDir: string): string | undefined {
+  const { pathname } = new URL(url);
+  if (!pathname.startsWith(STATIC_PREFIX)) return undefined;
+  const file = join(staticDir, pathname.slice(STATIC_PREFIX.length));
+  return existsSync(file) ? file : undefined;
+}
+
+/**
+ * The eager script bytes of one Lighthouse run. A route with a lazy marker has its marked script
+ * requests taken out: each one is a chunk the lazy allowance already counts, so it is budgeted once,
+ * there (ADR 0034). Every other route is measured exactly as the resource summary has it.
+ */
+export function eagerScriptBytes(
+  lhr: unknown,
+  staticDir: string,
+  lazyMarker?: string,
+): number {
+  const total = scriptTransferSize(lhr);
+  if (lazyMarker === undefined) return total;
+  if (!existsSync(staticDir)) {
+    throw new Error(`${staticDir} does not exist; run npm run build first`);
+  }
+  let lazy = 0;
+  for (const request of scriptRequests(lhr)) {
+    const file = staticFileOf(request.url, staticDir);
+    if (file !== undefined && readFileSync(file).includes(lazyMarker)) {
+      lazy += request.transferSize;
+    }
+  }
+  return total - lazy;
 }
 
 function readJson(path: string): unknown {
@@ -221,8 +278,18 @@ function formatJson(value: unknown): string {
 }
 
 function record(paths: Paths, route: string): string {
+  const entries = existsSync(paths.baselinePath)
+    ? readRoutes(paths.baselinePath)
+    : [];
+  const existing = entries.find((entry) => field(entry, 'route') === route);
+  // The floor is measured the way --check measures it, so a lazy route's floor leaves out its chunk.
+  const lazyMarker = existing
+    ? routeBaseline(existing, paths.baselinePath).lazyMarker
+    : undefined;
   const reports = reportsFor(paths.reportsDir, route);
-  const runBytes = reports.map(scriptTransferSize).sort((a, b) => a - b);
+  const runBytes = reports
+    .map((lhr) => eagerScriptBytes(lhr, paths.staticDir, lazyMarker))
+    .sort((a, b) => a - b);
   const first = reports[0];
   const measured: Json = {
     floorBytes: median(runBytes),
@@ -236,10 +303,6 @@ function record(paths: Paths, route: string): string {
     runBytes,
     command: 'npm run bundle:record',
   };
-  const entries = existsSync(paths.baselinePath)
-    ? readRoutes(paths.baselinePath)
-    : [];
-  const existing = entries.find((entry) => field(entry, 'route') === route);
   const merged: Json = {
     ...(existing ?? { budgetDeltaBytes: BUDGET_DELTA_BYTES, route }),
     ...measured,
@@ -253,12 +316,20 @@ function record(paths: Paths, route: string): string {
 
 function checkRoute(entry: RouteBaseline, paths: Paths): Line[] {
   const reports = reportsFor(paths.reportsDir, entry.route);
-  const measured = median(reports.map(scriptTransferSize));
+  const measured = median(
+    reports.map((lhr) =>
+      eagerScriptBytes(lhr, paths.staticDir, entry.lazyMarker),
+    ),
+  );
   const eager = checkBudget(measured, entry);
+  const taken =
+    entry.lazyMarker === undefined
+      ? ''
+      : ', with the lazy chunk bytes taken out';
   const lines: Line[] = [
     {
       ok: eager.ok,
-      message: `bundle: ${eager.ok ? 'ok' : 'over budget'}, ${String(measured)} bytes of script for ${entry.route} against a limit of ${String(eager.limit)} (floor ${String(entry.floorBytes)} plus ${String(entry.budgetDeltaBytes)})`,
+      message: `bundle: ${eager.ok ? 'ok' : 'over budget'}, ${String(measured)} bytes of script for ${entry.route}${taken} against a limit of ${String(eager.limit)} (floor ${String(entry.floorBytes)} plus ${String(entry.budgetDeltaBytes)})`,
     },
   ];
   if (
