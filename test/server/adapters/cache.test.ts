@@ -14,6 +14,16 @@ describe('fake cache', () => {
     expect(readTour).toHaveBeenLastCalledWith('valley-of-flowers-trek');
   });
 
+  it('[Q7] cached accepts a revalidate option and still passes the arguments through', async () => {
+    const cache = createFakeCache();
+    const readCatalogue = vi.fn(async (page: number) => ({ page }));
+    const cachedRead = cache.cached(readCatalogue, ['catalogue'], ['tours'], {
+      revalidate: 3600,
+    });
+    expect(await cachedRead(2)).toEqual({ page: 2 });
+    expect(readCatalogue).toHaveBeenLastCalledWith(2);
+  });
+
   it('[Q7] invalidate records every tag in order', async () => {
     const cache = createFakeCache();
     await cache.invalidate('tours', 'tour:1');

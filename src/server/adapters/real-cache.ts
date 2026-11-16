@@ -8,8 +8,11 @@ import type { Cache } from './cache';
  */
 export function createNextCache(): Cache {
   return {
-    cached(fn, keyParts, tags) {
-      return unstable_cache(fn, keyParts, { tags });
+    cached(fn, keyParts, tags, options) {
+      return unstable_cache(fn, keyParts, {
+        tags,
+        revalidate: options?.revalidate,
+      });
     },
     async invalidate(...tags) {
       for (const tag of tags) {

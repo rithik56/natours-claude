@@ -39,13 +39,13 @@ describe('success helpers', () => {
     });
   });
 
-  it('[B9] list adds the page, limit and total as meta', async () => {
-    const response = list([1, 2], { page: 2, limit: 2, total: 5 });
+  it('[B9] list nests the items under the key and adds the page, limit and total as meta', async () => {
+    const response = list('tours', [1, 2], { page: 2, limit: 2, total: 5 });
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       status: 'success',
-      data: [1, 2],
+      data: { tours: [1, 2] },
       meta: { page: 2, limit: 2, total: 5 },
     });
   });

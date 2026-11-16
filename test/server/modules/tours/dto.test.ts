@@ -15,6 +15,7 @@ async function clearStoredAlts(tour: TourDoc): Promise<void> {
 }
 
 const SUMMARY_KEYS = [
+  'createdAt',
   'difficulty',
   'duration',
   'id',
@@ -64,6 +65,14 @@ describe('tour DTOs', () => {
     expect(summary.id).toBe(record._id);
     expect(summary.startDates).toEqual(record.startDates);
     expect(summary.price).toBe(record.price);
+  });
+
+  it('[B1] toTourSummary gives createdAt as the ISO instant the document was created', async () => {
+    const tour = await createTour();
+
+    const summary = toTourSummary(tour);
+
+    expect(summary.createdAt).toBe(tour.createdAt.toISOString());
   });
 
   it('[R6] toTourSummary keeps the order of startDates', async () => {
