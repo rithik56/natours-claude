@@ -59,10 +59,9 @@ export type TourSummary = {
 };
 
 /** A photo credit as a page shows it: `alt` is always text (D-15). */
-export type TourPhotoCredit = Omit<
-  TourFields['photoCredits'][number],
-  'alt'
-> & { alt: string };
+type TourPhotoCredit = Omit<TourFields['photoCredits'][number], 'alt'> & {
+  alt: string;
+};
 
 /** A tour as its detail page shows it. */
 export type TourDetail = TourSummary & {
