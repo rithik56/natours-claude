@@ -14,6 +14,7 @@ import { gzipSync } from 'node:zlib';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   checkBudget,
+  eagerScriptBytes,
   lazyChunkBytes,
   median,
   scriptTransferSize,
@@ -24,11 +25,21 @@ const FLOOR = 150_000;
 const DELTA = 40_960;
 const TOUR = '/tour/valley-of-flowers-trek';
 const TOUR_URL = `http://localhost:3300${TOUR}`;
+const ROOT_URL = 'http://localhost:3300/';
+const CHUNK_URL = 'http://localhost:3300/_next/static/chunks/leaflet.js';
 const MARKER = 'leaflet-container';
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.80 Safari/537.36';
 
-function report(url: string, scriptBytes: number) {
+type ScriptRequest = { url: string; transferSize: number };
+
+// A Lighthouse report as the collect step writes it: the resource summary's script row is the sum of
+// the Script requests in network-requests, which is how the lazy chunk ends up in the eager total.
+function report(
+  url: string,
+  scriptBytes: number,
+  scripts: ScriptRequest[] = [],
+) {
   return {
     lighthouseVersion: '13.6.0',
     requestedUrl: url,
@@ -42,6 +53,18 @@ function report(url: string, scriptBytes: number) {
             { resourceType: 'document', transferSize: 4_000 },
             { resourceType: 'script', transferSize: scriptBytes },
             { resourceType: 'stylesheet', transferSize: 5_000 },
+          ],
+        },
+      },
+      'network-requests': {
+        details: {
+          items: [
+            { url, resourceType: 'Document', transferSize: 4_000 },
+            ...scripts.map((script) => ({
+              url: script.url,
+              resourceType: 'Script',
+              transferSize: script.transferSize,
+            })),
           ],
         },
       },
@@ -139,6 +162,68 @@ describe('lazyChunkBytes', () => {
   });
 });
 
+describe('eagerScriptBytes', () => {
+  let dir = '';
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'eager-script-'));
+    mkdirSync(join(dir, 'chunks'), { recursive: true });
+    writeFileSync(
+      join(dir, 'chunks', 'leaflet.js'),
+      `${MARKER}${'q'.repeat(2_000)}`,
+    );
+    writeFileSync(join(dir, 'chunks', 'app.js'), 'y'.repeat(2_000));
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('[R8] takes the lazy chunk out of the eager bytes when Lighthouse loaded it eagerly', () => {
+    const lhr = report(TOUR_URL, 200_000, [
+      { url: CHUNK_URL, transferSize: 40_000 },
+    ]);
+    expect(eagerScriptBytes(lhr, dir, MARKER)).toBe(160_000);
+  });
+
+  it('[R8] keeps eager script that does not carry the marker', () => {
+    const lhr = report(TOUR_URL, 200_000, [
+      {
+        url: 'http://localhost:3300/_next/static/chunks/app.js',
+        transferSize: 40_000,
+      },
+    ]);
+    expect(eagerScriptBytes(lhr, dir, MARKER)).toBe(200_000);
+  });
+
+  it('[R9] leaves a route without a lazy marker exactly as the resource summary has it', () => {
+    const lhr = report(ROOT_URL, 200_000, [
+      { url: CHUNK_URL, transferSize: 40_000 },
+    ]);
+    expect(eagerScriptBytes(lhr, dir)).toBe(200_000);
+  });
+
+  it('[R8] throws when a lazy route has no build output to read', () => {
+    const lhr = report(TOUR_URL, 200_000);
+    expect(() => eagerScriptBytes(lhr, join(dir, 'missing'), MARKER)).toThrow(
+      /npm run build/,
+    );
+  });
+
+  it('[R8] throws when a lazy route report has no network-requests audit', () => {
+    const lhr = {
+      audits: {
+        'resource-summary': report(TOUR_URL, 200_000).audits[
+          'resource-summary'
+        ],
+      },
+    };
+    expect(() => eagerScriptBytes(lhr, dir, MARKER)).toThrow(
+      /network-requests/,
+    );
+  });
+});
+
 describe('measure-bundle CLI', () => {
   let dir = '';
   let reportsDir = '';
@@ -178,13 +263,26 @@ describe('measure-bundle CLI', () => {
     };
   }
 
-  function writeReports(url: string, sizes: number[]) {
+  function writeReports(
+    url: string,
+    sizes: number[],
+    scripts: ScriptRequest[] = [],
+  ) {
     mkdirSync(reportsDir, { recursive: true });
     const slug = url.replace(/[^a-z0-9]/gi, '_');
     sizes.forEach((size, index) => {
       const file = join(reportsDir, `lhr-${slug}-${String(index)}.json`);
-      writeFileSync(file, JSON.stringify(report(url, size)));
+      writeFileSync(file, JSON.stringify(report(url, size, scripts)));
     });
+  }
+
+  // The marked chunk the tour map loads: its gzipped size is well above zero and well below 1 MB.
+  function writeMarkedChunk() {
+    mkdirSync(join(staticDir, 'chunks'), { recursive: true });
+    writeFileSync(
+      join(staticDir, 'chunks', 'leaflet.js'),
+      `${MARKER}\n${randomBytes(20_000).toString('hex')}`,
+    );
   }
 
   function entry(route: string, extra: Record<string, unknown> = {}) {
@@ -303,6 +401,78 @@ describe('measure-bundle CLI', () => {
     const result = run('--check');
     expect(result.status).toBe(1);
     expect(result.output).toContain('npm run build');
+  });
+
+  it('[R8] --check counts a lazy chunk that Lighthouse loaded once, under the lazy allowance', () => {
+    // The eager script total is 200,000, over the 190,960 limit, but 40,000 of it is the marked
+    // chunk: without it the eager bytes are 160,000, which passes.
+    writeBaseline([
+      entry('/'),
+      entry(TOUR, { lazyAllowanceBytes: 1_000_000, lazyMarker: MARKER }),
+    ]);
+    writeReports(ROOT_URL, [FLOOR, FLOOR, FLOOR]);
+    writeReports(
+      TOUR_URL,
+      [200_000, 200_000, 200_000],
+      [{ url: CHUNK_URL, transferSize: 40_000 }],
+    );
+    writeMarkedChunk();
+    const result = run('--check');
+    expect(result.status).toBe(0);
+    expect(result.output).toContain('160000 bytes of script for');
+    expect(result.output).not.toContain('200000 bytes of script');
+  });
+
+  it('[R8] --check fails naming the lazy allowance when the loaded lazy chunk is over it', () => {
+    writeBaseline([
+      entry('/'),
+      entry(TOUR, { lazyAllowanceBytes: 1_000, lazyMarker: MARKER }),
+    ]);
+    writeReports(ROOT_URL, [FLOOR, FLOOR, FLOOR]);
+    writeReports(
+      TOUR_URL,
+      [200_000, 200_000, 200_000],
+      [{ url: CHUNK_URL, transferSize: 40_000 }],
+    );
+    writeMarkedChunk();
+    const result = run('--check');
+    expect(result.status).toBe(1);
+    const overLine = result.output
+      .split('\n')
+      .find((line) => line.includes('over budget'));
+    expect(overLine).toContain('lazy');
+    expect(overLine).toContain(TOUR);
+  });
+
+  it('[R9] --check leaves a route without a lazy marker unchanged when it loads a marked chunk', () => {
+    const over = FLOOR + DELTA + 1;
+    writeBaseline([entry('/')]);
+    writeReports(
+      ROOT_URL,
+      [over, over, over],
+      [{ url: CHUNK_URL, transferSize: 40_000 }],
+    );
+    writeMarkedChunk();
+    const result = run('--check');
+    expect(result.status).toBe(1);
+    expect(result.output).toContain(`${String(over)} bytes of script for /`);
+  });
+
+  it('[R8] --record --route for a lazy route records the eager bytes without the lazy chunk', () => {
+    writeBaseline([
+      entry('/'),
+      entry(TOUR, { lazyAllowanceBytes: 51_200, lazyMarker: MARKER }),
+    ]);
+    writeReports(
+      TOUR_URL,
+      [200_000, 200_000, 200_000],
+      [{ url: CHUNK_URL, transferSize: 40_000 }],
+    );
+    writeMarkedChunk();
+    expect(run('--record', ['--route', TOUR]).status).toBe(0);
+    const routes = readRoutes();
+    expect(routes[1]?.floorBytes).toBe(160_000);
+    expect(routes[1]?.lazyMarker).toBe(MARKER);
   });
 
   it('[R9] --record writes the median of three runs in any order', () => {
