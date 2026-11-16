@@ -269,14 +269,33 @@ const START_LOCATION = z.strictObject({
   address: TOUR_TEXT,
   description: TOUR_TEXT,
 });
-const LOCATIONS = z.array(
-  z.strictObject({
-    coordinates: lngLat,
-    description: TOUR_TEXT,
-    day: POSITIVE_WHOLE,
-  }),
-);
-const GUIDES = z.array(z.string().regex(OBJECT_ID_HEX));
+// Each stop has its own day. MapFrame keys its markers by day, so a repeated day would repeat a React
+// key and drop or duplicate a marker (WR-05).
+const LOCATIONS = z
+  .array(
+    z.strictObject({
+      coordinates: lngLat,
+      description: TOUR_TEXT,
+      day: POSITIVE_WHOLE,
+    }),
+  )
+  .refine(
+    (stops) => new Set(stops.map((stop) => stop.day)).size === stops.length,
+    {
+      message: messages.validation.invalidValue,
+    },
+  );
+
+// A guide is listed once (WR-05). The id is hex in either case, so the comparison ignores case.
+// No maximum is set here: the plan and the contracts name none.
+const GUIDES = z
+  .array(z.string().regex(OBJECT_ID_HEX))
+  .refine(
+    (ids) => new Set(ids.map((id) => id.toLowerCase())).size === ids.length,
+    {
+      message: messages.validation.invalidValue,
+    },
+  );
 
 /**
  * The body of PATCH /api/v1/tours/[id] (B4, S4, QA-04). Every editable field is

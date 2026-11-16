@@ -541,6 +541,50 @@ describe('admin tour writes over JSON (F6, B4, D-13)', () => {
       expect(renamed.status).toBe(400);
       expect(pathsOf(renamed.body as ErrorBody)).toEqual(['name']);
     });
+
+    it('[WR-05] two stops on the same day are 400 on create and on update', async () => {
+      const { user } = await createUser({ role: 'admin' });
+      // Every seed stop moved to day 1: two or more stops then share a day.
+      const stops = createBodyFor(HAMPI).locations as Array<{ day: number }>;
+      expect(stops.length).toBeGreaterThan(1);
+      const sameDay = stops.map((stop) => ({ ...stop, day: 1 }));
+
+      const created = await create(
+        { ...createBodyFor(HAMPI), locations: sameDay },
+        user,
+      );
+      expect(created.status).toBe(400);
+      expect(pathsOf(created.body as ErrorBody)).toEqual(['locations']);
+
+      await createTour({ slug: VALLEY });
+      const updated = await patch(
+        seedIdOf(VALLEY),
+        { locations: sameDay },
+        user,
+      );
+      expect(updated.status).toBe(400);
+      expect(pathsOf(updated.body as ErrorBody)).toEqual(['locations']);
+    });
+
+    it('[WR-05] a guide listed twice is 400 on create and on update', async () => {
+      const { user } = await createUser({ role: 'admin' });
+      // A real active guide, so only the repeat can refuse the body.
+      const { user: guide } = await createUser({ role: 'guide' });
+      const id = String(guide._id);
+      const twice = [id, id];
+
+      const created = await create(
+        { ...createBodyFor(HAMPI), guides: twice },
+        user,
+      );
+      expect(created.status).toBe(400);
+      expect(pathsOf(created.body as ErrorBody)).toEqual(['guides']);
+
+      await createTour({ slug: VALLEY });
+      const updated = await patch(seedIdOf(VALLEY), { guides: twice }, user);
+      expect(updated.status).toBe(400);
+      expect(pathsOf(updated.body as ErrorBody)).toEqual(['guides']);
+    });
   });
 
   describe('DELETE /api/v1/tours/[id] (F6, B4, D-16)', () => {
