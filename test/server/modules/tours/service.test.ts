@@ -1,7 +1,15 @@
+import { Types } from 'mongoose';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getDeps } from '@/server/deps';
-import { getBySlug, list, monthOptions } from '@/server/modules/tours/service';
+import {
+  getById,
+  getBySlug,
+  getGuides,
+  list,
+  monthOptions,
+} from '@/server/modules/tours/service';
 import { Tour } from '@/server/modules/tours/model';
+import { User } from '@/server/modules/users/model';
 import { useTestDatabase } from '../../../helpers/db';
 import { createTour } from '../../../helpers/factories';
 import { seedTours } from '../../../helpers/seed';
@@ -193,6 +201,116 @@ describe('tours service', () => {
       );
       expect(detailCall?.[1]).toEqual(['tour-detail', String(stored?._id)]);
       expect(detailCall?.[2]).toEqual([`tour:${String(stored?._id)}`]);
+    });
+  });
+
+  describe('tours service: getGuides and getById', () => {
+    // Valley of Flowers Trek: Gaurav Bisht is its lead guide, Rohit Rawat a guide (seed/data/users.json).
+    const VALLEY = 'valley-of-flowers-trek';
+
+    it('[B12] puts the lead guide first, even when the tour lists him second', async () => {
+      await createTour({ slug: VALLEY, withGuides: true });
+      const [lead, guide] = seedTours().find((tour) => tour.slug === VALLEY)!
+        .guides as [string, string];
+      const tour = await Tour.findOne({ slug: VALLEY }).select('_id').lean();
+
+      const people = await getGuides(String(tour?._id), [guide, lead]);
+
+      expect(people.map((person) => person.id)).toEqual([lead, guide]);
+      expect(people[0]!.role).toBe('lead-guide');
+    });
+
+    it('[B12] two guides with the same role keep the order of the tour guides array', async () => {
+      await createTour({ slug: VALLEY, withGuides: true });
+      const [first, second] = seedTours().find((tour) => tour.slug === VALLEY)!
+        .guides as [string, string];
+      await User.collection.updateMany(
+        { _id: { $in: [first, second].map((id) => new Types.ObjectId(id)) } },
+        { $set: { role: 'guide' } },
+      );
+      const tour = await Tour.findOne({ slug: VALLEY }).select('_id').lean();
+
+      const people = await getGuides(String(tour?._id), [second, first]);
+
+      expect(people.map((person) => person.id)).toEqual([second, first]);
+    });
+
+    it('[B12] a deactivated guide is left out, and the rest stay in order', async () => {
+      await createTour({ slug: VALLEY, withGuides: true });
+      const [lead, guide] = seedTours().find((tour) => tour.slug === VALLEY)!
+        .guides as [string, string];
+      await User.collection.updateOne(
+        { _id: new Types.ObjectId(guide) },
+        { $set: { active: false } },
+      );
+      const tour = await Tour.findOne({ slug: VALLEY }).select('_id').lean();
+
+      const people = await getGuides(String(tour?._id), [lead, guide]);
+
+      expect(people.map((person) => person.id)).toEqual([lead]);
+    });
+
+    it('[B12] a guide removed from the database is left out, and the rest stay in order', async () => {
+      await createTour({ slug: VALLEY, withGuides: true });
+      const [lead, guide] = seedTours().find((tour) => tour.slug === VALLEY)!
+        .guides as [string, string];
+      await User.deleteOne({ _id: guide });
+      const tour = await Tour.findOne({ slug: VALLEY }).select('_id').lean();
+
+      const people = await getGuides(String(tour?._id), [lead, guide]);
+
+      expect(people.map((person) => person.id)).toEqual([lead]);
+    });
+
+    it('[B12] a tour whose guides are all missing gets [] and never throws', async () => {
+      await createTour({ slug: VALLEY });
+      const tour = await Tour.findOne({ slug: VALLEY }).select('_id').lean();
+      const seeded = seedTours().find((entry) => entry.slug === VALLEY)!;
+
+      const people = await getGuides(String(tour?._id), seeded.guides);
+
+      expect(people).toEqual([]);
+    });
+
+    it('[S3] a guide carries only id, name, photo and role', async () => {
+      await createTour({ slug: VALLEY, withGuides: true });
+      const seeded = seedTours().find((entry) => entry.slug === VALLEY)!;
+      const tour = await Tour.findOne({ slug: VALLEY }).select('_id').lean();
+
+      const people = await getGuides(String(tour?._id), seeded.guides);
+
+      for (const person of people) {
+        expect(Object.keys(person).sort()).toEqual([
+          'id',
+          'name',
+          'photo',
+          'role',
+        ]);
+      }
+    });
+
+    it('[B12] getById returns the tour without guides and with its guide ids in order', async () => {
+      await createTour({ slug: VALLEY, withGuides: true });
+      const seeded = seedTours().find((entry) => entry.slug === VALLEY)!;
+      const tour = await Tour.findOne({ slug: VALLEY }).select('_id').lean();
+
+      const detail = await getById(String(tour?._id));
+
+      expect(detail.id).toBe(String(tour?._id));
+      expect(detail.guideIds).toEqual(seeded.guides);
+      expect(detail).not.toHaveProperty('guides');
+    });
+
+    it('[B12] getById refuses an unknown id as NOT_FOUND, and a malformed id the same way', async () => {
+      const unknown = await getById('0123456789abcdef01234567').catch(
+        (error: unknown) => error,
+      );
+      const malformed = await getById('not-an-id').catch(
+        (error: unknown) => error,
+      );
+
+      expect(unknown).toMatchObject({ code: 'NOT_FOUND' });
+      expect(malformed).toMatchObject({ code: 'NOT_FOUND' });
     });
   });
 });
