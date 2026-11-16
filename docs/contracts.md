@@ -276,6 +276,7 @@ export type ApiOptions<
   body?: B;
   /** A multipart upload (ADR 0038): `multipart/form-data` only, counted against `maxBytes`. */
   upload?: { maxBytes: number };
+  /** Checked after the body or upload is read, so the key can use the parsed body. */
   rateLimit?: {
     rule: RateLimitRule;
     key: (input: {
@@ -283,6 +284,11 @@ export type ApiOptions<
       body: Output<B>;
       user: SelfUser | null;
     }) => string;
+  };
+  /** Checked before any body or upload is read (ADR 0041). The key gets the request and the user only. */
+  rateLimitBeforeBody?: {
+    rule: RateLimitRule;
+    key: (input: { request: NextRequest; user: SelfUser | null }) => string;
   };
 };
 
@@ -319,7 +325,8 @@ The pipeline order is fixed (ADR 0017):
 1. **Request ID** (D7). An incoming `x-request-id` is reused only when it is a UUID. Otherwise `crypto.randomUUID()` mints one. The ID is on every response, every error body and every log line of the request.
 2. **Origin check on writes** (S9). A POST, PUT, PATCH or DELETE is refused with 403 unless its Origin equals the origin of `APP_URL` or an entry of `CORS_ORIGINS`, compared exactly. A request with no Origin header is accepted (SEC-26). A GET is never origin-checked.
 3. **Access** (S1) through `resolveAccess(access, request.cookies)`.
-4. **Params, query, then body or upload.** Query validation is strict: unknown keys fail with 400. A body schema needs `Content-Type: application/json`, otherwise 415, and a JSON body is limited to 1,048,576 bytes (413). Malformed JSON is 400. A route with `upload` needs `multipart/form-data`, otherwise 415, and its body is limited to the route's `maxBytes` (413). Both limits are counted before parsing: a declared Content-Length above the limit is refused before any byte is read, and a body without one is counted as it streams (ADR 0038, SEC-17).
+4. **Params, query, then the early rate limit (ADR 0041).** A route with `rateLimitBeforeBody` is checked here, before any body is read: a refused call is 429 and its body is never read.
+5. **Body or upload.** Query validation is strict: unknown keys fail with 400. A body schema needs `Content-Type: application/json`, otherwise 415, and a JSON body is limited to 1,048,576 bytes (413). Malformed JSON is 400. A route with `upload` needs `multipart/form-data`, otherwise 415, and its body is limited to the route's `maxBytes` (413). Both limits are counted before parsing: a declared Content-Length above the limit is refused before any byte is read, and a body without one is counted as it streams (ADR 0038, SEC-17).
 
 ```ts
 // src/server/api/body.ts (ADR 0038)
@@ -329,8 +336,8 @@ export async function readBodyLimited(request: Request, maxBytes: number): Promi
 export async function parseMultipart(bytes: Uint8Array<ArrayBuffer>, contentType: string): Promise<FormData>;
 // Throws VALIDATION_ERROR when the bytes are not well-formed multipart.
 ```
-5. **Rate limit**, through the adapter in `getDeps()`. A refused call is 429 RATE_LIMITED with a `Retry-After` header of at least 1 second.
-6. **The handler.**
+6. **Rate limit**, through the adapter in `getDeps()`, for a route with `rateLimit` (after the body). A refused call is 429 RATE_LIMITED with a `Retry-After` header of at least 1 second.
+7. **The handler.**
 
 Access comes before validation and rate limiting, so an anonymous caller learns nothing about the body schema and cannot use another caller's allowance. Any throw becomes the 2.1 envelope. A 4xx is logged as a warning and a 5xx as an error, both with the request ID and never with cookies, bodies or query strings. A thrown `redirect()`, `notFound()` or other Next control-flow error is rethrown first with `unstable_rethrow`.
 

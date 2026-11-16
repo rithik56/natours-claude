@@ -44,6 +44,7 @@ Every decision that departs from `plan.md`, and every project-level decision, is
 | 0038 | [Uploads are multipart with byte limits, and images are replaced by position](0038-uploads-multipart-limits-and-image-slots.md) | Accepted; amends 0017 |
 | 0039 | [The tour page awaits its booking, guides and reviews instead of streaming them](0039-tour-page-awaits-instead-of-streaming.md) | Accepted |
 | 0040 | [The credits page has no loading.tsx, so it shows with JavaScript off](0040-credits-page-has-no-loading-file.md) | Accepted |
+| 0041 | [A rate limit can run before the body is read](0041-rate-limit-before-the-body-for-uploads.md) | Accepted; amends 0017 and 0038 |
 
 ## Format
 

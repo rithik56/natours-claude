@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { messages } from '@/lib/messages';
 import { ok } from '@/server/api/responses';
@@ -694,6 +695,77 @@ describe('withApi', () => {
       expect([first.status, again.status, different.status]).toEqual([
         200, 429, 200,
       ]);
+    });
+  });
+
+  describe('rate limit before the body (WR-04)', () => {
+    const guarded = {
+      POST: withApi(handler, {
+        access: 'public',
+        upload: { maxBytes: 4096 },
+        rateLimitBeforeBody: {
+          rule: { name: 'probe-before-body', points: 1, durationSeconds: 60 },
+          key: ({ request }) => request.headers.get('x-forwarded-for') ?? '',
+        },
+      }),
+    };
+
+    it('[WR-04] a caller over the limit is refused with 429 before any upload is read', async () => {
+      const small = new FormData();
+      small.append(
+        'imageCover',
+        new File(['x'], 'a.jpg', { type: 'image/jpeg' }),
+      );
+      const first = await callRoute(
+        { POST: guarded.POST },
+        { method: 'POST', path: '/x', ip: '203.0.113.9', body: small },
+      );
+      expect(first.status).toBe(200);
+
+      // Over the route's 4096-byte limit: were the body read first, this would be 413.
+      const big = new FormData();
+      big.append('imageCover', new File([new Uint8Array(5000)], 'big.jpg'));
+      const request = new NextRequest(`${APP}/x`, {
+        method: 'POST',
+        headers: { 'x-forwarded-for': '203.0.113.9', origin: APP },
+        body: big,
+      });
+      const second = await guarded.POST(request, {
+        params: Promise.resolve({}),
+      });
+
+      expect(second.status).toBe(429);
+      expect(errorOf(await second.json()).code).toBe('RATE_LIMITED');
+      expect(request.bodyUsed).toBe(false);
+      expect(second.headers.get('retry-after')).not.toBeNull();
+    });
+
+    it('[WR-04] a caller under the limit still reaches the handler with the parsed upload', async () => {
+      const probe = {
+        POST: withApi(handler, {
+          access: 'public',
+          upload: { maxBytes: 4096 },
+          rateLimitBeforeBody: {
+            rule: { name: 'probe-under-limit', points: 5, durationSeconds: 60 },
+            key: ({ request }) => request.headers.get('x-forwarded-for') ?? '',
+          },
+        }),
+      };
+      const form = new FormData();
+      form.append(
+        'imageCover',
+        new File(['x'], 'a.jpg', { type: 'image/jpeg' }),
+      );
+
+      const result = await callRoute(probe, {
+        method: 'POST',
+        path: '/x',
+        ip: '203.0.113.10',
+        body: form,
+      });
+
+      expect(result.status).toBe(200);
+      expect(handler).toHaveBeenCalledTimes(1);
     });
   });
 

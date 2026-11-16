@@ -37,6 +37,7 @@ export type ApiOptions<
    * against `maxBytes`, and reaches the handler as `form`.
    */
   upload?: { maxBytes: number };
+  /** Checked after the body or upload is read, so the key can use the parsed body. */
   rateLimit?: {
     rule: RateLimitRule;
     key: (input: {
@@ -44,6 +45,15 @@ export type ApiOptions<
       body: Output<B>;
       user: SelfUser | null;
     }) => string;
+  };
+  /**
+   * Checked after params and query, before any body or upload is read (WR-04). A caller already
+   * over the limit is refused without the server parsing what they sent. The key gets the request
+   * and the user only, because no body has been read yet.
+   */
+  rateLimitBeforeBody?: {
+    rule: RateLimitRule;
+    key: (input: { request: NextRequest; user: SelfUser | null }) => string;
   };
 };
 
@@ -110,6 +120,15 @@ async function readUpload(
   return parseMultipart(bytes, contentType);
 }
 
+/** The seconds to wait when this key is over its limit, or undefined when the request may go on. */
+async function refusalSeconds(
+  key: string,
+  rule: RateLimitRule,
+): Promise<number | undefined> {
+  const result = await getDeps().rateLimiter.consume(key, rule);
+  return result.allowed ? undefined : Math.max(1, result.retryAfterSeconds);
+}
+
 function applyHeaders(target: Headers, extra: Record<string, string>): void {
   for (const [name, value] of Object.entries(extra)) {
     if (name.toLowerCase() === 'vary') target.append(name, value);
@@ -142,9 +161,9 @@ function finish(
 /**
  * Wraps a Route Handler in the fixed pipeline (plan.md 4.3, ADR 0017):
  *
- * 1. request ID, 2. Origin check on writes (S9), 3. access (S1), 4. params,
- * query, then body or upload (ADR 0038), 5. rate limit, 6. the handler. Any throw becomes the
- * plan.md 4.1 error envelope, logged with the same request ID (B9, D7).
+ * 1. request ID, 2. Origin check on writes (S9), 3. access (S1), 4. params and query, 5. rate limit
+ * when `beforeBody` is set (WR-04), 6. body or upload (ADR 0038), 7. rate limit otherwise, 8. the
+ * handler. Any throw becomes the plan.md 4.1 error envelope, logged with the same request ID (B9, D7).
  *
  * @param handler - Receives the validated input, the user and a request logger.
  * @param options - `access` is required; a route without it answers 403.
@@ -183,6 +202,16 @@ export function withApi<
             searchParamsToRecord(request.nextUrl.searchParams),
           ) as Output<Q>)
         : (undefined as Output<Q>);
+
+      const rateLimitBeforeBody = options.rateLimitBeforeBody;
+      if (rateLimitBeforeBody) {
+        retryAfterSeconds = await refusalSeconds(
+          rateLimitBeforeBody.key({ request, user }),
+          rateLimitBeforeBody.rule,
+        );
+        if (retryAfterSeconds !== undefined) throw new AppError('RATE_LIMITED');
+      }
+
       const body = options.body
         ? ((await readBody(request, options.body)) as Output<B>)
         : (undefined as Output<B>);
@@ -190,16 +219,13 @@ export function withApi<
         ? await readUpload(request, options.upload.maxBytes)
         : undefined;
 
-      if (options.rateLimit) {
-        const key = options.rateLimit.key({ request, body, user });
-        const result = await getDeps().rateLimiter.consume(
-          key,
-          options.rateLimit.rule,
+      const rateLimit = options.rateLimit;
+      if (rateLimit) {
+        retryAfterSeconds = await refusalSeconds(
+          rateLimit.key({ request, body, user }),
+          rateLimit.rule,
         );
-        if (!result.allowed) {
-          retryAfterSeconds = Math.max(1, result.retryAfterSeconds);
-          throw new AppError('RATE_LIMITED');
-        }
+        if (retryAfterSeconds !== undefined) throw new AppError('RATE_LIMITED');
       }
 
       const response = await handler({
