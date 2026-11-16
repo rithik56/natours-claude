@@ -4,22 +4,35 @@ import { notFound } from 'next/navigation';
 import { cache, Suspense } from 'react';
 import { BookingSection } from '@/components/features/booking-section';
 import {
+  GuidesFallback,
+  GuidesSection,
+} from '@/components/features/guides-section';
+import {
   TourGallery,
   type GalleryPhoto,
 } from '@/components/features/tour-gallery';
 import { TourRoute } from '@/components/features/tour-route';
+import {
+  ReviewsFallback,
+  ReviewsSection,
+} from '@/components/features/reviews-section';
 import { FactsStrip } from '@/components/ui/facts-strip';
 import { Link } from '@/components/ui/link';
 import { PhotoCredits } from '@/components/ui/photo-credits';
 import { Skeleton } from '@/components/ui/skeleton';
+import { parseQuery } from '@/server/api/parse-query';
 import { formatPrice } from '@/lib/format';
 import { getConfig } from '@/server/config';
 import { getDeps } from '@/server/deps';
+import { reviewPageQuerySchema } from '@/server/modules/reviews/schemas';
 import type { TourDetail } from '@/server/modules/tours/dto';
 import { getBySlug } from '@/server/modules/tours/service';
 import styles from './page.module.css';
 
-type TourPageProps = { params: Promise<{ slug: string }> };
+type TourPageProps = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
 // One lookup per request: generateMetadata and the page share it through React's cache() (R3).
 // A missing slug calls notFound() before anything renders, so it is a real 404 (R4, ADR 0032).
@@ -80,7 +93,7 @@ function dayCount(days: number): string {
  */
 export async function generateMetadata({
   params,
-}: TourPageProps): Promise<Metadata> {
+}: Pick<TourPageProps, 'params'>): Promise<Metadata> {
   const { slug } = await params;
   const tour = await getTourPage(slug);
   if (!tour) notFound();
@@ -118,10 +131,15 @@ export async function generateMetadata({
   };
 }
 
-export default async function TourPage({ params }: TourPageProps) {
+export default async function TourPage({
+  params,
+  searchParams,
+}: TourPageProps) {
   const { slug } = await params;
   const tour = await getTourPage(slug);
   if (!tour) notFound();
+  // Lenient (D-08, T-04-22): a bad reviewPage falls back to the first page, and the reviews clamp it.
+  const { reviewPage } = parseQuery(reviewPageQuerySchema, await searchParams);
 
   const cover = coverCredit(tour);
   const photos = galleryPhotos(tour);
@@ -188,6 +206,19 @@ export default async function TourPage({ params }: TourPageProps) {
             <TourGallery photos={photos} />
           </section>
         ) : null}
+        {/* The headings stay outside their boundaries, so the page keeps its order while the lists stream (R4). */}
+        <section className={styles.section}>
+          <h2>Your guides</h2>
+          <Suspense fallback={<GuidesFallback />}>
+            <GuidesSection tour={tour} />
+          </Suspense>
+        </section>
+        <section id="reviews" className={styles.reviews}>
+          <h2>Reviews</h2>
+          <Suspense fallback={<ReviewsFallback />}>
+            <ReviewsSection tour={tour} page={reviewPage} />
+          </Suspense>
+        </section>
         {credits.length > 0 ? (
           <section className={styles.section}>
             <h2>Photo credits</h2>

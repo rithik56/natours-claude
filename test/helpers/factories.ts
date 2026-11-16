@@ -206,7 +206,9 @@ export async function createReview(
     user: options.user._id,
     review: options.review ?? record.review,
     rating: options.rating ?? record.rating,
-    ...(options.createdAt !== undefined ? { createdAt: options.createdAt } : {}),
+    ...(options.createdAt !== undefined
+      ? { createdAt: options.createdAt }
+      : {}),
   });
 }
 

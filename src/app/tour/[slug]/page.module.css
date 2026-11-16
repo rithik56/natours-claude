@@ -57,6 +57,14 @@
     max-width: 65ch;
   }
 
+  /* The reviews anchor: a jump to #reviews leaves the heading clear of the top of the viewport (UI-SPEC). */
+  .reviews {
+    display: grid;
+    gap: var(--space-4);
+    min-width: 0;
+    scroll-margin-top: var(--space-5);
+  }
+
   @media (width >= 64em) {
     .page {
       grid-template-columns: minmax(0, 1fr) 22rem;

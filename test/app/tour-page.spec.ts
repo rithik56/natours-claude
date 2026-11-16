@@ -76,7 +76,7 @@ test.describe('[D-07] the static route holds its slot with JavaScript off', () =
 test.describe('[D-06] the phone order', () => {
   test.use({ viewport: { width: 375, height: 900 } });
 
-  test('[D-06] the headings read cover and name, then itinerary, description, photos and photo credits', async ({
+  test('[D-06] the headings read cover and name, then itinerary, description, photos, guides, reviews and photo credits', async ({
     page,
   }) => {
     await page.goto('/tour/ladakh-high-passes');
@@ -87,6 +87,8 @@ test.describe('[D-06] the phone order', () => {
       'Itinerary',
       'About this tour',
       'Photos',
+      'Your guides',
+      'Reviews',
       'Photo credits',
     ]);
   });

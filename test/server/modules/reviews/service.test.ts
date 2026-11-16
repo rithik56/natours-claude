@@ -5,13 +5,13 @@ import { getDeps } from '@/server/deps';
 import { getLogger } from '@/server/logger';
 import { Review } from '@/server/modules/reviews/model';
 import { listForTour } from '@/server/modules/reviews/service';
+import type { TourDoc } from '@/server/modules/tours/model';
 import { User } from '@/server/modules/users/model';
 import { useTestDatabase } from '../../../helpers/db';
 import {
   createReview,
   createTour,
   createUser,
-  type TourDoc,
 } from '../../../helpers/factories';
 
 const DAY = 24 * 60 * 60 * 1000;
