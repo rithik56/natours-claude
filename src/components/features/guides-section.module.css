@@ -1,8 +1,5 @@
 @layer components {
-  /*
-   * The guides list, shared by the streamed list and its fallback, so the skeletons and the real
-   * guides take the same box. Items are spaced by --space-4 as the Reviews list is.
-   */
+  /* The guides list. Items are spaced by --space-4, as the Reviews list is. */
   .list {
     display: grid;
     gap: var(--space-4);

@@ -1,25 +1,18 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { cache, Suspense } from 'react';
+import { cache } from 'react';
 import { BookingSection } from '@/components/features/booking-section';
-import {
-  GuidesFallback,
-  GuidesSection,
-} from '@/components/features/guides-section';
+import { GuidesSection } from '@/components/features/guides-section';
 import {
   TourGallery,
   type GalleryPhoto,
 } from '@/components/features/tour-gallery';
 import { TourRoute } from '@/components/features/tour-route';
-import {
-  ReviewsFallback,
-  ReviewsSection,
-} from '@/components/features/reviews-section';
+import { ReviewsSection } from '@/components/features/reviews-section';
 import { FactsStrip } from '@/components/ui/facts-strip';
 import { Link } from '@/components/ui/link';
 import { PhotoCredits } from '@/components/ui/photo-credits';
-import { Skeleton } from '@/components/ui/skeleton';
 import { parseQuery } from '@/server/api/parse-query';
 import { formatPrice } from '@/lib/format';
 import { getConfig } from '@/server/config';
@@ -149,6 +142,10 @@ export default async function TourPage({
     .map((paragraph) => paragraph.trim())
     .filter((paragraph) => paragraph.length > 0);
 
+  // The booking panel, the guides and the reviews are async Server Components with no await between
+  // them, so their reads start together and the page is sent once the slowest has finished. None of
+  // them sits behind Suspense: a streamed boundary's content is shown only by inline script, so with
+  // JavaScript off it would never appear (R11, D-08, ADR 0039).
   return (
     <article className={styles.page}>
       <header className={styles.header}>
@@ -179,11 +176,9 @@ export default async function TourPage({
           rating={tour.ratingsAverage}
         />
       </header>
-      {/* The booking panel depends on the visitor, so it streams behind a same-sized skeleton (R4, R5). */}
+      {/* The booking panel depends on the visitor, so it is read on every request and never cached (R5). */}
       <div className={styles.aside}>
-        <Suspense fallback={<Skeleton variant="booking-panel" />}>
-          <BookingSection tour={tour} />
-        </Suspense>
+        <BookingSection tour={tour} />
       </div>
       <div className={styles.content}>
         {tour.locations.length > 0 ? (
@@ -206,18 +201,13 @@ export default async function TourPage({
             <TourGallery photos={photos} />
           </section>
         ) : null}
-        {/* The headings stay outside their boundaries, so the page keeps its order while the lists stream (R4). */}
         <section className={styles.section}>
           <h2>Your guides</h2>
-          <Suspense fallback={<GuidesFallback />}>
-            <GuidesSection tour={tour} />
-          </Suspense>
+          <GuidesSection tour={tour} />
         </section>
         <section id="reviews" className={styles.reviews}>
           <h2>Reviews</h2>
-          <Suspense fallback={<ReviewsFallback />}>
-            <ReviewsSection tour={tour} page={reviewPage} />
-          </Suspense>
+          <ReviewsSection tour={tour} page={reviewPage} />
         </section>
         {credits.length > 0 ? (
           <section className={styles.section}>

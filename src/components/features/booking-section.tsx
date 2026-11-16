@@ -12,8 +12,8 @@ type BookingSectionProps = {
 
 /**
  * The booking panel for the signed-in visitor (U11, R5). It depends on the user, so it is
- * never cached: it reads the session, then the traveller's own booking, on every request.
- * The page streams it behind a `booking-panel` skeleton.
+ * never cached: it reads the session, then the traveller's own booking, on every request. The page
+ * awaits it together with the guides and the reviews, with no Suspense boundary (ADR 0039).
  *
  * There is no try/catch here on purpose. A database outage in either read reaches the
  * Phase 3 error page, so a visitor is never shown a panel that guesses at their booking.

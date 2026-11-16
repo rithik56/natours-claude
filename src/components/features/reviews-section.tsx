@@ -1,6 +1,5 @@
 import { Pagination } from '@/components/ui/pagination';
 import { ReviewItem } from '@/components/ui/review-item';
-import { Skeleton } from '@/components/ui/skeleton';
 import { getDeps } from '@/server/deps';
 import type { ReviewDto } from '@/server/modules/reviews/dto';
 import { listForTour } from '@/server/modules/reviews/service';
@@ -67,22 +66,6 @@ export function ReviewList({ items, page, totalPages, slug }: ReviewListProps) {
   );
 }
 
-/**
- * The placeholder for the reviews while they stream: four review-item skeletons, which is what
- * every seed tour has, in the same list as the real reviews (R4).
- */
-export function ReviewsFallback() {
-  return (
-    <ul className={styles.list}>
-      {[0, 1, 2, 3].map((index) => (
-        <li key={index}>
-          <Skeleton variant="review-item" />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 function toListItem(review: ReviewDto): ReviewListItem {
   return {
     id: review.id,
@@ -103,8 +86,8 @@ type ReviewsSectionProps = {
 };
 
 /**
- * The reviews of one tour, one page at a time (D-08). It reads only its own data, so it streams in
- * beside the booking panel and the guides.
+ * The reviews of one tour, one page at a time (D-08). It reads only its own data, so the page starts
+ * its read together with the booking panel and the guides (ADR 0039).
  */
 export async function ReviewsSection({ tour, page }: ReviewsSectionProps) {
   const result = await listForTour(tour.id, page);
