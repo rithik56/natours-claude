@@ -8,7 +8,7 @@ import { toReview, type ReviewDto } from './dto';
 import { Review, type ReviewFields } from './model';
 
 /** Reviews per page on a tour (D-08). */
-export const REVIEWS_PER_PAGE = 5;
+const REVIEWS_PER_PAGE = 5;
 
 /** One page of a tour's reviews, newest first (D-08). */
 export type ReviewPage = {
