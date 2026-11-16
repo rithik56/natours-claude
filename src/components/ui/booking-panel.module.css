@@ -1,25 +1,25 @@
 @layer components {
   /*
-   * On mobile the panel is a bar pinned to the bottom of the screen. From 64em
-   * up it sits beside the content and stays in view as the page scrolls.
+   * Below 64em the panel is an ordinary block in the page flow, straight after the facts strip,
+   * with the same hairline border and radius at every width (D-06, C1, ADR 0033). It is never
+   * pinned to the bottom of the screen. From 64em it sits in the right column and stays in view
+   * as the page scrolls, at the sticky offset the design contract gives.
    */
   .panel {
-    position: sticky;
-    bottom: 0;
+    position: static;
     display: grid;
     gap: var(--space-4);
     padding: var(--space-4);
-    border-top: var(--border-width-hairline) solid var(--color-border);
+    border: var(--border-width-hairline) solid var(--color-border);
+    border-radius: var(--radius-md);
     background: var(--color-surface);
   }
 
   @media (width >= 64em) {
     .panel {
+      position: sticky;
       top: var(--space-5);
-      bottom: auto;
       padding: var(--space-5);
-      border: var(--border-width-hairline) solid var(--color-border);
-      border-radius: var(--radius-md);
     }
   }
 

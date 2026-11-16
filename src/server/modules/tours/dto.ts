@@ -69,7 +69,7 @@ type TourPhotoCredit = Omit<TourFields['photoCredits'][number], 'alt'> & {
 
 /**
  * A tour as its detail page and API show it. The guides are not in here: they
- * stream in on their own, so the tour document itself needs no populate (plan 04-06, RESEARCH
+ * are read on their own, so the tour document itself needs no populate (plan 04-06, RESEARCH
  * Pattern 6). `guideIds` keeps the tour's guides order for that later read.
  */
 export type TourDetail = TourSummary & {

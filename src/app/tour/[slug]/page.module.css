@@ -35,11 +35,6 @@
     line-height: 1.55;
   }
 
-  /* Reserved for the booking panel. Empty until plan 04-07 fills it, so it takes no space. */
-  .aside:empty {
-    display: none;
-  }
-
   .content {
     display: grid;
     gap: var(--space-7);
@@ -60,6 +55,14 @@
 
   .description p {
     max-width: 65ch;
+  }
+
+  /* The reviews anchor: a jump to #reviews leaves the heading clear of the top of the viewport (UI-SPEC). */
+  .reviews {
+    display: grid;
+    gap: var(--space-4);
+    min-width: 0;
+    scroll-margin-top: var(--space-5);
   }
 
   @media (width >= 64em) {

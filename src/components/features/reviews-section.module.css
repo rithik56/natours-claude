@@ -1,0 +1,22 @@
+@layer components {
+  /* The reviews list, spaced by --space-4 (UI-SPEC). */
+  .list {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* With no reviews, one muted line under the heading and no action (UI-SPEC Open item 9). */
+  .empty {
+    margin: 0;
+    color: var(--color-text-muted);
+    line-height: var(--line-height-body);
+  }
+
+  /* The pagination sits below the list, at the page's own spacing (UI-SPEC pagination top margin). */
+  .paging {
+    margin-top: var(--space-6);
+  }
+}

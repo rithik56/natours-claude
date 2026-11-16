@@ -2,22 +2,30 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
+import { BookingSection } from '@/components/features/booking-section';
+import { GuidesSection } from '@/components/features/guides-section';
 import {
   TourGallery,
   type GalleryPhoto,
 } from '@/components/features/tour-gallery';
 import { TourRoute } from '@/components/features/tour-route';
+import { ReviewsSection } from '@/components/features/reviews-section';
 import { FactsStrip } from '@/components/ui/facts-strip';
 import { Link } from '@/components/ui/link';
 import { PhotoCredits } from '@/components/ui/photo-credits';
+import { parseQuery } from '@/server/api/parse-query';
 import { formatPrice } from '@/lib/format';
 import { getConfig } from '@/server/config';
 import { getDeps } from '@/server/deps';
+import { reviewPageQuerySchema } from '@/server/modules/reviews/schemas';
 import type { TourDetail } from '@/server/modules/tours/dto';
 import { getBySlug } from '@/server/modules/tours/service';
 import styles from './page.module.css';
 
-type TourPageProps = { params: Promise<{ slug: string }> };
+type TourPageProps = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
 // One lookup per request: generateMetadata and the page share it through React's cache() (R3).
 // A missing slug calls notFound() before anything renders, so it is a real 404 (R4, ADR 0032).
@@ -78,7 +86,7 @@ function dayCount(days: number): string {
  */
 export async function generateMetadata({
   params,
-}: TourPageProps): Promise<Metadata> {
+}: Pick<TourPageProps, 'params'>): Promise<Metadata> {
   const { slug } = await params;
   const tour = await getTourPage(slug);
   if (!tour) notFound();
@@ -116,10 +124,15 @@ export async function generateMetadata({
   };
 }
 
-export default async function TourPage({ params }: TourPageProps) {
+export default async function TourPage({
+  params,
+  searchParams,
+}: TourPageProps) {
   const { slug } = await params;
   const tour = await getTourPage(slug);
   if (!tour) notFound();
+  // Lenient (D-08, T-04-22): a bad reviewPage falls back to the first page, and the reviews clamp it.
+  const { reviewPage } = parseQuery(reviewPageQuerySchema, await searchParams);
 
   const cover = coverCredit(tour);
   const photos = galleryPhotos(tour);
@@ -129,6 +142,10 @@ export default async function TourPage({ params }: TourPageProps) {
     .map((paragraph) => paragraph.trim())
     .filter((paragraph) => paragraph.length > 0);
 
+  // The booking panel, the guides and the reviews are async Server Components with no await between
+  // them, so their reads start together and the page is sent once the slowest has finished. None of
+  // them sits behind Suspense: a streamed boundary's content is shown only by inline script, so with
+  // JavaScript off it would never appear (R11, D-08, ADR 0039).
   return (
     <article className={styles.page}>
       <header className={styles.header}>
@@ -159,8 +176,10 @@ export default async function TourPage({ params }: TourPageProps) {
           rating={tour.ratingsAverage}
         />
       </header>
-      {/* Reserved for the booking panel (plan 04-07): empty until then, so the aside column stays hidden. */}
-      <div className={styles.aside} />
+      {/* The booking panel depends on the visitor, so it is read on every request and never cached (R5). */}
+      <div className={styles.aside}>
+        <BookingSection tour={tour} />
+      </div>
       <div className={styles.content}>
         {tour.locations.length > 0 ? (
           <section className={styles.section}>
@@ -182,6 +201,14 @@ export default async function TourPage({ params }: TourPageProps) {
             <TourGallery photos={photos} />
           </section>
         ) : null}
+        <section className={styles.section}>
+          <h2>Your guides</h2>
+          <GuidesSection tour={tour} />
+        </section>
+        <section id="reviews" className={styles.reviews}>
+          <h2>Reviews</h2>
+          <ReviewsSection tour={tour} page={reviewPage} />
+        </section>
         {credits.length > 0 ? (
           <section className={styles.section}>
             <h2>Photo credits</h2>
