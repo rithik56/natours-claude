@@ -1,6 +1,6 @@
 # 0034. The route map's fallback and the boundary file
 
-Status: Accepted. The simplification percentage is the one the user chooses at plan 04-08, Task 3; 2% is the default until then.
+Status: Accepted. The user chose keep-2 at plan 04-08, Task 3, on 16 Nov 2026: the 2% simplification stays, and `public/data/india-soi.geojson` is unchanged.
 Date: 16 Nov 2026
 Requirements: R8, U11, D14
 Plan review: DES-05, DES-11

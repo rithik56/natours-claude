@@ -17,14 +17,14 @@ provides:
   - "The vendor cascade layer, declared first, for third-party CSS"
   - "The boundary file at public/data/india-soi.geojson, at the 2% default"
 affects:
-  - "04-09 (applies the user's Task 3 boundary choice; blocked until this plan is re-summarised as complete)"
+  - "04-09 (applies the user's Task 3 boundary choice; keep-2 means no file swap)"
 
 # Actuals (#2632): estimate was 110000 tokens over 3 tasks.
 # Measured as chars/4 over the realized diff 6ef2813..HEAD (131,808 characters, 18 files, including the 84 KB boundary file and the lockfile).
 actuals:
   tokens: 32952
-  tasks: 2
-  commits: 2
+  tasks: 3
+  commits: 3
 
 # Tech tracking
 tech-stack:
@@ -65,18 +65,18 @@ key-decisions:
   - "The Leaflet route is fitted with --space-5 padding, and the bottom also reserves the attribution's height, so no stop is drawn under the attribution text"
   - "The boundary is at public/data/india-soi.geojson (ADR 0028 suggested src/data/); recorded in ADR 0034"
   - "The map is non-interactive and has no tile layer; markers are built with textContent; the attribution is the approved copy.md wording with the Leaflet prefix off"
-  - "2% simplification is committed as the default; the user's Task 3 choice is pending"
+  - "The user chose keep-2 at Task 3: the 2% boundary file stays exactly as committed"
 
 patterns-established:
   - "Leaflet's overlay SVG keeps its own size: the tour route's SVG-fills-the-slot rule is overridden with a more specific selector in the map's module"
   - "Pre-scroll tests run at a 480px viewport, because at 900px the slot is already inside the 12rem margin and the map correctly loads at once"
 
-requirements-completed: []  # Left empty on purpose: the plan is halted at Task 3, and R8 closes only when the user's boundary choice is applied (04-09).
+requirements-completed: []  # Left empty on purpose: the boundary choice is keep-2 (no file change), but R8 closure is for the orchestrator to confirm after 04-09.
 
 # Metrics
 duration: "not measured (plan start time was not recorded)"
 completed: 2026-11-16
-status: halted
+status: complete
 
 coverage:
   - id: D1
@@ -155,23 +155,23 @@ coverage:
     requirement: R8
     verification: []
     human_judgment: true
-    rationale: "The user chooses the simplification from the six screenshots. This is a visual, legal-weight judgement that no test can make. Pending at Task 3."
+    rationale: "The user chose keep-2 (the 2% file) from the six screenshots. This is a visual, legal-weight judgement that no test can make. Recorded at Task 3, with no file change."
 
 # Measured from the verified base: git rev-list --count plan_head_before..HEAD (#3968).
 plan_head_before: 6ef281395007c2bcc87511a993a1e9e6b603e899
-plan_head_after: 259d90c56408459d621eed3c2f4c76e2f8d88c74
+plan_head_after: 48a29778e79bb59d0197df5c76f14957a35c717c
 ---
 
 # Phase 4 Plan 08: The Leaflet route map in the static slot, with the India boundary and its attribution
 
-**A non-interactive Leaflet route map replaces the static route in the same 5:3 slot when it scrolls near, draws once, outlines India from the Survey of India file on our own origin, and falls back silently. Halted at Task 3 for the user's boundary simplification choice.**
+**A non-interactive Leaflet route map replaces the static route in the same 5:3 slot when it scrolls near, draws once, outlines India from the Survey of India file on our own origin, and falls back silently. The user kept the 2% boundary at Task 3 (keep-2).**
 
 ## Performance
 
 - **Duration:** not measured (plan start time was not recorded)
 - **Started:** not recorded
-- **Completed:** 2026-11-16 (halted at the Task 3 checkpoint)
-- **Tasks:** 2 of 3 complete; Task 3 is a `checkpoint:decision` with `gate="blocking-human"`, awaiting the user
+- **Completed:** 2026-11-16 (Task 3 resolved after the checkpoint, as keep-2)
+- **Tasks:** 3 of 3 complete; Task 3 is a `checkpoint:decision` with `gate="blocking-human"`, resolved by the user as keep-2
 - **Files changed:** 18 (see key-files)
 
 ## Accomplishments
@@ -187,9 +187,9 @@ plan_head_after: 259d90c56408459d621eed3c2f4c76e2f8d88c74
 
 1. **Task 1: Leaflet replaces the static route in the same slot when it scrolls into view** - `1056fcc` (feat, with the dependency reason in the body)
 2. **Task 2: The Survey of India boundary, its attribution, candidate files and ADR 0034** - `259d90c` (feat)
-3. **Task 3: Choose the boundary simplification by eye** - not committed (checkpoint, awaiting the user)
+3. **Task 3: Choose the boundary simplification by eye** - no task commit: the user chose keep-2, so the file is unchanged and there is nothing to commit. Recorded in "Boundary simplification" below.
 
-**Plan metadata:** the docs commit that adds this file follows `259d90c` (docs(map): ... [R8, U11, D14] (04-08)).
+**Plan metadata:** the halted-summary commit `48a2977` added this file; the completion commit that records keep-2 follows it.
 
 _Note: this plan has no TDD tasks._
 
@@ -219,7 +219,7 @@ _Note: this plan has no TDD tasks._
 - The Leaflet route is fitted inside `--space-5` padding, and the bottom also reserves the attribution's height, so no stop is drawn under the attribution text.
 - The boundary is at `public/data/`, not `src/data/` (ADR 0028 suggested `src/data/`); recorded in ADR 0034.
 - The map is not interactive (no drag, zoom, wheel, double-click, box or keyboard zoom), and has no tile layer.
-- 2% is committed as the default boundary, until the user chooses at Task 3.
+- 2% is kept: the user chose keep-2 at Task 3, so the committed file is the final boundary.
 
 ## Deviations from Plan
 
@@ -280,7 +280,9 @@ None - no external service configuration required.
 
 ## Boundary simplification
 
-**Pending.** The user has not chosen yet; Task 3 is the checkpoint that asks for the choice. The default committed is 2%. The user's choice will be recorded here verbatim, once given.
+**Chosen: keep-2.** The user's reply, verbatim: `keep-2`. The 2% file committed in `259d90c` stays exactly as it is; it was not regenerated or modified (`git diff` against `259d90c` is empty).
+
+Sizes of the kept file, measured on 16 Nov 2026 from `public/data/india-soi.geojson`: 84,432 bytes raw (`wc -c`); 27,017 bytes gzipped at `gzip -9` and 26,973 bytes at `gzip -6`. The gzipped figure of 27,022 bytes in ADR 0034 was taken at another setting; gzip output depends on the level and header, so it differs by a few bytes. The raw size is unchanged.
 
 Candidates produced from the datameet `Country/india-soi.geojson` (mapshaper 0.6.121, `-simplify weighted P% keep-shapes`):
 
@@ -299,13 +301,13 @@ Screenshots of the slot at 1280px (captured after the layout fixes), in the scra
 - `/private/tmp/claude-501/-Users-rithikagarwal-Desktop-natours-claude/fb9187a9-3a4c-45c1-8e00-948e0bd1eb89/scratchpad/shots/meghalaya-living-root-bridges-2pct.png`
 - `/private/tmp/claude-501/-Users-rithikagarwal-Desktop-natours-claude/fb9187a9-3a4c-45c1-8e00-948e0bd1eb89/scratchpad/shots/meghalaya-living-root-bridges-5pct.png`
 
-`public/data/india-soi.geojson` in the worktree holds the 2% file, which the commit ships.
+`public/data/india-soi.geojson` holds the 2% file, unchanged since `259d90c`, and that is the shipped boundary.
 
 ## Next Phase Readiness
 
-- Plan 04-09 applies the user's Task 3 choice (one file swap, per ADR 0034). It is blocked until this plan is re-summarised as complete.
-- To finish this plan: the user replies with the choice (`keep-2`, `use-5`, `use-1`, or another percentage); the executor (or a continuation) then regenerates the file if needed, records the choice verbatim above, and sets `status: complete`.
-- No blockers beyond that decision.
+- Plan 04-09 was waiting on this plan's completion. Its Task 3 step (a one-file swap, per ADR 0034) is a no-op for keep-2, because the file stays as committed. Whether 04-09 runs its other work is for the orchestrator to decide.
+- No file changes are needed for the boundary. The choice is recorded above and in ADR 0034.
+- No blockers.
 
 ## Self-Check: PASSED
 
@@ -314,4 +316,4 @@ Screenshots of the slot at 1280px (captured after the layout fixes), in the scra
 
 ---
 *Phase: 04-browse-tours*
-*Completed: 2026-11-16 (halted at Task 3)*
+*Completed: 2026-11-16 (Task 3 resolved as keep-2)*
