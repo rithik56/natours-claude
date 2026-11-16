@@ -63,7 +63,7 @@ export function ok(data: unknown, init?: ResponseInit): Response;
 
 export function created(data: unknown): Response;
 
-export function list(data: unknown[], meta: ListMeta): Response;
+export function list(key: string, items: unknown[], meta: ListMeta): Response;
 
 export function noContent(): Response;
 
@@ -76,9 +76,9 @@ export function errorResponse(
 ): Response;
 ```
 
-- `ok` answers 200 with `{ status: 'success', data }`. `created` answers 201 with the same shape. `list` answers 200 with `{ status: 'success', data, meta }`. `noContent` answers 204 with no body.
+- `ok` answers 200 with `{ status: 'success', data }`. `created` answers 201 with the same shape. `list` answers 200 with `{ status: 'success', data: { [key]: items }, meta }`. `noContent` answers 204 with no body.
 - `status` is `fail` for a status below 500 and `error` for 500 and above. `details` is left out unless the error has them. A body never carries a stack or a cause (SEC-11).
-- `list` puts the array itself in `data`. The `plan.md` 4.1 example nests it under a key such as `tours`. No ADR settles which one the catalogue API uses: Phase 4 decides when the first list route exists, and records it here.
+- `list` nests the items under the key it is given, as plan.md 4.1 shows: `GET /api/v1/tours` answers `data: { tours: [...] }` with `meta: { page, limit, total }`. Phase 4 settled this shape for the catalogue (ADR 0031, section 11).
 
 ### 2.2 Error codes (plan.md 4.2)
 
@@ -613,11 +613,14 @@ The fake is a fixed window per rule name and key, timed by `now()`. With `APP_NO
 
 ```ts
 // src/server/adapters/cache.ts
+type CacheOptions = { revalidate?: number };
+
 export interface Cache {
   cached<A extends unknown[], R>(
     fn: (...args: A) => Promise<R>,
     keyParts: string[],
     tags: string[],
+    options?: CacheOptions,
   ): (...args: A) => Promise<R>;
   invalidate(...tags: string[]): Promise<void>;
 }
@@ -632,7 +635,7 @@ export function createFakeCache(): FakeCache;
 export function createNextCache(): Cache;
 ```
 
-`createNextCache` wraps `unstable_cache(fn, keyParts, { tags })` and calls `revalidateTag(tag, { expire: 0 })` (ADR 0012). It is the only file that imports `next/cache`. Coverage excludes it, because `unstable_cache` throws outside a Next request. The fake calls the function every time and records the invalidated tags. Phase 4 settles the cache keys and tag names when the first cached service arrives (ARC-02, ARC-03). Every cached read needs explicit tags, and every write that changes cached data must call `invalidate` with the same tags.
+`createNextCache` wraps `unstable_cache(fn, keyParts, { tags, revalidate })` and calls `revalidateTag(tag, { expire: 0 })` (ADR 0012). `revalidate` is the optional `options.revalidate` in seconds, and absent means Next's default; the fake ignores it. It is the only file that imports `next/cache`. Coverage excludes it, because `unstable_cache` throws outside a Next request. The fake calls the function every time and records the invalidated tags. The cache keys and tag names are settled in ADR 0031 and section 11 (ARC-02, ARC-03). Every cached read needs explicit tags, and every write that changes cached data must call `invalidate` with the same tags.
 
 ```ts
 // src/server/deps.ts
@@ -1251,14 +1254,144 @@ Each is written into this file by the phase that builds it (ADR 0005).
 
 | Contract | Phase |
 | --- | --- |
-| `toursService.list(query)` returning `{ items, total }`, cached with a tag (R5); `toursService.getBySlug(slug)`; `toursService.getById(id)` | 4 |
+| `toursService.list(query)` returning `{ items, total, page, limit, totalPages }`, cached with a tag (R5); `toursService.getBySlug(slug)`; `toursService.getById(id)` | 4 (`list` and `monthOptions` are done, section 11; `getBySlug` and `getById` follow in later plans) |
 | `reviewsService.listForTour(tourId, page)`, cached with a tag | 4 |
 | `bookingsService.hasPaidBooking(userId, tourId)`, which the booking panel needs for "already booked", never cached | 4 |
 | `images.normalize(file, preset)`, and the real storage adapter | 4 (the disk adapter and `/media` are in, ADR 0029; S3 waits for 8) |
-| The cache keys and tag names, and the shape of a list response in `data` (section 2.1) | 4 |
+| The cache keys and tag names, and the shape of a list response in `data` (section 2.1) | 4 (done: ADR 0031, section 11) |
 | `npm run seed` with `--reset` and `--today=YYYY-MM-DD`: the date roll (`rollStartDates`), and the seed/README.md rules (`checkSeedRules`) that stop a run and name the first broken rule (ADR 0023, ADR 0030) | 4 |
 | `Welcome` and `PasswordReset` email-template props, the mailer's SMTP implementation, the Redis rate limiter and the BullMQ queue | 5 |
 | `toAdminUser`, or a record of why there is none (ADR 0013) | 5 |
 | `BookingConfirmed` email-template props, which need the tour, date and price beyond `{ to, firstName, url }` (SEC-09, ADR 0016) | 6 |
 | `bookingsService.listMine(userId)` with tour summaries, `reviewsService.canReview(userId, tourId)` (and whether it needs a finished trip, D-04), the real Stripe client, and the access matrix of every route | 6 |
 | `src/components/ui/` and `src/components/features/` prop contracts (plan.md 4.6) | 3 |
+
+## 11. Tours catalogue (plan 04-04, ADR 0031)
+
+The public catalogue is one cache entry, queried in memory. `/` and `GET /api/v1/tours` call the same `list()`, so the page and the API cannot drift (B13).
+
+### Signatures
+
+```ts
+// src/server/modules/tours/service.ts (server-only)
+export function list(query: CatalogueQuery): Promise<TourListResult>;
+export function monthOptions(): Promise<string[]>;
+
+// src/server/modules/tours/catalogue-query.ts (pure, server-only, no database)
+export type CatalogueEntry = TourSummary;
+export type CatalogueFilter = {
+  field: 'price' | 'duration' | 'ratingsAverage' | 'maxGroupSize';
+  op: 'eq' | 'gte' | 'gt' | 'lte' | 'lt';
+  value: number;
+};
+export type CatalogueQuery = {
+  sort: string[]; // tokens, each optionally prefixed with '-'; name then id always follow
+  page: number; // one-based
+  limit: number;
+  clampPage: boolean; // true on '/', false on the API
+  difficulty?: 'easy' | 'medium' | 'difficult';
+  lengthBand?: readonly [number, number]; // inclusive days
+  maxPrice?: number; // inclusive, whole rupees
+  month?: string; // YYYY-MM
+  filters?: readonly CatalogueFilter[];
+};
+export type TourListResult = {
+  items: CatalogueEntry[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+export function applyCatalogueQuery(
+  entries: readonly CatalogueEntry[],
+  query: CatalogueQuery,
+  today: IstDay,
+): TourListResult;
+export function nextBookableDate(
+  startDates: readonly IstDay[],
+  today: IstDay,
+): IstDay | null;
+export function monthOptionsFrom(
+  entries: readonly CatalogueEntry[],
+  today: IstDay,
+): string[];
+export function projectFields(
+  items: readonly CatalogueEntry[],
+  fields: readonly (keyof CatalogueEntry)[],
+): ProjectedEntry[];
+
+// src/server/modules/tours/schemas.ts (server-only)
+export const PAGE_SORTS: readonly [
+  '-ratingsAverage',
+  'price',
+  '-price',
+  'duration',
+  '-duration',
+];
+export const LENGTH_BANDS = { '3-4': [3, 4], '5-6': [5, 6], '7-8': [7, 8] };
+export const PRICE_BANDS: readonly [20000, 30000, 40000];
+export function buildPageQuerySchema(monthValues: readonly string[]);
+export const apiListQuerySchema;
+export function toApiCatalogueQuery(parsed): CatalogueQuery;
+```
+
+`TourSummary` gains `createdAt`, an ISO instant. The `Cache.cached` and `responses.list` signatures are in sections 2.1 and 5.
+
+### Page query (`/`, lenient, through `parseQuery`)
+
+A field that fails its schema falls back to its default, and an unknown key is dropped (plan.md 4.3).
+
+| Param | Values | Default or fallback |
+|-------|--------|---------------------|
+| `difficulty` | `easy`, `medium`, `difficult` | absent |
+| `length` | `3-4`, `5-6`, `7-8` (inclusive days) | absent |
+| `month` | `YYYY-MM`, only a month in the derived options | absent |
+| `maxPrice` | `20000`, `30000`, `40000` (inclusive) | absent |
+| `sort` | `-ratingsAverage`, `price`, `-price`, `duration`, `-duration` | `-ratingsAverage` (ties go name then id, D-03) |
+| `page` | integer 1 or more | 1; a page past the end is clamped to the last page |
+| `limit` | integer 1 to 100 | 12; an out-of-range value falls back, it is not clamped |
+
+### API query (`GET /api/v1/tours`, strict through `withApi`)
+
+An unknown key, an operator the allowlist does not name, or a bad value is a 400 `VALIDATION_ERROR` (S7, B11, QA-17). Values are digits only, so `1.5`, `1e1`, `+2` and values with spaces are refused.
+
+| Param | Values | Default |
+|-------|--------|---------|
+| `difficulty` | `easy`, `medium`, `difficult` | absent |
+| `price`, `duration`, `ratingsAverage`, `maxGroupSize` | a number, or the bracketed `[gte]`, `[gt]`, `[lte]`, `[lt]` form | absent |
+| `month` | `YYYY-MM` | absent |
+| `sort` | a comma list of at most 5 tokens from `price`, `ratingsAverage`, `duration`, `maxGroupSize`, `name`, `createdAt`, each optionally prefixed `-`, with no field twice | `-createdAt`, then name, then id |
+| `fields` | a comma list of `TourSummary` keys; `id` is always kept | every key |
+| `page` | integer 1 or more | 1 (no clamp: a page past the end answers `tours: []` with the real `meta.total`) |
+| `limit` | integer 1 to 100 | 20 |
+
+Sort tokens are case-sensitive, so `Price` is refused on the API and falls back on `/`.
+
+### Response
+
+`GET /api/v1/tours` answers `{ status: 'success', data: { tours: [...] }, meta: { page, limit, total } }`. Each item is a `TourSummary`, or with `fields` only the requested keys and `id`. `/` renders the same items.
+
+### Cache keys and tags
+
+| Read | Key | Tag | Lifetime | Built by |
+|------|-----|-----|----------|----------|
+| Whole public catalogue | `['catalogue']` | `tours` | `revalidate: 3600` | `list`, `monthOptions` |
+
+No key contains a value from the URL, so no request creates an entry (QA-12). The cache holds every start date, and "upcoming" is worked out per request against today's IST day (QA-13). Nothing that depends on the signed-in user is cached (R5). Later plans add keys for tour detail, guides and reviews, each keyed by an id that exists (ADR 0031).
+
+### Write to tag
+
+Services clear tags after the write has finished and been awaited, through `getDeps().cache.invalidate(...)` (ADR 0012).
+
+| Write | Phase | Tags to clear |
+|-------|-------|---------------|
+| Tour create | 4 | `tours` |
+| Tour update (JSON PATCH) | 4 | `tours`, `tour:<id>` |
+| Tour images replaced | 4 | `tours`, `tour:<id>` |
+| Tour delete (after the 409 check, reviews deleted) | 4 | `tours`, `tour:<id>`, `reviews:<id>` |
+| Review create, update or delete (`setRatings` changes the tour) | 6 | `reviews:<tourId>`, `tour:<tourId>`, `tours` |
+| Booking create or refund | 6 | none (bookings are never cached) |
+| User name, photo, role or active change | 5 | `tour:<id>` for each tour the user guides, `reviews:<tourId>` for each tour they reviewed |
+| Seed run | 4 | none from the CLI, which cannot clear them; the `revalidate` time and a restart cover it |
+
+Operators: after `npm run seed`, restart `next dev` or `next start`, or wait up to an hour, before the list shows the reseeded tours. The Phase 4 test suite asserts `fakes.cache.invalidated` for each Phase 4 row once those writes exist.

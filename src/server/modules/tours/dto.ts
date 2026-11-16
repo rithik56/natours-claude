@@ -18,6 +18,7 @@ type SummarySource = Pick<
   | 'summary'
   | 'imageCover'
   | 'startDates'
+  | 'createdAt'
 > & {
   _id: { toString(): string };
   startLocation: Pick<
@@ -51,6 +52,8 @@ export type TourSummary = {
   summary: string;
   imageCover: string;
   startDates: IstDay[];
+  /** An ISO instant. The API sorts by it when no sort is given (B1). */
+  createdAt: string;
   startLocation: {
     coordinates: number[];
     address: string;
@@ -112,6 +115,7 @@ export function toTourSummary(tour: SummarySource): TourSummary {
     summary: tour.summary,
     imageCover: tour.imageCover,
     startDates: tour.startDates.map(toIstDay),
+    createdAt: tour.createdAt.toISOString(),
     startLocation: {
       coordinates: [...tour.startLocation.coordinates],
       address: tour.startLocation.address,

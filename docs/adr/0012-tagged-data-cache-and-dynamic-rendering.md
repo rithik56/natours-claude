@@ -1,6 +1,6 @@
 # 0012. Tagged data cache and dynamic rendering
 
-Status: Accepted
+Status: Accepted; amended by 0031 (optional revalidate)
 Date: 9 Nov 2026
 Requirements: S11
 Plan review: ARC-01, ARC-02, ARC-03

@@ -1,0 +1,449 @@
+openapi: 3.1.0
+info:
+  title: Natours API
+  version: 1.0.0
+  summary: The public REST API for the Natours tour catalogue (plan.md 4.1, 4.2).
+servers:
+  - url: /api/v1
+paths:
+  /tours:
+    get:
+      operationId: listTours
+      summary: List the catalogue, with filters, sort, fields and paging.
+      description: >-
+        Filters, sort, fields and paging run in memory on one cached catalogue
+        (ADR 0031). The query is strict: an unknown key, an operator the
+        allowlist does not name, or a bad value is a 400 VALIDATION_ERROR.
+        Values are digits only where a number is expected.
+      parameters:
+        - $ref: '#/components/parameters/difficulty'
+        - $ref: '#/components/parameters/priceFilter'
+        - $ref: '#/components/parameters/priceGte'
+        - $ref: '#/components/parameters/priceGt'
+        - $ref: '#/components/parameters/priceLte'
+        - $ref: '#/components/parameters/priceLt'
+        - $ref: '#/components/parameters/durationFilter'
+        - $ref: '#/components/parameters/durationGte'
+        - $ref: '#/components/parameters/durationGt'
+        - $ref: '#/components/parameters/durationLte'
+        - $ref: '#/components/parameters/durationLt'
+        - $ref: '#/components/parameters/ratingsAverageFilter'
+        - $ref: '#/components/parameters/ratingsAverageGte'
+        - $ref: '#/components/parameters/ratingsAverageGt'
+        - $ref: '#/components/parameters/ratingsAverageLte'
+        - $ref: '#/components/parameters/ratingsAverageLt'
+        - $ref: '#/components/parameters/maxGroupSizeFilter'
+        - $ref: '#/components/parameters/maxGroupSizeGte'
+        - $ref: '#/components/parameters/maxGroupSizeGt'
+        - $ref: '#/components/parameters/maxGroupSizeLte'
+        - $ref: '#/components/parameters/maxGroupSizeLt'
+        - $ref: '#/components/parameters/month'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/fields'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: One page of tours, with the page, limit and total.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TourListEnvelope'
+        '400':
+          description: The query was refused.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                status: fail
+                error:
+                  code: VALIDATION_ERROR
+                  message: The query is not valid.
+                  details:
+                    - path: page
+                      message: Enter a whole number.
+                  requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a111
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+components:
+  parameters:
+    difficulty:
+      name: difficulty
+      in: query
+      required: false
+      description: The difficulty of the tour.
+      schema:
+        type: string
+        enum: [easy, medium, difficult]
+    priceFilter:
+      name: price
+      in: query
+      required: false
+      description: The price in whole rupees, by equality.
+      schema:
+        type: number
+        minimum: 0
+    priceGte:
+      name: 'price[gte]'
+      in: query
+      required: false
+      description: The price is at least this many rupees (inclusive).
+      schema:
+        type: number
+        minimum: 0
+    priceGt:
+      name: 'price[gt]'
+      in: query
+      required: false
+      description: The price is more than this many rupees.
+      schema:
+        type: number
+        minimum: 0
+    priceLte:
+      name: 'price[lte]'
+      in: query
+      required: false
+      description: The price is at most this many rupees (inclusive).
+      schema:
+        type: number
+        minimum: 0
+    priceLt:
+      name: 'price[lt]'
+      in: query
+      required: false
+      description: The price is less than this many rupees.
+      schema:
+        type: number
+        minimum: 0
+    durationFilter:
+      name: duration
+      in: query
+      required: false
+      description: The length in days, by equality.
+      schema:
+        type: number
+        minimum: 0
+    durationGte:
+      name: 'duration[gte]'
+      in: query
+      required: false
+      description: The length is at least this many days (inclusive).
+      schema:
+        type: number
+        minimum: 0
+    durationGt:
+      name: 'duration[gt]'
+      in: query
+      required: false
+      description: The length is more than this many days.
+      schema:
+        type: number
+        minimum: 0
+    durationLte:
+      name: 'duration[lte]'
+      in: query
+      required: false
+      description: The length is at most this many days (inclusive).
+      schema:
+        type: number
+        minimum: 0
+    durationLt:
+      name: 'duration[lt]'
+      in: query
+      required: false
+      description: The length is less than this many days.
+      schema:
+        type: number
+        minimum: 0
+    ratingsAverageFilter:
+      name: ratingsAverage
+      in: query
+      required: false
+      description: The average rating, by equality.
+      schema:
+        type: number
+        minimum: 0
+        maximum: 5
+    ratingsAverageGte:
+      name: 'ratingsAverage[gte]'
+      in: query
+      required: false
+      description: The average rating is at least this value (inclusive).
+      schema:
+        type: number
+        minimum: 0
+        maximum: 5
+    ratingsAverageGt:
+      name: 'ratingsAverage[gt]'
+      in: query
+      required: false
+      description: The average rating is more than this value.
+      schema:
+        type: number
+        minimum: 0
+        maximum: 5
+    ratingsAverageLte:
+      name: 'ratingsAverage[lte]'
+      in: query
+      required: false
+      description: The average rating is at most this value (inclusive).
+      schema:
+        type: number
+        minimum: 0
+        maximum: 5
+    ratingsAverageLt:
+      name: 'ratingsAverage[lt]'
+      in: query
+      required: false
+      description: The average rating is less than this value.
+      schema:
+        type: number
+        minimum: 0
+        maximum: 5
+    maxGroupSizeFilter:
+      name: maxGroupSize
+      in: query
+      required: false
+      description: The largest group, by equality.
+      schema:
+        type: number
+        minimum: 0
+    maxGroupSizeGte:
+      name: 'maxGroupSize[gte]'
+      in: query
+      required: false
+      description: The largest group is at least this many people (inclusive).
+      schema:
+        type: number
+        minimum: 0
+    maxGroupSizeGt:
+      name: 'maxGroupSize[gt]'
+      in: query
+      required: false
+      description: The largest group is more than this many people.
+      schema:
+        type: number
+        minimum: 0
+    maxGroupSizeLte:
+      name: 'maxGroupSize[lte]'
+      in: query
+      required: false
+      description: The largest group is at most this many people (inclusive).
+      schema:
+        type: number
+        minimum: 0
+    maxGroupSizeLt:
+      name: 'maxGroupSize[lt]'
+      in: query
+      required: false
+      description: The largest group is less than this many people.
+      schema:
+        type: number
+        minimum: 0
+    month:
+      name: month
+      in: query
+      required: false
+      description: >-
+        A tour matches when it has a bookable departure (after today, IST) in
+        this calendar month.
+      schema:
+        type: string
+        pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+        example: '2027-01'
+    sort:
+      name: sort
+      in: query
+      required: false
+      description: >-
+        A comma list of at most five tokens, each a field name, prefixed with
+        `-` for descending. Each field appears once. Name and then id always
+        break ties. Default -createdAt. Sort tokens are case-sensitive.
+      schema:
+        type: string
+        example: price,-ratingsAverage
+    fields:
+      name: fields
+      in: query
+      required: false
+      description: >-
+        A comma list of TourSummary keys. The id is always returned. Default is
+        every key.
+      schema:
+        type: string
+        example: name,price
+    page:
+      name: page
+      in: query
+      required: false
+      description: One-based page number. A page past the end answers an empty list.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    limit:
+      name: limit
+      in: query
+      required: false
+      description: Items per page.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+  schemas:
+    StartLocation:
+      type: object
+      required: [coordinates, address, description]
+      properties:
+        coordinates:
+          type: array
+          items:
+            type: number
+          minItems: 2
+          maxItems: 2
+          description: Longitude first, then latitude (GeoJSON).
+        address:
+          type: string
+          example: Rishikesh, Uttarakhand
+        description:
+          type: string
+    TourSummary:
+      type: object
+      description: A tour as the catalogue and cards show it (S3, R6).
+      required:
+        [
+          id,
+          name,
+          slug,
+          duration,
+          maxGroupSize,
+          difficulty,
+          price,
+          ratingsAverage,
+          ratingsQuantity,
+          summary,
+          imageCover,
+          startDates,
+          createdAt,
+          startLocation,
+        ]
+      properties:
+        id:
+          type: string
+          example: 92da98fc3b348f5b6de92063
+        name:
+          type: string
+          example: Rishikesh Ganga Rafting
+        slug:
+          type: string
+          example: rishikesh-ganga-rafting
+        duration:
+          type: integer
+          description: Length in days.
+          minimum: 1
+        maxGroupSize:
+          type: integer
+          minimum: 1
+        difficulty:
+          type: string
+          enum: [easy, medium, difficult]
+        price:
+          type: integer
+          description: Price in whole rupees (B20).
+          minimum: 1
+        ratingsAverage:
+          type: number
+          minimum: 1
+          maximum: 5
+        ratingsQuantity:
+          type: integer
+          minimum: 0
+        summary:
+          type: string
+        imageCover:
+          type: string
+          description: A storage key, not a URL.
+        startDates:
+          type: array
+          description: Each is an IST calendar day, YYYY-MM-DD (B19).
+          items:
+            type: string
+            format: date
+        createdAt:
+          type: string
+          format: date-time
+        startLocation:
+          $ref: '#/components/schemas/StartLocation'
+    TourListMeta:
+      type: object
+      required: [page, limit, total]
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+        total:
+          type: integer
+          minimum: 0
+    TourListEnvelope:
+      type: object
+      required: [status, data, meta]
+      properties:
+        status:
+          type: string
+          enum: [success]
+        data:
+          type: object
+          required: [tours]
+          properties:
+            tours:
+              type: array
+              items:
+                $ref: '#/components/schemas/TourSummary'
+        meta:
+          $ref: '#/components/schemas/TourListMeta'
+    ErrorDetail:
+      type: object
+      required: [path, message]
+      properties:
+        path:
+          type: string
+        message:
+          type: string
+    ErrorEnvelope:
+      type: object
+      description: The plan.md 4.1 failure body. It never carries a stack or a cause (SEC-11).
+      required: [status, error]
+      properties:
+        status:
+          type: string
+          enum: [fail, error]
+        error:
+          type: object
+          required: [code, message, requestId]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                $ref: '#/components/schemas/ErrorDetail'
+            requestId:
+              type: string
+              format: uuid

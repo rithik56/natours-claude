@@ -1,5 +1,8 @@
 import 'server-only';
 
+/** Options a cached read may set. `revalidate` is seconds; absent means Next's default (ADR 0031). */
+type CacheOptions = { revalidate?: number };
+
 /**
  * The tagged data cache (ADR 0012). Services call `cached` and `invalidate`
  * and never import Next's cache functions themselves.
@@ -9,6 +12,7 @@ export interface Cache {
     fn: (...args: A) => Promise<R>,
     keyParts: string[],
     tags: string[],
+    options?: CacheOptions,
   ): (...args: A) => Promise<R>;
   invalidate(...tags: string[]): Promise<void>;
 }

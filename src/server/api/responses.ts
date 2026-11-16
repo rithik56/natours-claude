@@ -24,9 +24,12 @@ export function created(data: unknown): Response {
   return Response.json({ status: 'success', data }, { status: 201 });
 }
 
-/** 200 with the page of `data` and its `meta`. */
-export function list(data: unknown[], meta: ListMeta): Response {
-  return Response.json({ status: 'success', data, meta });
+/**
+ * 200 with a page of items nested under `data[key]` and its `meta` (plan.md 4.1),
+ * for example `{ status, data: { tours: [...] }, meta: { page, limit, total } }`.
+ */
+export function list(key: string, items: unknown[], meta: ListMeta): Response {
+  return Response.json({ status: 'success', data: { [key]: items }, meta });
 }
 
 /** 204 with an empty body. */

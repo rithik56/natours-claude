@@ -11,7 +11,8 @@ type TourRowProps = {
   photoUrl: string;
   lengthDays: number;
   difficulty: 'easy' | 'medium' | 'difficult';
-  startDate: Date | string;
+  /** Omitted when the tour has no upcoming departure (C8). */
+  startDate?: Date | string;
   priceRupees: number;
   href: string;
 };
@@ -27,8 +28,6 @@ export function TourRow({
   priceRupees,
   href,
 }: TourRowProps) {
-  const dateTime =
-    typeof startDate === 'string' ? startDate : startDate.toISOString();
   const days = lengthDays === 1 ? '1 day' : `${lengthDays} days`;
 
   return (
@@ -52,9 +51,20 @@ export function TourRow({
           </span>
         </div>
         <div className={styles.summary}>
-          <time dateTime={dateTime} className={styles.date}>
-            {formatDate(startDate)}
-          </time>
+          {startDate === undefined ? (
+            <span className={styles.date}>No upcoming dates</span>
+          ) : (
+            <time
+              dateTime={
+                typeof startDate === 'string'
+                  ? startDate
+                  : startDate.toISOString()
+              }
+              className={styles.date}
+            >
+              {formatDate(startDate)}
+            </time>
+          )}
           <Price rupees={priceRupees} />
         </div>
       </Link>
