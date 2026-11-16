@@ -96,7 +96,8 @@
         "author": "Rohit Sharma (edited by UnpetitproleX)",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Valley_of_flowers_national_park,_Uttarakhand,_India_03_(edit).jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Valley_of_flowers_national_park,_Uttarakhand,_India_03_(edit).jpg",
+        "alt": "A meadow of pink and white wildflowers lies beneath steep green slopes and cloud-capped peaks"
       },
       {
         "file": "valley-of-flowers-trek-1.jpg",
@@ -104,7 +105,8 @@
         "author": "Rohit Sharma",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Valley_of_flowers_national_park,_Uttarakhand,_India_01.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Valley_of_flowers_national_park,_Uttarakhand,_India_01.jpg",
+        "alt": "A green valley meadow with snow-capped peaks beyond the forested slopes"
       },
       {
         "file": "valley-of-flowers-trek-2.jpg",
@@ -112,7 +114,8 @@
         "author": "Amareshwara Sainadh",
         "license": "CC BY-SA 3.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hemkund_Lake.JPG"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hemkund_Lake.JPG",
+        "alt": "A still, grey-green lake lies below snow-streaked rock cliffs, with a visitor on the stone shore"
       },
       {
         "file": "valley-of-flowers-trek-3.jpg",
@@ -120,7 +123,8 @@
         "author": "Rohit Sharma",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Brahma_kamal_at_Valley_of_flowers_national_park,_India.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Brahma_kamal_at_Valley_of_flowers_national_park,_India.jpg",
+        "alt": "Pale, papery flower buds of Brahma kamal rise from broad green leaves"
       }
     ],
     "ratingsQuantity": 4,
@@ -214,7 +218,8 @@
         "author": "Kanthi Kiran",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kedarkantha_Peak.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kedarkantha_Peak.jpg",
+        "alt": "A snow-capped peak rises above dark pines and red-leaved trees under a clear blue sky"
       },
       {
         "file": "kedarkantha-winter-trek-1.jpg",
@@ -222,7 +227,8 @@
         "author": "Kanthi Kiran",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Juda_ka_Talab.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Juda_ka_Talab.jpg",
+        "alt": "A partly frozen blue lake edged by snow and tall conifers"
       },
       {
         "file": "kedarkantha-winter-trek-2.jpg",
@@ -230,7 +236,8 @@
         "author": "rakesh kumar",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kedarkantha.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kedarkantha.jpg",
+        "alt": "A snowy clearing with a trodden path, a few wooden benches and pines on the ridge"
       },
       {
         "file": "kedarkantha-winter-trek-3.jpg",
@@ -238,7 +245,8 @@
         "author": "rakesh kumar",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_view_from_peak.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_view_from_peak.jpg",
+        "alt": "A trodden snow path leads towards snow-capped Himalayan ranges under a clear blue sky"
       }
     ],
     "ratingsQuantity": 4,
@@ -359,7 +367,8 @@
         "author": "Vishal Akki",
         "license": "CC BY-SA 3.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pangong_Tso_VM.JPG"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pangong_Tso_VM.JPG",
+        "alt": "A still blue lake reflects brown hills and a sky full of clouds"
       },
       {
         "file": "ladakh-high-passes-1.jpg",
@@ -367,7 +376,8 @@
         "author": "KennyOMG",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nubra_Valley_2.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nubra_Valley_2.jpg",
+        "alt": "Green fields and village clusters on a wide valley floor, ringed by brown mountains"
       },
       {
         "file": "ladakh-high-passes-2.jpg",
@@ -375,7 +385,8 @@
         "author": "Bernard Gagnon",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Thiksey_Monastery,_Ladakh_01.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Thiksey_Monastery,_Ladakh_01.jpg",
+        "alt": "A whitewashed monastery with red-trimmed upper walls climbs a hill above green trees"
       },
       {
         "file": "ladakh-high-passes-3.jpg",
@@ -383,7 +394,8 @@
         "author": "Vyacheslav Argenberg",
         "license": "CC BY 2.0",
         "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Saser_Muztagh_from_Khardung_La_2.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Saser_Muztagh_from_Khardung_La_2.jpg",
+        "alt": "A road winds down a barren valley towards snow-capped peaks under a blue sky"
       }
     ],
     "ratingsQuantity": 4,
@@ -495,7 +507,8 @@
         "author": "Prasad Gaude",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Key_Monastery_-_Spiti_-Himachal_Pradesh_MG_6796.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Key_Monastery_-_Spiti_-Himachal_Pradesh_MG_6796.jpg",
+        "alt": "A monastery of whitewashed buildings climbs a hill above a river valley in evening light"
       },
       {
         "file": "spiti-valley-star-gazer-1.jpg",
@@ -503,7 +516,8 @@
         "author": "Wayfarersonmove",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chandratal_July_2017.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chandratal_July_2017.jpg",
+        "alt": "A teal lake lies beneath brown mountains, with a path along its shore"
       },
       {
         "file": "spiti-valley-star-gazer-2.jpg",
@@ -511,15 +525,17 @@
         "author": "Deepank Ranka",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dhankar_Gompa,_Spiti.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dhankar_Gompa,_Spiti.jpg",
+        "alt": "Whitewashed houses and a monastery cling to a cliff above a river valley"
       },
       {
         "file": "spiti-valley-star-gazer-3.jpg",
         "title": "Spiti River Kaza Himachal Jun18 D72 7232.jpg",
-        "author": "This Photo was taken by Timothy A. Gonsalves. Feel free to use my photos, but please mention me as the author. I would",
+        "author": "Timothy A. Gonsalves",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Spiti_River_Kaza_Himachal_Jun18_D72_7232.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Spiti_River_Kaza_Himachal_Jun18_D72_7232.jpg",
+        "alt": "A braided river runs across a wide valley between brown mountains under a blue sky"
       }
     ],
     "ratingsQuantity": 4,
@@ -613,7 +629,8 @@
         "author": "Vyacheslav Argenberg",
         "license": "CC BY 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kerala_backwaters,_Houseboats,_India.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kerala_backwaters,_Houseboats,_India.jpg",
+        "alt": "A houseboat with a thatched roof and white canopy glides along a calm backwater, with palms on the banks"
       },
       {
         "file": "kerala-backwaters-and-hills-1.jpg",
@@ -621,7 +638,8 @@
         "author": "Rainer Halama",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Munnar_Tea_Plantations-WUS07343-Pano.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Munnar_Tea_Plantations-WUS07343-Pano.jpg",
+        "alt": "Rolling tea plantations on hillsides under a pale blue sky, with mountains in the distance"
       },
       {
         "file": "kerala-backwaters-and-hills-2.jpg",
@@ -629,7 +647,8 @@
         "author": "Rainer Halama",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Eravikulam_National_Park-WUS07186.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Eravikulam_National_Park-WUS07186.jpg",
+        "alt": "Tea bushes and golden grass on hillsides, with forest and hills stretching into the distance"
       },
       {
         "file": "kerala-backwaters-and-hills-3.jpg",
@@ -637,7 +656,8 @@
         "author": "Vyacheslav Argenberg",
         "license": "CC BY 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kerala_backwaters,_Canal,_Palm_trees,_India.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kerala_backwaters,_Canal,_Palm_trees,_India.jpg",
+        "alt": "A wooden boat moored beside a canal under leaning palm trees, with a footbridge beyond"
       }
     ],
     "ratingsQuantity": 4,
@@ -719,10 +739,11 @@
       {
         "file": "thar-desert-camel-safari-cover.jpg",
         "title": "Sunset Sand Dunes Jaisalmer Dec14 DSC 6540.jpg",
-        "author": "This Photo was taken by Timothy A. Gonsalves. Feel free to use my photos, but please mention me as the author. I would",
+        "author": "Timothy A. Gonsalves",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sunset_Sand_Dunes_Jaisalmer_Dec14_DSC_6540.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sunset_Sand_Dunes_Jaisalmer_Dec14_DSC_6540.jpg",
+        "alt": "Rippled sand dunes at sunset, with scrub and trees along the horizon"
       },
       {
         "file": "thar-desert-camel-safari-1.jpg",
@@ -730,7 +751,8 @@
         "author": "Clément Bardot",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jaisalmer_Fort,_India.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jaisalmer_Fort,_India.jpg",
+        "alt": "The honey-coloured sandstone bastions and walls of Jaisalmer Fort under a blue sky"
       },
       {
         "file": "thar-desert-camel-safari-2.jpg",
@@ -738,7 +760,8 @@
         "author": "Clément Bardot",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dromedary_in_Thar_desert.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dromedary_in_Thar_desert.jpg",
+        "alt": "A camel kneels on the sand in a red and green embroidered saddle cloth"
       },
       {
         "file": "thar-desert-camel-safari-3.jpg",
@@ -746,7 +769,8 @@
         "author": "Roshanrajverma",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sam_dunes_(Jaisalmer).jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sam_dunes_(Jaisalmer).jpg",
+        "alt": "Wind-rippled sand dunes stretch towards a hazy horizon dotted with scrub"
       }
     ],
     "ratingsQuantity": 4,
@@ -849,7 +873,8 @@
         "author": "Vyacheslav Argenberg",
         "license": "CC BY 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Havelock_Island,_Ethereal_mangrove_tree,_Andaman_Islands.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Havelock_Island,_Ethereal_mangrove_tree,_Andaman_Islands.jpg",
+        "alt": "A lone mangrove tree with its roots exposed on the sand, where the beach meets turquoise water"
       },
       {
         "file": "andaman-island-explorer-1.jpg",
@@ -857,7 +882,8 @@
         "author": "Vinayaraj",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Radhanagar_Beach_Havelock_vrvbaan042k24_(10).jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Radhanagar_Beach_Havelock_vrvbaan042k24_(10).jpg",
+        "alt": "A wide white-sand beach with a forested headland, and a few people walking at the water's edge"
       },
       {
         "file": "andaman-island-explorer-2.jpg",
@@ -865,7 +891,8 @@
         "author": "Vyacheslav Argenberg",
         "license": "CC BY 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shaheed_Island,_Andaman_Islands,_Tropical_beach.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Shaheed_Island,_Andaman_Islands,_Tropical_beach.jpg",
+        "alt": "Tall trees and pandanus shrubs rise above a white beach, with rocky reef flats to one side"
       },
       {
         "file": "andaman-island-explorer-3.jpg",
@@ -873,7 +900,8 @@
         "author": "Vyacheslav Argenberg",
         "license": "CC BY 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Havelock_Island,_Sandy_lagoon,_Andaman_Islands.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Havelock_Island,_Sandy_lagoon,_Andaman_Islands.jpg",
+        "alt": "A bleached fallen tree lies over the sand and reaches out above shallow turquoise water"
       }
     ],
     "ratingsQuantity": 4,
@@ -976,7 +1004,8 @@
         "author": "Yann",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Taj_Mahal,_Agra,_India.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Taj_Mahal,_Agra,_India.jpg",
+        "alt": "The white marble Taj Mahal, with its dome and four minarets, across a long reflecting pool"
       },
       {
         "file": "golden-triangle-heritage-1.jpg",
@@ -984,7 +1013,8 @@
         "author": "Rijin S",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Amber_Fort_Jaipur_01.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Amber_Fort_Jaipur_01.jpg",
+        "alt": "The yellow-ochre walls and turrets of Amber Fort climb a hillside under a clear sky"
       },
       {
         "file": "golden-triangle-heritage-2.jpg",
@@ -992,7 +1022,8 @@
         "author": "Diego Delso",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wind_Palace-Jaipur-India0002.JPG"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Wind_Palace-Jaipur-India0002.JPG",
+        "alt": "The pink sandstone façade of Hawa Mahal, with rows of small latticed windows"
       },
       {
         "file": "golden-triangle-heritage-3.jpg",
@@ -1000,7 +1031,8 @@
         "author": "VijayRajawat00",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tomb_Humayun.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tomb_Humayun.jpg",
+        "alt": "Red sandstone arches, white marble trim and a domed central tomb on a paved courtyard"
       }
     ],
     "ratingsQuantity": 4,
@@ -1112,7 +1144,8 @@
         "author": "Joydeep",
         "license": "CC BY-SA 3.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tea_plantation_Darjeeling.JPG"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tea_plantation_Darjeeling.JPG",
+        "alt": "Tea bushes cover the hillsides above a cluster of houses, with mist rising from the valley below"
       },
       {
         "file": "darjeeling-and-sikkim-tea-trails-1.jpg",
@@ -1120,7 +1153,8 @@
         "author": "Paramanu Sarkar",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Toy_Train_by_Paramanu_Sarkar_01.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Toy_Train_by_Paramanu_Sarkar_01.jpg",
+        "alt": "A blue-and-white toy train runs along a hillside track beside a winding road"
       },
       {
         "file": "darjeeling-and-sikkim-tea-trails-2.jpg",
@@ -1128,7 +1162,8 @@
         "author": "Subhrajyoti07",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cherry_Resort_inside_Temi_Tea_Garden,_Namchi,_Sikkim.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Cherry_Resort_inside_Temi_Tea_Garden,_Namchi,_Sikkim.jpg",
+        "alt": "A hotel on a hilltop among tea bushes, with cloud lying in the valley below"
       },
       {
         "file": "darjeeling-and-sikkim-tea-trails-3.jpg",
@@ -1136,7 +1171,8 @@
         "author": "Bernard Gagnon",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Do-drul_Chorten,_Gangtok_01.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Do-drul_Chorten,_Gangtok_01.jpg",
+        "alt": "A white stupa with a gilded spire stands in a courtyard beside a yellow building"
       }
     ],
     "ratingsQuantity": 4,
@@ -1212,7 +1248,8 @@
         "author": "Asif N Khan",
         "license": "CC BY 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tiger_-_Ranthambore_National_Park_2012-06-04.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tiger_-_Ranthambore_National_Park_2012-06-04.jpg",
+        "alt": "A tiger stands on a rocky bank at the edge of a muddy pool, looking towards the camera"
       },
       {
         "file": "ranthambore-tiger-safari-1.jpg",
@@ -1220,7 +1257,8 @@
         "author": "Drsouvikpaul",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ranthambore_Tiger_1C.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ranthambore_Tiger_1C.jpg",
+        "alt": "A tiger rests chest-deep in shallow water beside a fallen branch"
       },
       {
         "file": "ranthambore-tiger-safari-2.jpg",
@@ -1228,7 +1266,8 @@
         "author": "Giles Laurent",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:077_Sloth_bear_in_Ranthambore_National_Park_Photo_by_Giles_Laurent.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:077_Sloth_bear_in_Ranthambore_National_Park_Photo_by_Giles_Laurent.jpg",
+        "alt": "A sloth bear with a shaggy black coat and pale muzzle walks through dry scrub"
       },
       {
         "file": "ranthambore-tiger-safari-3.jpg",
@@ -1236,7 +1275,8 @@
         "author": "Giles Laurent",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:070_Mugger_crocodile_in_Ranthambore_National_Park_Photo_by_Giles_Laurent.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:070_Mugger_crocodile_in_Ranthambore_National_Park_Photo_by_Giles_Laurent.jpg",
+        "alt": "A mugger crocodile lies on a muddy bank beside shallow water and dry grass"
       }
     ],
     "ratingsQuantity": 4,
@@ -1330,7 +1370,8 @@
         "author": "PJeganathan",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Living_root_bridges_of_Nongriat_village_in_East_Khasi_Hills_district,_Meghalaya_JEG7387.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Living_root_bridges_of_Nongriat_village_in_East_Khasi_Hills_district,_Meghalaya_JEG7387.jpg",
+        "alt": "Two tiers of living tree-root bridges span a stream in the forest, with stone steps beside them"
       },
       {
         "file": "meghalaya-living-root-bridges-1.jpg",
@@ -1338,7 +1379,8 @@
         "author": "Kunal Dalui",
         "license": "CC BY-SA 3.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nohkalikai_Falls_Cherrapunji.JPG"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Nohkalikai_Falls_Cherrapunji.JPG",
+        "alt": "Waterfalls drop down a terraced cliff face in misty green hills"
       },
       {
         "file": "meghalaya-living-root-bridges-2.jpg",
@@ -1346,7 +1388,8 @@
         "author": "Joydeep Chakraborty",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dawki_Lake,_Meghalaya,_India.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Dawki_Lake,_Meghalaya,_India.jpg",
+        "alt": "A broad green river with small boats near the bank and wooded hills behind"
       },
       {
         "file": "meghalaya-living-root-bridges-3.jpg",
@@ -1354,7 +1397,8 @@
         "author": "Joydeep Chakraborty",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Living_root_bridge,_Maghalaya,_India1.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Living_root_bridge,_Maghalaya,_India1.jpg",
+        "alt": "Tree roots form an arch over a clear, shallow stream with mossy stones"
       }
     ],
     "ratingsQuantity": 4,
@@ -1439,7 +1483,8 @@
         "author": "Dey.sandip",
         "license": "CC BY-SA 3.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Krishna_Pushkarani_-_Hampi_Ruins.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Krishna_Pushkarani_-_Hampi_Ruins.jpg",
+        "alt": "Stone steps lead down to a still tank, with a pillared colonnade and boulders beyond"
       },
       {
         "file": "hampi-ruins-and-boulders-1.jpg",
@@ -1447,7 +1492,8 @@
         "author": "Vyacheslav Argenberg",
         "license": "CC BY 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hampi,_India,_Lotus_Mahal.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hampi,_India,_Lotus_Mahal.jpg",
+        "alt": "A carved stone shrine on a green lawn, framed by a large gnarled tree"
       },
       {
         "file": "hampi-ruins-and-boulders-2.jpg",
@@ -1455,7 +1501,8 @@
         "author": "Ingo Mehling",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hampi_-_Tungabhadra_River_from_Hampi_River_Walk.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hampi_-_Tungabhadra_River_from_Hampi_River_Walk.jpg",
+        "alt": "Rounded granite boulders line the banks of a river that curves beneath a hill"
       },
       {
         "file": "hampi-ruins-and-boulders-3.jpg",
@@ -1463,7 +1510,8 @@
         "author": "Vyacheslav Argenberg",
         "license": "CC BY 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hampi,_India,_Temple_on_top_of_Matanga_Hill.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hampi,_India,_Temple_on_top_of_Matanga_Hill.jpg",
+        "alt": "A weathered, carved stone temple tower on a rocky hilltop, with a standing stone pillar beside it"
       }
     ],
     "ratingsQuantity": 4,
@@ -1539,7 +1587,8 @@
         "author": "Ritikamaheshwari58",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rapid_ahead!.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Rapid_ahead!.jpg",
+        "alt": "Rafts run the green rapids below rocky cliffs, with boulders in the foreground"
       },
       {
         "file": "rishikesh-ganga-rafting-1.jpg",
@@ -1547,7 +1596,8 @@
         "author": "Emőke Dénes",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Ganges_at_Rishikesh_-_1.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:The_Ganges_at_Rishikesh_-_1.jpg",
+        "alt": "The green-grey Ganga flows between wooded hills, with white buildings on the far bank"
       },
       {
         "file": "rishikesh-ganga-rafting-2.jpg",
@@ -1555,7 +1605,8 @@
         "author": "Sumita Roy Dutta",
         "license": "CC BY-SA 4.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:River_rafting_at_Rishikesh_Photographed_By_Sumita_Roy.jpg"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:River_rafting_at_Rishikesh_Photographed_By_Sumita_Roy.jpg",
+        "alt": "A blue raft with its paddlers on the green river, with leafy branches in the foreground"
       },
       {
         "file": "rishikesh-ganga-rafting-3.jpg",
@@ -1563,7 +1614,8 @@
         "author": "Vvnataraj",
         "license": "CC BY-SA 3.0",
         "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-        "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_rafting_camp_on_the_banks_of_Ganga.JPG"
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:A_rafting_camp_on_the_banks_of_Ganga.JPG",
+        "alt": "White tents line a sandy riverbank above the green water, with a raft on the river"
       }
     ],
     "ratingsQuantity": 4,
