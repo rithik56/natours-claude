@@ -10,3 +10,4 @@ dist/
 .lighthouseci/
 next-env.d.ts
 .gsd/
+public/data/

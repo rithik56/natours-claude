@@ -18,6 +18,15 @@
     outline: none;
   }
 
+  /*
+   * tour-route.module.css sizes every SVG in the slot to 100% of its box, for the static drawing. Leaflet
+   * sizes its own overlay SVG from its width and height attributes, and a 100% height inside Leaflet's
+   * zero-size pane collapses it to 0, so the overlay keeps its own size here (the more specific selector wins).
+   */
+  .host .map svg {
+    height: auto;
+  }
+
   /* The route's outline under the line: Neel in both themes, so the yellow line stands out (C4). */
   .outline {
     stroke: var(--color-header-bg);

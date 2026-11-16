@@ -146,6 +146,72 @@ test.describe('[U25] the Leaflet route line with motion allowed', () => {
   });
 });
 
+test.describe('[R8] the India boundary on the route map', () => {
+  test.use({ viewport: { width: 1280, height: 480 } });
+
+  test('[R8] the boundary is drawn under the two route paths, and its attribution is visible', async ({
+    page,
+  }) => {
+    await page.goto(TOUR);
+    await page.locator(SLOT).scrollIntoViewIfNeeded();
+
+    // The boundary path, then the outline and the line: three paths in the overlay pane.
+    await expect(
+      page.locator(`${SLOT} .leaflet-overlay-pane path`),
+    ).toHaveCount(3);
+    await expect(page.locator('.leaflet-control-attribution')).toContainText(
+      'India boundary: Survey of India, via DataMeet Maps, CC BY-SA 2.5 / ODbL',
+    );
+    await expect(page.locator('.leaflet-control-attribution')).toBeVisible();
+  });
+
+  test('[R8] every request the page makes goes to localhost, and the boundary comes from our own origin', async ({
+    page,
+  }) => {
+    const urls: string[] = [];
+    page.on('request', (request) => urls.push(request.url()));
+    await page.goto(TOUR);
+    await page.locator(SLOT).scrollIntoViewIfNeeded();
+    await expect(
+      page.locator(`${SLOT} .leaflet-overlay-pane path`),
+    ).toHaveCount(3);
+
+    const remote = urls.filter(
+      (url) => url.startsWith('http') && new URL(url).hostname !== 'localhost',
+    );
+    expect(remote).toEqual([]);
+    expect(urls.some((url) => url.endsWith('/data/india-soi.geojson'))).toBe(
+      true,
+    );
+  });
+});
+
+test.describe('[R8] the route map when the boundary fails', () => {
+  test.use({ viewport: { width: 1280, height: 480 } });
+
+  test('[R8] with the boundary answering 500, the static route stays with no message and the itinerary is unchanged', async ({
+    page,
+  }) => {
+    await page.route('**/data/india-soi.geojson', (route) =>
+      route.fulfill({ status: 500, body: 'unavailable' }),
+    );
+    await page.goto(TOUR);
+    const itineraryBefore = await itineraryLabels(page);
+
+    await page.locator(SLOT).scrollIntoViewIfNeeded();
+
+    // The map mounts, its boundary fetch fails, and the map is removed: the static route is what remains.
+    await expect(page.locator('.leaflet-container')).toHaveCount(0);
+    await expect(
+      page.locator(SLOT).getByRole('img', { name: /^Route map/ }),
+    ).toHaveCount(1);
+    await expect(
+      page.locator(SLOT).locator('[role="alert"], [role="status"]'),
+    ).toHaveCount(0);
+    expect(await itineraryLabels(page)).toEqual(itineraryBefore);
+  });
+});
+
 test.describe('[R8] the route map with JavaScript off', () => {
   test.use({
     javaScriptEnabled: false,

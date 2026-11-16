@@ -4,12 +4,21 @@ import L from 'leaflet';
 import { useEffect, useRef } from 'react';
 import { FRAME_TOKENS } from '@/components/ui/map-frame';
 import {
+  longitudeScale,
   nudgeCoincident,
   type RouteStop,
   toPlanar,
 } from '@/lib/route-projection';
 import './leaflet-vendor.css';
 import styles from './route-map.module.css';
+
+/** The India boundary, on our own origin, so no tile or third-party host is contacted (ADR 0028, ADR 0034). */
+const BOUNDARY_URL = '/data/india-soi.geojson';
+/** The approved attribution, with the licence ADR 0028 records (copy.md "Map attribution"). */
+const BOUNDARY_ATTRIBUTION =
+  'India boundary: Survey of India, via DataMeet Maps, CC BY-SA 2.5 / ODbL';
+
+type BoundaryData = Parameters<typeof L.geoJSON>[0];
 
 type RouteMapProps = {
   stops: RouteStop[];
@@ -51,6 +60,8 @@ export default function RouteMap({
     const container = containerRef.current;
     if (!container) return undefined;
     let map: L.Map | null = null;
+    // Set on cleanup, so a boundary that arrives after the map is gone is ignored.
+    let cancelled = false;
     try {
       const created = L.map(container, {
         // CRS.Simple reads a point as (lng, lat), so the planar x goes in as lng and y as lat.
@@ -74,10 +85,20 @@ export default function RouteMap({
       const planar = toPlanar(stops);
       const latlngs = planar.map((stop) => toLatLng(stop.x, stop.y));
 
-      // The same fit as MapFrame: the route's bounds, inset by --space-5 (C6).
+      // The attribution control, without the default "Leaflet" prefix, in the approved wording (copy.md).
+      const attribution = L.control
+        .attribution({ prefix: false })
+        .addTo(created);
+      attribution.addAttribution(BOUNDARY_ATTRIBUTION);
+      attribution.getContainer()?.classList.add(styles.attribution ?? '');
+
+      // The same fit as MapFrame: the route's bounds, inset by --space-5 (C6). The bottom also keeps the
+      // attribution's height clear, so no stop is drawn under the approved attribution text.
       const pad = tokenPixels('--space-5');
+      const attributionHeight = attribution.getContainer()?.offsetHeight ?? 0;
       created.fitBounds(L.latLngBounds(latlngs), {
-        padding: [pad, pad],
+        paddingTopLeft: [pad, pad],
+        paddingBottomRight: [pad, pad + attributionHeight],
         animate: false,
         maxZoom: 12,
       });
@@ -122,13 +143,37 @@ export default function RouteMap({
         }).addTo(created);
       }
 
-      callbacks.current.onReady();
+      // The boundary is fetched as data from our origin and drawn below the route, unfilled and not interactive.
+      // The map is ready only once it is drawn; a failed fetch or parse keeps the static route in the slot.
+      const scale = longitudeScale(stops);
+      fetch(BOUNDARY_URL)
+        .then((response) => {
+          if (!response.ok) throw new Error(`boundary ${response.status}`);
+          return response.json() as Promise<BoundaryData>;
+        })
+        .then((data) => {
+          if (cancelled) return;
+          const boundary = L.geoJSON(data, {
+            coordsToLatLng: (coords) => L.latLng(coords[1], coords[0] * scale),
+            interactive: false,
+            style: () => ({ className: styles.boundary, fill: false }),
+          }).addTo(created);
+          boundary.bringToBack();
+          callbacks.current.onReady();
+        })
+        .catch(() => {
+          if (cancelled) return;
+          map?.remove();
+          map = null;
+          callbacks.current.onError();
+        });
     } catch {
       map?.remove();
       map = null;
       callbacks.current.onError();
     }
     return () => {
+      cancelled = true;
       map?.remove();
     };
   }, [stops]);

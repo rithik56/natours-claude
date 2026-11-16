@@ -37,6 +37,7 @@ Every decision that departs from `plan.md`, and every project-level decision, is
 | 0031 | [One cached catalogue, queried in memory](0031-one-cached-catalogue-queried-in-memory.md) | Accepted |
 | 0032 | [No loading.tsx on the tour page or at the root](0032-no-loading-file-on-the-tour-page.md) | Accepted |
 | 0033 | [The booking panel sits in the page flow on a phone, and "booked" means an upcoming paid booking](0033-booking-panel-in-the-page-flow.md) | Accepted |
+| 0034 | [The route map's fallback and the boundary file](0034-route-map-fallback-and-boundary-file.md) | Accepted |
 | 0035 | [A vendor cascade layer for third-party CSS](0035-vendor-cascade-layer.md) | Accepted |
 | 0039 | [The tour page awaits its booking, guides and reviews instead of streaming them](0039-tour-page-awaits-instead-of-streaming.md) | Accepted |
 | 0040 | [The credits page has no loading.tsx, so it shows with JavaScript off](0040-credits-page-has-no-loading-file.md) | Accepted |

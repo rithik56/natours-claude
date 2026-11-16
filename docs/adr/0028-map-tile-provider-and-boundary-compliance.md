@@ -1,6 +1,6 @@
 # 0028. Map-tile provider and boundary compliance
 
-Status: Accepted
+Status: Accepted; amended by 0034 (boundary file location)
 Date: 10 Nov 2026
 Requirements: D14
 Plan review: DEL-17, DES-08
