@@ -292,6 +292,27 @@ export const tourUpdateSchema = z
 export type TourUpdateInput = z.infer<typeof tourUpdateSchema>;
 
 /**
+ * The body of POST /api/v1/tours (F6, B4, D-13): JSON only and strict. The cover, the gallery,
+ * the credits, the ratings and the slug are not in it, so a created tour has no photo until one
+ * is added with its credit (D-14), and no JSON body can write them.
+ */
+export const tourCreateSchema = z.strictObject({
+  name: TOUR_NAME,
+  duration: POSITIVE_WHOLE,
+  maxGroupSize: POSITIVE_WHOLE,
+  difficulty: z.enum(DIFFICULTIES),
+  price: POSITIVE_WHOLE,
+  summary: TOUR_TEXT,
+  startLocation: START_LOCATION,
+  description: DESCRIPTION.optional(),
+  startDates: START_DATES.optional(),
+  locations: LOCATIONS.optional(),
+  guides: GUIDES.optional(),
+});
+
+export type TourCreateInput = z.infer<typeof tourCreateSchema>;
+
+/**
  * Turns a parsed API query into a catalogue query. An absent sort is -createdAt
  * (B1); an absent page is 1 and an absent limit is 20. The API never clamps (B11).
  */

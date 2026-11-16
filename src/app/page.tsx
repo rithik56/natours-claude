@@ -8,6 +8,7 @@ import { now } from '@/server/clock';
 import { getConfig } from '@/server/config';
 import { getDeps } from '@/server/deps';
 import { nextBookableDate } from '@/server/modules/tours/catalogue-query';
+import { hasCover } from '@/server/modules/tours/dto';
 import {
   buildPageQuerySchema,
   LENGTH_BANDS,
@@ -66,7 +67,8 @@ export default async function HomePage(props: PageProps<'/'>) {
         />
       ) : (
         <ul className={styles.list}>
-          {result.items.map((tour, index) => (
+          {/* The catalogue holds only covered tours (D-13); hasCover narrows each photo's type. */}
+          {result.items.filter(hasCover).map((tour, index) => (
             <TourRow
               key={tour.id}
               name={tour.name}

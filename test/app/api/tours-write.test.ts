@@ -413,7 +413,10 @@ describe('admin tour writes over JSON (F6, B4, D-13)', () => {
       const created = (await create(createBodyFor(HAMPI), user))
         .body as TourBody;
       const id = created.data.tour.id as string;
-      const [lng, lat] = seedRecordOf(HAMPI).startLocation.coordinates;
+      const [lng, lat] = seedRecordOf(HAMPI).startLocation.coordinates as [
+        number,
+        number,
+      ];
       const nearby = { lat, lng, distance: 50, unit: 'km' as const };
 
       expect(

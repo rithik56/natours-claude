@@ -166,7 +166,8 @@ describe('runSeed photos and tours', () => {
     await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
     const tours = await Tour.find().lean();
     for (const tour of tours) {
-      expect(fakes.storage.files.has(tour.imageCover)).toBe(true);
+      expect(tour.imageCover).toEqual(expect.any(String));
+      expect(fakes.storage.files.has(tour.imageCover as string)).toBe(true);
     }
   });
 

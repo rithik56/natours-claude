@@ -39,12 +39,13 @@ Every decision that departs from `plan.md`, and every project-level decision, is
 | 0033 | [The booking panel sits in the page flow on a phone, and "booked" means an upcoming paid booking](0033-booking-panel-in-the-page-flow.md) | Accepted |
 | 0034 | [The route map's fallback and the boundary file](0034-route-map-fallback-and-boundary-file.md) | Accepted |
 | 0035 | [A vendor cascade layer for third-party CSS](0035-vendor-cascade-layer.md) | Accepted |
+| 0036 | [The tour cover is optional, and a tour without one stays out of the public catalogue](0036-tour-cover-optional-and-hidden-until-added.md) | Accepted |
 | 0039 | [The tour page awaits its booking, guides and reviews instead of streaming them](0039-tour-page-awaits-instead-of-streaming.md) | Accepted |
 | 0040 | [The credits page has no loading.tsx, so it shows with JavaScript off](0040-credits-page-has-no-loading-file.md) | Accepted |
 
 ## Format
 
-One file per decision, named `NNNN-kebab-title.md`, numbered from 0001 in order. The numbers 0036 to 0038 are reserved for the later phase 4 plans, so the table has that gap until they are written; no other gap is allowed. Each file starts with its title as `# NNNN. Title`, then these header lines: `Status:`, `Date:` (in India Standard Time, for example 9 Nov 2026), `Requirements:` and `Plan review:`. Then come the sections `## Context`, `## Decision` and `## Consequences`, all of them filled in.
+One file per decision, named `NNNN-kebab-title.md`, numbered from 0001 in order. The numbers 0037 and 0038 are reserved for the later phase 4 plans, so the table has that gap until they are written; no other gap is allowed. Each file starts with its title as `# NNNN. Title`, then these header lines: `Status:`, `Date:` (in India Standard Time, for example 9 Nov 2026), `Requirements:` and `Plan review:`. Then come the sections `## Context`, `## Decision` and `## Consequences`, all of them filled in.
 
 ## Adding an ADR
 

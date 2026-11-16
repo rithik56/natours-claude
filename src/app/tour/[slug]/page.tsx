@@ -19,6 +19,7 @@ import { getConfig } from '@/server/config';
 import { getDeps } from '@/server/deps';
 import { reviewPageQuerySchema } from '@/server/modules/reviews/schemas';
 import type { TourDetail } from '@/server/modules/tours/dto';
+import { hasCover } from '@/server/modules/tours/dto';
 import { getBySlug } from '@/server/modules/tours/service';
 import styles from './page.module.css';
 
@@ -89,7 +90,8 @@ export async function generateMetadata({
 }: Pick<TourPageProps, 'params'>): Promise<Metadata> {
   const { slug } = await params;
   const tour = await getTourPage(slug);
-  if (!tour) notFound();
+  // A tour with no cover is not published (D-13): it answers 404 like an unknown slug.
+  if (!tour || !hasCover(tour)) notFound();
 
   const { appOrigin } = getConfig();
   const pageUrl = `${appOrigin}/tour/${tour.slug}`;
@@ -130,7 +132,8 @@ export default async function TourPage({
 }: TourPageProps) {
   const { slug } = await params;
   const tour = await getTourPage(slug);
-  if (!tour) notFound();
+  // A tour with no cover is not published (D-13): it answers 404 like an unknown slug.
+  if (!tour || !hasCover(tour)) notFound();
   // Lenient (D-08, T-04-22): a bad reviewPage falls back to the first page, and the reviews clamp it.
   const { reviewPage } = parseQuery(reviewPageQuerySchema, await searchParams);
 

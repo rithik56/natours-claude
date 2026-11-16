@@ -100,6 +100,8 @@ type SeedTourRecord = ReturnType<typeof seedTours>[number] & {
 type CreateTourOptions = {
   /** Selects that seed tour. Without it, the next seed tour not yet in this database. */
   slug?: string;
+  /** Creates the tour with no cover, the way a tour created over JSON is stored (D-13). */
+  withoutCover?: boolean;
   /** Only numbers, dates and the enum may change. Text always comes from the seed. */
   overrides?: Partial<{
     price: number;
@@ -168,7 +170,7 @@ export async function createTour(
     ...rest,
     startDates: startDates.map(fromIstDay),
     // QA-03: seeded photos are stored under tours/, the keys that `npm run seed` writes.
-    imageCover: `tours/${imageCover}`,
+    imageCover: options.withoutCover ? undefined : `tours/${imageCover}`,
     images: images.map((file) => `tours/${file}`),
     photoCredits: photoCredits.map((credit) => ({
       ...credit,

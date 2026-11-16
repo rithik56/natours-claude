@@ -769,8 +769,8 @@ export interface TourFields {
   price: number;
   summary: string;
   description?: string;
-  /** A storage key, not a URL. */
-  imageCover: string;
+  /** A storage key, not a URL. Absent until a cover is added (D-13, ADR 0036). */
+  imageCover?: string;
   images: string[];
   photoCredits: PhotoCredit[];
   /** Each is 00:00 IST on its day (B19). */
@@ -796,7 +796,7 @@ export type TourDoc = HydratedDocument<TourFields>;
 | `price` | required whole rupees, at least 1. There is no `priceDiscount` (ADR 0014). |
 | `summary` | required, trimmed |
 | `description` | optional, trimmed |
-| `imageCover` | required storage key |
+| `imageCover` | optional storage key; a tour created over JSON has none until a cover is added (D-13, ADR 0036) |
 | `images` | storage keys, at most 3 |
 | `photoCredits` | every field of each credit is required (U27) |
 | `startDates` | each 00:00 IST |
@@ -914,7 +914,8 @@ export type TourSummary = {
   ratingsAverage: number;
   ratingsQuantity: number;
   summary: string;
-  imageCover: string;
+  /** null for a tour with no cover yet (D-13); no public read returns such a tour. */
+  imageCover: string | null;
   startDates: IstDay[];
   startLocation: {
     coordinates: number[];

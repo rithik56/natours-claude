@@ -57,8 +57,11 @@ export interface TourFields {
   price: number;
   summary: string;
   description?: string;
-  /** A storage key, not a URL. */
-  imageCover: string;
+  /**
+   * A storage key, not a URL. Optional (D-13, ADR 0036): a tour created over JSON has no cover
+   * until one is added with its credit, and the public reads leave a cover-less tour out.
+   */
+  imageCover?: string;
   images: string[];
   photoCredits: PhotoCredit[];
   /** Each is 00:00 IST on its day (B19). */
@@ -197,7 +200,7 @@ const schema = new Schema<TourFields>(
     },
     summary: { ...requiredText, trim: true },
     description: { type: String, trim: true },
-    imageCover: requiredText,
+    imageCover: { type: String, trim: true },
     images: {
       type: [String],
       validate: {

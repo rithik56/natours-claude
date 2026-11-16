@@ -18,6 +18,7 @@ import {
   type TourListResult,
 } from './catalogue-query';
 import {
+  hasCover,
   toCreditGroup,
   toTourDetail,
   toTourSummary,
@@ -25,7 +26,7 @@ import {
   type TourDetail,
   type TourSummary,
 } from './dto';
-import type { TourUpdateInput } from './schemas';
+import type { TourCreateInput, TourUpdateInput } from './schemas';
 import { Tour, type TourDoc, type TourFields } from './model';
 
 type TourRecord = TourFields & { _id: Types.ObjectId };
@@ -33,8 +34,9 @@ type TourRecord = TourFields & { _id: Types.ObjectId };
 const OBJECT_ID = /^[0-9a-f]{24}$/i;
 
 /**
- * Reads every tour for the catalogue: no filter and no populate, so the
- * catalogue holds no guides and no reviews (B12).
+ * Reads every covered tour for the catalogue: no populate, so the catalogue holds no
+ * guides and no reviews (B12). A tour with no cover is left out (D-13, ADR 0036), so
+ * every public read that is built on the catalogue leaves it out too.
  *
  * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
  */
@@ -42,7 +44,7 @@ async function loadCatalogue(): Promise<TourSummary[]> {
   await connectDb();
   try {
     const records = await Tour.find().sort({ name: 1 }).lean<TourRecord[]>();
-    return records.map(toTourSummary);
+    return records.filter((record) => hasCover(record)).map(toTourSummary);
   } catch (error) {
     if (!isDbUnavailableError(error)) throw error;
     const unavailable = new AppError('SERVICE_UNAVAILABLE');
@@ -195,6 +197,7 @@ export async function toursWithin(
   await connectDb();
   try {
     const records = await Tour.find({
+      imageCover: { $type: 'string' },
       startLocation: {
         $geoWithin: { $centerSphere: [[input.lng, input.lat], radius] },
       },
@@ -241,6 +244,7 @@ export async function distancesFrom(
           distanceField: 'distance',
           distanceMultiplier: METRES_TO[input.unit],
           spherical: true,
+          query: { imageCover: { $type: 'string' } },
         },
       },
       {
@@ -274,7 +278,9 @@ async function loadCredits(): Promise<CreditGroup[]> {
       .sort({ createdAt: 1, _id: 1 })
       .select({ name: 1, slug: 1, imageCover: 1, images: 1, photoCredits: 1 })
       .lean<TourRecord[]>();
-    return records.flatMap((record) => toCreditGroup(record) ?? []);
+    return records
+      .filter((record) => hasCover(record))
+      .flatMap((record) => toCreditGroup(record) ?? []);
   } catch (error) {
     if (!isDbUnavailableError(error)) throw error;
     const unavailable = new AppError('SERVICE_UNAVAILABLE');
@@ -476,6 +482,32 @@ function writeFailure(error: unknown): unknown {
 async function detailWithGuides(doc: TourDoc): Promise<TourWithGuides> {
   const detail = toTourDetail(doc.toObject() as unknown as TourRecord);
   return { ...detail, guides: await getGuides(detail.id, detail.guideIds) };
+}
+
+/**
+ * Creates a tour from JSON (F6, B4, D-13). The cover is optional: the tour has no photo
+ * until one is added with its credit, and the public reads leave it out until then. The
+ * `tours` tag is cleared once the save has finished.
+ *
+ * @param input - The tour, validated by `tourCreateSchema`.
+ * @returns The saved tour, with `imageCover` null and its guides.
+ * @throws AppError CONFLICT with the approved message when the name or slug is taken.
+ * @throws AppError VALIDATION_ERROR on the guides path when a guide id is not a guide.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function createTour(
+  input: TourCreateInput,
+): Promise<TourWithGuides> {
+  await assertGuides(input.guides);
+  let doc: TourDoc;
+  try {
+    await connectDb();
+    doc = await Tour.create(toModelFields(input));
+  } catch (error) {
+    throw writeFailure(error);
+  }
+  await getDeps().cache.invalidate('tours');
+  return detailWithGuides(doc);
 }
 
 /**

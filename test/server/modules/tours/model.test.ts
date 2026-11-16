@@ -45,7 +45,7 @@ describe('tours data layer', () => {
     it('[F6] (D-13) a tour saves without an imageCover, so a cover-less tour can be created from JSON', async () => {
       const tour = await createTour({
         slug: 'hampi-ruins-and-boulders',
-        overrides: { imageCover: undefined, images: [], photoCredits: [] },
+        withoutCover: true,
       });
 
       expect(tour.imageCover).toBeUndefined();
