@@ -122,7 +122,8 @@ describe('tour DTOs', () => {
 
     const detail = toTourDetail(populated!);
 
-    expect(detail.images).toEqual(record.images);
+    // QA-03: stored photo keys carry the tours/ prefix the seed writes.
+    expect(detail.images).toEqual(record.images.map((file) => `tours/${file}`));
     expect(detail.locations.map((stop) => stop.description)).toEqual(
       record.locations.map((stop) => stop.description),
     );
@@ -130,7 +131,7 @@ describe('tour DTOs', () => {
       record.locations.map((stop) => stop.day),
     );
     expect(detail.photoCredits.map((credit) => credit.file)).toEqual(
-      record.photoCredits.map((credit) => credit.file),
+      record.photoCredits.map((credit) => `tours/${credit.file}`),
     );
   });
 

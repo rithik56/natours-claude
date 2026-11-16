@@ -163,10 +163,17 @@ export async function createTour(
 ): Promise<TourDoc> {
   const record = await pickSeedTour(options.slug);
   if (options.withGuides) await createSeedGuides(record.guides);
-  const { startDates, ...rest } = record;
+  const { startDates, imageCover, images, photoCredits, ...rest } = record;
   return Tour.create({
     ...rest,
     startDates: startDates.map(fromIstDay),
+    // QA-03: seeded photos are stored under tours/, the keys that `npm run seed` writes.
+    imageCover: `tours/${imageCover}`,
+    images: images.map((file) => `tours/${file}`),
+    photoCredits: photoCredits.map((credit) => ({
+      ...credit,
+      file: `tours/${credit.file}`,
+    })),
     ...options.overrides,
   });
 }

@@ -236,7 +236,10 @@ describe('tours data layer', () => {
 
       const reloaded = await Tour.findById(tour._id).lean();
 
-      expect(reloaded?.images).toEqual(record.images);
+      // QA-03: stored photo keys carry the tours/ prefix the seed writes.
+      expect(reloaded?.images).toEqual(
+        record.images.map((file) => `tours/${file}`),
+      );
       expect(reloaded?.startDates.map((date) => date.toISOString())).toEqual(
         record.startDates.map((day) => fromIstDay(day).toISOString()),
       );
@@ -244,7 +247,7 @@ describe('tours data layer', () => {
         record.locations.map((stop) => stop.description),
       );
       expect(reloaded?.photoCredits.map((credit) => credit.file)).toEqual(
-        record.photoCredits.map((credit) => credit.file),
+        record.photoCredits.map((credit) => `tours/${credit.file}`),
       );
     });
 

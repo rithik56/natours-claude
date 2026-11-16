@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // next dev otherwise writes an untracked AGENTS.md when it detects an AI agent.
   agentRules: false,
+  // ADR 0029: the optimiser reads only same-origin /media photos. No remote host, so the CSP is unchanged.
+  images: {
+    localPatterns: [{ pathname: '/media/**', search: '' }],
+  },
   async headers() {
     return [
       {

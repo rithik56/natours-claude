@@ -148,9 +148,9 @@ describe('proxy request id', () => {
 
 describe('proxy matcher', () => {
   const SOURCE =
-    '/((?!api|webhooks|healthz|readyz|_next/static|_next/image|favicon.ico).*)';
+    '/((?!api|webhooks|healthz|readyz|media|_next/static|_next/image|favicon.ico).*)';
   const PAGE_PATHS =
-    /^\/((?!api|webhooks|healthz|readyz|_next\/static|_next\/image|favicon.ico).*)$/;
+    /^\/((?!api|webhooks|healthz|readyz|media|_next\/static|_next\/image|favicon.ico).*)$/;
   const entry = config.matcher[0];
   const matches = (path: string) => PAGE_PATHS.test(path);
 
@@ -168,6 +168,9 @@ describe('proxy matcher', () => {
     expect(matches('/webhooks/stripe')).toBe(false);
     expect(matches('/healthz')).toBe(false);
     expect(matches('/readyz')).toBe(false);
+    expect(matches('/media/tours/valley-of-flowers-trek-cover.jpg')).toBe(
+      false,
+    );
     expect(matches('/_next/static/chunks/a.js')).toBe(false);
     expect(matches('/_next/image')).toBe(false);
     expect(matches('/favicon.ico')).toBe(false);
