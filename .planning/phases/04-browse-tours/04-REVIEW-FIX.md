@@ -35,7 +35,7 @@ status: partial
 **Verification:** Without the export, the six new tests fail (`The route module has no OPTIONS handler`). With it, all six pass.
 **Note:** The read-only tour routes (`stats`, `top-5-cheap`, `monthly-plan`, `distances`, `within`) do not export `OPTIONS`. A simple cross-origin GET needs no preflight, and the review scoped this finding to the write routes. `docs/contracts.md` line 348 could be read to cover them too, so the orchestrator may want to decide that.
 
-### WR-01: Non-Latin tour names produce an empty slug
+### WR-01: Non-Latin tour names produce an empty slug, and the second one collides
 
 **Status:** fixed: requires human verification
 **Files modified:** `src/server/modules/tours/schemas.ts`, `test/app/api/tours-write.test.ts`
@@ -54,7 +54,7 @@ status: partial
 **Documentation:** ADR 0041 records the change, since it amends ADR 0017's fixed pipeline order. `docs/contracts.md` is updated to match.
 **Needs review:** The review suggested `rateLimit.beforeBody: true`. A union of the two shapes stopped TypeScript from typing the key of every existing route, so the option is a separate field. That choice is recorded in ADR 0041.
 
-### WR-05: Tour write schemas accept duplicate stop days and duplicate guides
+### WR-05: Tour write schemas accept duplicate stop days and duplicate or unbounded guides
 
 **Status:** fixed
 **Files modified:** `src/server/modules/tours/schemas.ts`, `test/app/api/tours-write.test.ts`
