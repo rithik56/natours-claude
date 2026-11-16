@@ -1,11 +1,15 @@
 import 'server-only';
 import { cache } from 'react';
 import type { Types } from 'mongoose';
-import { istMonthBounds, toIstDay } from '@/lib/ist';
+import { messages } from '@/lib/messages';
+import { fromIstDay, istMonthBounds, toIstDay } from '@/lib/ist';
 import { now } from '@/server/clock';
 import { connectDb, isDbUnavailableError } from '@/server/db';
 import { getDeps } from '@/server/deps';
 import { AppError } from '@/server/errors';
+import { getLogger } from '@/server/logger';
+import { countForTour } from '@/server/modules/bookings/service';
+import { deleteForTour } from '@/server/modules/reviews/service';
 import type { PublicUser } from '@/server/modules/users/dto';
 import { findActivePublicByIds } from '@/server/modules/users/service';
 import {
@@ -17,6 +21,7 @@ import {
   type TourListResult,
 } from './catalogue-query';
 import {
+  hasCover,
   toCreditGroup,
   toTourDetail,
   toTourSummary,
@@ -24,15 +29,17 @@ import {
   type TourDetail,
   type TourSummary,
 } from './dto';
-import { Tour, type TourFields } from './model';
+import type { TourCreateInput, TourUpdateInput } from './schemas';
+import { Tour, type TourDoc, type TourFields } from './model';
 
 type TourRecord = TourFields & { _id: Types.ObjectId };
 
 const OBJECT_ID = /^[0-9a-f]{24}$/i;
 
 /**
- * Reads every tour for the catalogue: no filter and no populate, so the
- * catalogue holds no guides and no reviews (B12).
+ * Reads every covered tour for the catalogue: no populate, so the catalogue holds no
+ * guides and no reviews (B12). A tour with no cover is left out (D-13, ADR 0036), so
+ * every public read that is built on the catalogue leaves it out too.
  *
  * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
  */
@@ -40,7 +47,7 @@ async function loadCatalogue(): Promise<TourSummary[]> {
   await connectDb();
   try {
     const records = await Tour.find().sort({ name: 1 }).lean<TourRecord[]>();
-    return records.map(toTourSummary);
+    return records.filter((record) => hasCover(record)).map(toTourSummary);
   } catch (error) {
     if (!isDbUnavailableError(error)) throw error;
     const unavailable = new AppError('SERVICE_UNAVAILABLE');
@@ -193,6 +200,7 @@ export async function toursWithin(
   await connectDb();
   try {
     const records = await Tour.find({
+      imageCover: { $type: 'string' },
       startLocation: {
         $geoWithin: { $centerSphere: [[input.lng, input.lat], radius] },
       },
@@ -239,6 +247,7 @@ export async function distancesFrom(
           distanceField: 'distance',
           distanceMultiplier: METRES_TO[input.unit],
           spherical: true,
+          query: { imageCover: { $type: 'string' } },
         },
       },
       {
@@ -272,7 +281,9 @@ async function loadCredits(): Promise<CreditGroup[]> {
       .sort({ createdAt: 1, _id: 1 })
       .select({ name: 1, slug: 1, imageCover: 1, images: 1, photoCredits: 1 })
       .lean<TourRecord[]>();
-    return records.flatMap((record) => toCreditGroup(record) ?? []);
+    return records
+      .filter((record) => hasCover(record))
+      .flatMap((record) => toCreditGroup(record) ?? []);
   } catch (error) {
     if (!isDbUnavailableError(error)) throw error;
     const unavailable = new AppError('SERVICE_UNAVAILABLE');
@@ -388,4 +399,209 @@ export async function getGuides(
     ['tour-guides', tourId],
     [`tour:${tourId}`],
   )(guideIds);
+}
+
+/** A tour with its guides, as the write routes answer it (B13): the same shape as GET by id. */
+export type TourWithGuides = TourDetail & { guides: PublicUser[] };
+
+/** Reads a tour document by id for a write. A malformed id is absent, not an error. */
+async function loadDocument(id: string): Promise<TourDoc | null> {
+  if (!OBJECT_ID.test(id)) return null;
+  await connectDb();
+  const doc = await Tour.findById(id);
+  return doc;
+}
+
+/**
+ * Maps the validated input onto the model: start dates become 00:00 IST instants, and
+ * the two points become GeoJSON (B19). Only the keys the caller sent are returned, so
+ * an update never touches a field it does not name.
+ */
+function toModelFields(input: TourUpdateInput): Record<string, unknown> {
+  const { startDates, startLocation, locations, ...rest } = input;
+  return {
+    ...rest,
+    ...(startDates && { startDates: startDates.map((day) => fromIstDay(day)) }),
+    ...(startLocation && {
+      startLocation: { type: 'Point', ...startLocation },
+    }),
+    ...(locations && {
+      locations: locations.map((stop) => ({ type: 'Point', ...stop })),
+    }),
+  };
+}
+
+/**
+ * Every guide id must name an active user with the role guide or lead-guide (B12). A
+ * missing, deactivated or other-role id is a 400 on the guides path, so no tour can list
+ * a visitor, an admin or a missing account as its guide.
+ *
+ * @throws AppError VALIDATION_ERROR on the guides path when any id is not a guide.
+ */
+async function assertGuides(ids: string[] | undefined): Promise<void> {
+  if (!ids || ids.length === 0) return;
+  const people = await findActivePublicByIds(ids);
+  const guides = new Set(
+    people
+      .filter(
+        (person) => person.role === 'guide' || person.role === 'lead-guide',
+      )
+      .map((person) => person.id),
+  );
+  if (ids.some((id) => !guides.has(id))) {
+    throw new AppError('VALIDATION_ERROR', undefined, [
+      { path: 'guides', message: messages.validation.invalidValue },
+    ]);
+  }
+}
+
+/** A write that hits the unique name or slug index gets the approved 409 (copy.md). */
+function isDuplicateKey(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    (error as { code?: unknown }).code === 11000
+  );
+}
+
+/**
+ * Maps a failed write. A duplicate name or slug is the approved CONFLICT; an outage
+ * is SERVICE_UNAVAILABLE with the driver error as cause (B10); anything else is
+ * returned unchanged, so validator errors reach the error mapper as they are.
+ */
+function writeFailure(error: unknown): unknown {
+  if (isDuplicateKey(error)) {
+    return new AppError('CONFLICT', messages.tours.duplicateName);
+  }
+  if (isDbUnavailableError(error)) {
+    const unavailable = new AppError('SERVICE_UNAVAILABLE');
+    unavailable.cause = error;
+    return unavailable;
+  }
+  return error;
+}
+
+/** The saved tour with its guides, read after the cache has been cleared for it. */
+async function detailWithGuides(doc: TourDoc): Promise<TourWithGuides> {
+  const detail = toTourDetail(doc.toObject() as unknown as TourRecord);
+  return { ...detail, guides: await getGuides(detail.id, detail.guideIds) };
+}
+
+/**
+ * Creates a tour from JSON (F6, B4, D-13). The cover is optional: the tour has no photo
+ * until one is added with its credit, and the public reads leave it out until then. The
+ * `tours` tag is cleared once the save has finished.
+ *
+ * @param input - The tour, validated by `tourCreateSchema`.
+ * @returns The saved tour, with `imageCover` null and its guides.
+ * @throws AppError CONFLICT with the approved message when the name or slug is taken.
+ * @throws AppError VALIDATION_ERROR on the guides path when a guide id is not a guide.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function createTour(
+  input: TourCreateInput,
+): Promise<TourWithGuides> {
+  await assertGuides(input.guides);
+  let doc: TourDoc;
+  try {
+    await connectDb();
+    doc = await Tour.create(toModelFields(input));
+  } catch (error) {
+    throw writeFailure(error);
+  }
+  await getDeps().cache.invalidate('tours');
+  return detailWithGuides(doc);
+}
+
+/**
+ * Changes some of one tour's editable fields (B4, QA-04). The tour is loaded, the
+ * fields are set and the document is saved, so the validators and the slug hook run:
+ * a rename regenerates the slug. The tags `tours` and `tour:<id>` are cleared once the
+ * save has finished.
+ *
+ * @param id - The tour's 24-character hex id, already checked by the route.
+ * @param input - The fields to change, validated by `tourUpdateSchema`.
+ * @returns The tour after the change, with its guides.
+ * @throws AppError NOT_FOUND when no tour has the id.
+ * @throws AppError CONFLICT with the approved message when the name or slug is taken.
+ * @throws AppError VALIDATION_ERROR on the guides path when a guide id is not a guide.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function updateTour(
+  id: string,
+  input: TourUpdateInput,
+): Promise<TourWithGuides> {
+  let doc: TourDoc | null;
+  try {
+    doc = await loadDocument(id);
+  } catch (error) {
+    throw writeFailure(error);
+  }
+  if (!doc) throw new AppError('NOT_FOUND');
+  await assertGuides(input.guides);
+  doc.set(toModelFields(input));
+  try {
+    await doc.save();
+  } catch (error) {
+    throw writeFailure(error);
+  }
+  await getDeps().cache.invalidate('tours', `tour:${id}`);
+  return detailWithGuides(doc);
+}
+
+/**
+ * Removes a deleted tour's stored photos, one key at a time (F6). A key that cannot be removed is
+ * logged and the next one is tried: the tour is already gone, so a photo that stays is a storage
+ * clean-up for an operator, not a failed request.
+ */
+async function removePhotos(
+  tourId: string,
+  keys: Array<string | undefined>,
+): Promise<void> {
+  const storage = getDeps().storage;
+  for (const key of keys) {
+    if (!key) continue;
+    try {
+      await storage.delete(key);
+    } catch (error) {
+      getLogger().error(
+        { tourId, key, err: error },
+        'stored photo not deleted after its tour was removed',
+      );
+    }
+  }
+}
+
+/**
+ * Deletes a tour that has no booking (F6, T-04-34), with its reviews and its stored photos. A
+ * tour with any booking is refused before anything is removed, so no booking can point at a
+ * deleted tour through the API. The tour goes first, then its reviews, then its photos, best
+ * effort (ADR 0036 and ADR 0037). The tags `tours`, `tour:<id>` and `reviews:<id>` are cleared
+ * once the database work has finished, even when it fails part way.
+ *
+ * @param id - The tour's 24-character hex id, already checked by the route.
+ * @throws AppError NOT_FOUND when no tour has the id, which includes a second delete of the same tour.
+ * @throws AppError CONFLICT with the approved message when the tour has any booking; nothing is removed.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function deleteTour(id: string): Promise<void> {
+  let doc: TourDoc | null;
+  try {
+    doc = await loadDocument(id);
+  } catch (error) {
+    throw writeFailure(error);
+  }
+  if (!doc) throw new AppError('NOT_FOUND');
+  if ((await countForTour(id)) > 0) {
+    throw new AppError('CONFLICT', messages.tours.hasBookings);
+  }
+  try {
+    await Tour.deleteOne({ _id: doc._id });
+    await deleteForTour(id);
+  } catch (error) {
+    throw writeFailure(error);
+  } finally {
+    await getDeps().cache.invalidate('tours', `tour:${id}`, `reviews:${id}`);
+  }
+  await removePhotos(id, [doc.imageCover, ...doc.images]);
 }

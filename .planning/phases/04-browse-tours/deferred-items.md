@@ -14,3 +14,6 @@
 
 - `CreditPhoto` is exported from `src/server/modules/tours/dto.ts` (line 84) but nothing imports it, so `npx knip --no-progress` reports it and the CI checks job would fail on it. It is already on the base commit 04bda8b, and it is outside plan 04-11's files, so it was left alone. The same fix as `TourPhotoCredit` applies: drop the export keyword in a later plan that touches `dto.ts`. Found during plan 04-11 (Task 3, knip check).
   status: resolved (16 Nov 2026, the export keyword was dropped)
+
+- The coverage gate (`npm run test:coverage`, every `src/server/modules/**/service.ts` at or above 85% lines) fails for `src/server/modules/users/service.ts`, at 77.77% lines. The uncovered lines (61 to 64) are the `SERVICE_UNAVAILABLE` catch in `findActivePublicByIds`, which no test reaches. The function is not changed by plan 04-12, and its catch predates it, so the gate was already failing on it before this plan. Found during plan 04-12 (Task 3, coverage check). Fix with one test in `test/server/modules/users/service.test.ts` that makes the users read fail with a network error, in a plan that owns the users module.
+  status: open

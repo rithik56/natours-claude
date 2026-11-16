@@ -3,7 +3,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fromIstDay } from '@/lib/ist';
 import { Booking } from '@/server/modules/bookings/model';
-import { findUpcomingPaid } from '@/server/modules/bookings/service';
+import {
+  countForTour,
+  findUpcomingPaid,
+} from '@/server/modules/bookings/service';
 import { useTestDatabase } from '../../../helpers/db';
 import {
   createBooking,
@@ -140,5 +143,43 @@ describe('bookings service: findUpcomingPaid', () => {
 
     expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
     expect((error as Error).cause).toBe(driverError);
+  });
+
+  describe('countForTour (F6)', () => {
+    it('[F6] counts every booking of the tour, paid or refunded, and none of another tour', async () => {
+      const tour = await createTour({ slug: 'valley-of-flowers-trek' });
+      const other = await createTour({ slug: 'kedarkantha-winter-trek' });
+      const { user: first } = await createUser();
+      const { user: second } = await createUser();
+      await createBooking({ user: first, tour, status: 'paid' });
+      await createBooking({ user: second, tour, status: 'refunded' });
+      await createBooking({ user: first, tour: other });
+
+      expect(await countForTour(String(tour._id))).toBe(2);
+    });
+
+    it('[F6] a tour with no booking counts zero, and a malformed id counts zero', async () => {
+      const tour = await createTour({ slug: 'valley-of-flowers-trek' });
+
+      expect(await countForTour(String(tour._id))).toBe(0);
+      expect(await countForTour('not-an-id')).toBe(0);
+    });
+
+    it('[B10] a count that fails with a network error is refused as SERVICE_UNAVAILABLE, with the driver error as the cause', async () => {
+      const tour = await createTour({ slug: 'valley-of-flowers-trek' });
+      const driverError = Object.assign(new Error('connection reset'), {
+        name: 'MongoNetworkError',
+      });
+      vi.spyOn(Booking, 'countDocuments').mockImplementationOnce(() => {
+        throw driverError;
+      });
+
+      const error = await countForTour(String(tour._id)).catch(
+        (caught: unknown) => caught,
+      );
+
+      expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+      expect((error as Error).cause).toBe(driverError);
+    });
   });
 });

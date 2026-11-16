@@ -44,4 +44,9 @@ export const messages = {
     tooBig: (max: number) =>
       `Enter a number that is at most ${grouped.format(max)}.`,
   },
+  /** Tour API wording, from docs/design/copy.md "Tour API messages" (plan.md 4.2). */
+  tours: {
+    duplicateName: 'A tour with that name already exists.',
+    hasBookings: "This tour has bookings, so it can't be deleted.",
+  },
 } as const;

@@ -39,7 +39,11 @@ type DetailSource = SummarySource &
     guides: GuideRef[];
   };
 
-/** A tour as the catalogue and cards show it (S3, R6). */
+/**
+ * A tour as the catalogue and cards show it (S3, R6). `imageCover` is null for a tour
+ * with no cover yet (D-13). The public reads never return such a tour, so a card always
+ * has its photo; `hasCover` narrows the type where a cover is needed.
+ */
 export type TourSummary = {
   id: string;
   name: string;
@@ -51,7 +55,7 @@ export type TourSummary = {
   ratingsAverage: number;
   ratingsQuantity: number;
   summary: string;
-  imageCover: string;
+  imageCover: string | null;
   startDates: IstDay[];
   /** An ISO instant. The API sorts by it when no sort is given (B1). */
   createdAt: string;
@@ -110,6 +114,7 @@ type CreditSource = Pick<
  */
 export function toCreditGroup(tour: CreditSource): CreditGroup | null {
   const photos = [tour.imageCover, ...tour.images].flatMap((key) => {
+    if (key === undefined) return [];
     const credit = tour.photoCredits.find((entry) => entry.file === key);
     if (!credit) return [];
     return [
@@ -153,6 +158,19 @@ function altFor(
   return fallbackAlt(credit, tour);
 }
 
+/**
+ * Whether a tour has a cover (D-13). The public reads keep only covered tours, so a card
+ * or a page that needs its photo narrows with this guard instead of trusting the type.
+ *
+ * @param entry - A summary, a detail or a stored record; only `imageCover` is read.
+ * @returns True when `imageCover` is a non-empty storage key.
+ */
+export function hasCover<T extends { imageCover?: string | null }>(
+  entry: T,
+): entry is T & { imageCover: string } {
+  return typeof entry.imageCover === 'string' && entry.imageCover.length > 0;
+}
+
 /** Maps a tour for lists and cards. Every array keeps the document's order (R6). */
 export function toTourSummary(tour: SummarySource): TourSummary {
   return {
@@ -166,7 +184,7 @@ export function toTourSummary(tour: SummarySource): TourSummary {
     ratingsAverage: tour.ratingsAverage,
     ratingsQuantity: tour.ratingsQuantity,
     summary: tour.summary,
-    imageCover: tour.imageCover,
+    imageCover: tour.imageCover ?? null,
     startDates: tour.startDates.map(toIstDay),
     createdAt: tour.createdAt.toISOString(),
     startLocation: {

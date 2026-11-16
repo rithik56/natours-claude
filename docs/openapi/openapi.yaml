@@ -76,6 +76,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+    post:
+      operationId: createTour
+      summary: Create a tour with no cover (lead guide or admin).
+      description: >-
+        Creates a tour from strict JSON (F6, B4, D-12). The tour has no cover, so
+        `imageCover` is null, and it stays out of every public read until a photo
+        with its credit is added (D-13, ADR 0036). Lead guides and admins only, an
+        exact role match (D-16, ADR 0037). Clears the `tours` cache.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TourCreateBody'
+      responses:
+        '201':
+          description: The tour, with its guides and a null imageCover.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TourDetailEnvelope'
+        '400':
+          description: >-
+            The body is not valid. Each refused key, such as `images`, `imageCover`,
+            `photoCredits`, `slug`, `ratingsAverage` or an unknown key, is named by its
+            path, as is a guide id that is not a guide.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: No one is signed in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: The caller is not a lead guide or admin, or the Origin is another site's.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: Another tour already has this name or slug.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                status: fail
+                error:
+                  code: CONFLICT
+                  message: A tour with that name already exists.
+                  requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a114
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
   /tours/{id}:
     get:
       operationId: getTour
@@ -118,6 +184,131 @@ paths:
                   code: NOT_FOUND
                   message: The tour was not found.
                   requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a113
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    patch:
+      operationId: updateTour
+      summary: Change some of a tour's editable fields (lead guide or admin).
+      description: >-
+        Only the editable fields are accepted (B4, S4). An image, credit, slug or
+        rating key, or any unknown key, is a 400 that names each path, and an empty
+        body is a 400. The tour is loaded, set and saved, so the validators and the
+        slug hook run: a rename regenerates the slug (QA-04). A repeat of the same
+        PATCH leaves the same tour (F6). Clears `tours` and `tour:<id>`. Lead guides
+        and admins only (D-16, ADR 0037).
+      parameters:
+        - $ref: '#/components/parameters/tourId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TourUpdateBody'
+      responses:
+        '200':
+          description: The tour after the change, with its guides.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TourDetailEnvelope'
+        '400':
+          description: >-
+            The id or body is not valid, a key is refused (named by path), or a guide
+            id is not a guide.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: No one is signed in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: The caller is not a lead guide or admin, or the Origin is another site's.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: No tour has this id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: Another tour already has this name or slug.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    delete:
+      operationId: deleteTour
+      summary: Delete a tour that has no booking (lead guide or admin).
+      description: >-
+        Refused with 409 while the tour has any booking, paid or refunded, and then
+        nothing is removed (F6, T-04-34). Otherwise the tour is deleted, then its
+        reviews, then its stored photos, best effort. A second delete of the same
+        tour is 404. Clears `tours`, `tour:<id>` and `reviews:<id>`. Lead guides and
+        admins only (D-16, ADR 0037).
+      parameters:
+        - $ref: '#/components/parameters/tourId'
+      responses:
+        '204':
+          description: The tour, its reviews and its stored photos are gone. No body.
+        '401':
+          description: No one is signed in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: The caller is not a lead guide or admin, or the Origin is another site's.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: No tour has this id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '409':
+          description: The tour has a booking, so it is not deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                status: fail
+                error:
+                  code: CONFLICT
+                  message: This tour has bookings, so it can't be deleted.
+                  requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a115
         '500':
           description: An unexpected server error.
           content:
@@ -880,6 +1071,154 @@ components:
               description: Every tour, nearest first.
               items:
                 $ref: '#/components/schemas/TourDistance'
+    TourStartLocationInput:
+      type: object
+      description: The meeting point of a tour. Coordinates are GeoJSON order, longitude first.
+      additionalProperties: false
+      required: [coordinates, address, description]
+      properties:
+        coordinates:
+          type: array
+          minItems: 2
+          maxItems: 2
+          description: '[longitude, latitude]: longitude −180 to 180, latitude −90 to 90.'
+          items:
+            type: number
+        address:
+          type: string
+          minLength: 1
+        description:
+          type: string
+          minLength: 1
+    TourLocationInput:
+      type: object
+      description: One stop of the itinerary, on a day of the tour.
+      additionalProperties: false
+      required: [coordinates, description, day]
+      properties:
+        coordinates:
+          type: array
+          minItems: 2
+          maxItems: 2
+          description: '[longitude, latitude], in range as for the start location.'
+          items:
+            type: number
+        description:
+          type: string
+          minLength: 1
+        day:
+          type: integer
+          minimum: 1
+    TourCreateBody:
+      type: object
+      description: >-
+        The tour to create (F6, B4, D-13). Strict JSON: an unknown key is a 400. There is
+        no cover, gallery, credit, rating or slug field, so the new tour has no photo until
+        one is added with its credit (D-14).
+      additionalProperties: false
+      required:
+        [
+          name,
+          duration,
+          maxGroupSize,
+          difficulty,
+          price,
+          summary,
+          startLocation,
+        ]
+      properties:
+        name:
+          type: string
+          minLength: 10
+          maxLength: 40
+          description: Trimmed before the length check.
+        duration:
+          type: integer
+          minimum: 1
+          description: Days.
+        maxGroupSize:
+          type: integer
+          minimum: 1
+        difficulty:
+          type: string
+          enum: [easy, medium, difficult]
+        price:
+          type: integer
+          minimum: 1
+          description: Whole rupees.
+        summary:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        startDates:
+          type: array
+          uniqueItems: true
+          description: IST calendar days (YYYY-MM-DD). Each is stored as 00:00 IST (B19).
+          items:
+            type: string
+            format: date
+        startLocation:
+          $ref: '#/components/schemas/TourStartLocationInput'
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/TourLocationInput'
+        guides:
+          type: array
+          description: Ids of active users whose role is guide or lead-guide.
+          items:
+            type: string
+            pattern: '^[0-9a-fA-F]{24}$'
+    TourUpdateBody:
+      type: object
+      description: >-
+        The editable fields of a tour (B4, S4). Every field is optional, but at least one
+        is required. Strict: images, imageCover, photoCredits, slug, ratingsAverage,
+        ratingsQuantity and any unknown key are a 400 that names the path.
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 10
+          maxLength: 40
+          description: Trimmed before the length check. A rename regenerates the slug.
+        duration:
+          type: integer
+          minimum: 1
+        maxGroupSize:
+          type: integer
+          minimum: 1
+        difficulty:
+          type: string
+          enum: [easy, medium, difficult]
+        price:
+          type: integer
+          minimum: 1
+          description: Whole rupees.
+        summary:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        startDates:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            format: date
+        startLocation:
+          $ref: '#/components/schemas/TourStartLocationInput'
+        locations:
+          type: array
+          items:
+            $ref: '#/components/schemas/TourLocationInput'
+        guides:
+          type: array
+          items:
+            type: string
+            pattern: '^[0-9a-fA-F]{24}$'
     ErrorDetail:
       type: object
       required: [path, message]

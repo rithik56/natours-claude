@@ -42,6 +42,16 @@ describe('tours data layer', () => {
   });
 
   describe('Tour model', () => {
+    it('[F6] (D-13) a tour saves without an imageCover, so a cover-less tour can be created from JSON', async () => {
+      const tour = await createTour({
+        slug: 'hampi-ruins-and-boulders',
+        withoutCover: true,
+      });
+
+      expect(tour.imageCover).toBeUndefined();
+      expect(await Tour.countDocuments({ _id: tour._id })).toBe(1);
+    });
+
     it('[B5] saves all 13 seed tours', async () => {
       for (const record of seed) {
         const tour = await createTour({ slug: record.slug });

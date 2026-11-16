@@ -57,12 +57,21 @@ function pathOf(path: ReadonlyArray<PropertyKey>): string {
   return path.map(String).join('.');
 }
 
-/** One { path, message } per issue, with dotted paths for nested fields. */
+/**
+ * One { path, message } per issue, with dotted paths for nested fields. A strict
+ * object reports all of its unknown keys in one issue, so each key becomes its own
+ * detail with the key as its path, and the body names every field it refused (S4).
+ */
 export function issuesToDetails(error: z.ZodError): ErrorDetail[] {
-  return error.issues.map((issue) => ({
-    path: pathOf(issue.path),
-    message: issue.message,
-  }));
+  return error.issues.flatMap((issue) => {
+    if (issue.code === 'unrecognized_keys') {
+      return issue.keys.map((key) => ({
+        path: pathOf([...issue.path, key]),
+        message: issue.message,
+      }));
+    }
+    return [{ path: pathOf(issue.path), message: issue.message }];
+  });
 }
 
 /** The first message per top-level field. Root-level issues, such as unknown keys, are left out. */

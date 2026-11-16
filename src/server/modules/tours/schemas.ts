@@ -1,4 +1,5 @@
 import 'server-only';
+import { fromIstDay } from '@/lib/ist';
 import { z } from '@/server/validation';
 import type { CatalogueFilter, CatalogueQuery } from './catalogue-query';
 
@@ -222,6 +223,94 @@ export const monthlyPlanParamsSchema = z.strictObject({
     .transform(Number)
     .pipe(z.number().int().min(2000).max(2100)),
 });
+
+// The editable tour fields (B4, S4). Create and update share these rules, so a field means the
+// same thing on both routes. Every object is strict: an unknown key is a 400 naming its path.
+// Images, credits, the slug and the ratings are not in these schemas, so no JSON body can write them.
+const TOUR_NAME = z.string().trim().min(10).max(40);
+const TOUR_TEXT = z.string().trim().min(1);
+const POSITIVE_WHOLE = z.number().int().min(1);
+const OBJECT_ID_HEX = /^[0-9a-f]{24}$/i;
+
+/** [longitude, latitude], each in range. GeoJSON order, as the model stores it. */
+const lngLat = z.tuple([
+  z.number().min(-180).max(180),
+  z.number().min(-90).max(90),
+]);
+
+/** A calendar day in IST, `YYYY-MM-DD`, that `fromIstDay` accepts (B19). */
+const istDay = z.string().refine((value) => {
+  try {
+    fromIstDay(value);
+    return true;
+  } catch {
+    return false;
+  }
+});
+
+const noRepeatedDay = (days: string[]) => new Set(days).size === days.length;
+
+const DESCRIPTION = z.string().trim();
+const START_DATES = z.array(istDay).refine(noRepeatedDay);
+const START_LOCATION = z.strictObject({
+  coordinates: lngLat,
+  address: TOUR_TEXT,
+  description: TOUR_TEXT,
+});
+const LOCATIONS = z.array(
+  z.strictObject({
+    coordinates: lngLat,
+    description: TOUR_TEXT,
+    day: POSITIVE_WHOLE,
+  }),
+);
+const GUIDES = z.array(z.string().regex(OBJECT_ID_HEX));
+
+/**
+ * The body of PATCH /api/v1/tours/[id] (B4, S4, QA-04). Every editable field is
+ * optional, but an empty body is refused: a PATCH must change something.
+ */
+export const tourUpdateSchema = z
+  .strictObject({
+    name: TOUR_NAME.optional(),
+    duration: POSITIVE_WHOLE.optional(),
+    maxGroupSize: POSITIVE_WHOLE.optional(),
+    difficulty: z.enum(DIFFICULTIES).optional(),
+    price: POSITIVE_WHOLE.optional(),
+    summary: TOUR_TEXT.optional(),
+    description: DESCRIPTION.optional(),
+    startDates: START_DATES.optional(),
+    startLocation: START_LOCATION.optional(),
+    locations: LOCATIONS.optional(),
+    guides: GUIDES.optional(),
+  })
+  // Runs only on a body that parsed cleanly, so an unknown key is reported by its own path alone.
+  .refine((input) => Object.keys(input).length > 0, {
+    when: (payload) => payload.issues.length === 0,
+  });
+
+export type TourUpdateInput = z.infer<typeof tourUpdateSchema>;
+
+/**
+ * The body of POST /api/v1/tours (F6, B4, D-13): JSON only and strict. The cover, the gallery,
+ * the credits, the ratings and the slug are not in it, so a created tour has no photo until one
+ * is added with its credit (D-14), and no JSON body can write them.
+ */
+export const tourCreateSchema = z.strictObject({
+  name: TOUR_NAME,
+  duration: POSITIVE_WHOLE,
+  maxGroupSize: POSITIVE_WHOLE,
+  difficulty: z.enum(DIFFICULTIES),
+  price: POSITIVE_WHOLE,
+  summary: TOUR_TEXT,
+  startLocation: START_LOCATION,
+  description: DESCRIPTION.optional(),
+  startDates: START_DATES.optional(),
+  locations: LOCATIONS.optional(),
+  guides: GUIDES.optional(),
+});
+
+export type TourCreateInput = z.infer<typeof tourCreateSchema>;
 
 /**
  * Turns a parsed API query into a catalogue query. An absent sort is -createdAt

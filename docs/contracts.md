@@ -769,8 +769,8 @@ export interface TourFields {
   price: number;
   summary: string;
   description?: string;
-  /** A storage key, not a URL. */
-  imageCover: string;
+  /** A storage key, not a URL. Absent until a cover is added (D-13, ADR 0036). */
+  imageCover?: string;
   images: string[];
   photoCredits: PhotoCredit[];
   /** Each is 00:00 IST on its day (B19). */
@@ -796,7 +796,7 @@ export type TourDoc = HydratedDocument<TourFields>;
 | `price` | required whole rupees, at least 1. There is no `priceDiscount` (ADR 0014). |
 | `summary` | required, trimmed |
 | `description` | optional, trimmed |
-| `imageCover` | required storage key |
+| `imageCover` | optional storage key; a tour created over JSON has none until a cover is added (D-13, ADR 0036) |
 | `images` | storage keys, at most 3 |
 | `photoCredits` | every field of each credit is required (U27) |
 | `startDates` | each 00:00 IST |
@@ -914,7 +914,8 @@ export type TourSummary = {
   ratingsAverage: number;
   ratingsQuantity: number;
   summary: string;
-  imageCover: string;
+  /** null for a tour with no cover yet (D-13); no public read returns such a tour. */
+  imageCover: string | null;
   startDates: IstDay[];
   startLocation: {
     coordinates: number[];
@@ -1387,7 +1388,7 @@ No key contains a value from the URL, so no request creates an entry (QA-12). Th
 
 ### Write to tag
 
-Services clear tags after the write has finished and been awaited, through `getDeps().cache.invalidate(...)` (ADR 0012).
+Services clear tags after the write has finished and been awaited, through `getDeps().cache.invalidate(...)` (ADR 0012). The Phase 4 tour rows below are tested in `test/app/api/tours-write.test.ts`, which asserts the tags each write clears (ARC-02, QA-12).
 
 | Write | Phase | Tags to clear |
 |-------|-------|---------------|
@@ -1614,3 +1615,28 @@ export const distancesParamsSchema; // latlng, unit
 - **Coordinate and radius rules (B3, T-04-29).** `lat,lng`: latitude −90 to 90 and longitude −180 to 180, both ends included. Each part is a whole number or a decimal with an optional minus sign; no exponent, no spaces. `distance` is above 0 and at most 20000, a whole number or a decimal, in either unit. `unit` is `mi` or `km`. Any other value is a 400 `VALIDATION_ERROR` before MongoDB is called. A radius that contains no start location gives `tours: []` with 200.
 - **Ordering.** `toursWithin` sorts by name then id. `distancesFrom` is nearest first, as `$geoNear` sorts. `getMonthlyPlan` is in month order, and `getStats` in difficulty order.
 - **Concurrency.** Every read on these routes is side-effect free, so two parallel calls return identical bodies.
+
+### Tour writes (plan 04-12, F6, B4, S4, D-13, D-16)
+
+The admin writes over JSON. Each write is validated by a strict schema, changes the tour through the model, and clears exactly the tags in the write-to-tag table above.
+
+| Function | Module | What it does |
+|----------|--------|--------------|
+| `createTour(input)` | tours service | Checks the guide ids, then `Tour.create`; clears `tours`; returns the detail with its guides and `imageCover: null` (D-13). |
+| `updateTour(id, input)` | tours service | Loads the tour (`NOT_FOUND` when absent), checks the guide ids, sets the fields and calls `save()`, so validators and the slug hook run (QA-04); clears `tours` and `tour:<id>`; returns the detail with its guides. |
+| `deleteTour(id)` | tours service | `NOT_FOUND` when absent (a second delete too); `CONFLICT` with the approved message when `countForTour` is above 0, and nothing is removed; otherwise deletes the tour, then `deleteForTour`; clears `tours`, `tour:<id>` and `reviews:<id>` in a `finally`; then removes the stored photos best effort, logging each failure and carrying on. |
+| `countForTour(tourId)` | bookings service | Counts every booking of the tour, paid or refunded. A malformed id has none. |
+| `deleteForTour(tourId)` | reviews service | Deletes every review of the tour and returns the count. |
+| `hasCover(entry)` | tours dto | Type guard: true when `imageCover` is a non-empty storage key. Narrows a summary or detail before a photo is shown. |
+| `messages.tours` | `src/lib/messages.ts` | `duplicateName` ("A tour with that name already exists.") and `hasBookings` ("This tour has bookings, so it can't be deleted."), from copy.md. |
+
+Routes and rules:
+
+- `POST /api/v1/tours`, `PATCH /api/v1/tours/[id]` and `DELETE /api/v1/tours/[id]` declare `access: { roles: ['lead-guide', 'admin'] }`, an exact match. An anonymous caller gets 401, a user or guide 403, and a write from another site's Origin 403 (S9, ADR 0037). A write with no Origin header is accepted (SEC-26).
+- The bodies are `tourCreateSchema` and `tourUpdateSchema`: strict objects of the editable fields only (name, duration, maxGroupSize, difficulty, price, summary, description, startDates, startLocation, locations and guides for update; name, duration, maxGroupSize, difficulty, price, summary and startLocation are required for create). `images`, `imageCover`, `photoCredits`, `slug`, `ratingsAverage`, `ratingsQuantity` and any unknown key are a 400, and the details list every refused key by its own path (`issuesToDetails`, S4).
+- A PATCH must change something: an empty object is a 400. A name is 10 to 40 characters after trimming.
+- A start date is an IST day string (`YYYY-MM-DD`) that `fromIstDay` accepts, with no repeats, and is stored as 00:00 IST (B19). A point is `[longitude, latitude]`, in range, and stored as GeoJSON.
+- A guide id must be an active user whose role is `guide` or `lead-guide`. Any other id is a 400 on the path `guides`.
+- A name or slug that another tour has is a 409 with the approved message. The unique index reports it, and the service maps it, so the generic "That's already in use." wording never reaches a client.
+- A tour with no cover is not published, so it stays out of every public read until a cover is added (ADR 0036). `GET /api/v1/tours/[id]` still answers it, with `imageCover: null`.
+- The Phase 6 check for a tour that a booking can refer to, and the race between the bookings count and the delete, are recorded in ADR 0036.
