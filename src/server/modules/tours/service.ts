@@ -7,6 +7,7 @@ import { now } from '@/server/clock';
 import { connectDb, isDbUnavailableError } from '@/server/db';
 import { getDeps } from '@/server/deps';
 import { AppError } from '@/server/errors';
+import { normalize, randomImageKey } from '@/server/images';
 import { getLogger } from '@/server/logger';
 import { countForTour } from '@/server/modules/bookings/service';
 import { deleteForTour } from '@/server/modules/reviews/service';
@@ -29,7 +30,12 @@ import {
   type TourDetail,
   type TourSummary,
 } from './dto';
-import type { TourCreateInput, TourUpdateInput } from './schemas';
+import type {
+  ImagesInput,
+  PhotoCreditInput,
+  TourCreateInput,
+  TourUpdateInput,
+} from './schemas';
 import { Tour, type TourDoc, type TourFields } from './model';
 
 type TourRecord = TourFields & { _id: Types.ObjectId };
@@ -550,13 +556,14 @@ export async function updateTour(
 }
 
 /**
- * Removes a deleted tour's stored photos, one key at a time (F6). A key that cannot be removed is
- * logged and the next one is tried: the tour is already gone, so a photo that stays is a storage
- * clean-up for an operator, not a failed request.
+ * Removes stored photos, one key at a time (F6, S16). A key that cannot be removed is logged with
+ * `message` and the next one is tried: the database has already moved on, so a photo that stays is
+ * a storage clean-up for an operator, not a failed request.
  */
 async function removePhotos(
   tourId: string,
   keys: Array<string | undefined>,
+  message: string,
 ): Promise<void> {
   const storage = getDeps().storage;
   for (const key of keys) {
@@ -564,10 +571,7 @@ async function removePhotos(
     try {
       await storage.delete(key);
     } catch (error) {
-      getLogger().error(
-        { tourId, key, err: error },
-        'stored photo not deleted after its tour was removed',
-      );
+      getLogger().error({ tourId, key, err: error }, message);
     }
   }
 }
@@ -603,5 +607,139 @@ export async function deleteTour(id: string): Promise<void> {
   } finally {
     await getDeps().cache.invalidate('tours', `tour:${id}`, `reviews:${id}`);
   }
-  await removePhotos(id, [doc.imageCover, ...doc.images]);
+  await removePhotos(
+    id,
+    [doc.imageCover, ...doc.images],
+    'stored photo not deleted after its tour was removed',
+  );
+}
+
+/** One stored photo credit (U27), as the model keeps it. */
+type PhotoCredit = TourFields['photoCredits'][number];
+
+/** A 400 for a photo that arrived without its credit (U27). */
+function creditMissing(path: string): AppError {
+  return new AppError('VALIDATION_ERROR', undefined, [
+    { path, message: messages.tours.creditMissing },
+  ]);
+}
+
+/**
+ * Replaces a tour's photos from an upload (S16, B4, D-13, D-14). Each file is checked and
+ * re-encoded before anything is stored, stored under a random key, and given its credit. The
+ * cover is replaced when one is uploaded, a cover-less tour gets one here, and the new key and
+ * credit are saved in the same write (U27). Afterwards the tags `tours` and `tour:<id>` are
+ * cleared, and the replaced keys are deleted best effort: a failed delete is logged and the
+ * request still answers 200.
+ *
+ * @param id - The tour's 24-character hex id, already checked by the route.
+ * @param input - The parsed upload, from `parseImagesForm`.
+ * @returns The tour after the change, with its guides.
+ * @throws AppError NOT_FOUND when no tour has the id.
+ * @throws AppError PAYLOAD_TOO_LARGE or UNSUPPORTED_MEDIA_TYPE when a file is refused by `normalize`.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function replaceImages(
+  id: string,
+  input: ImagesInput,
+): Promise<TourWithGuides> {
+  let doc: TourDoc | null;
+  try {
+    doc = await loadDocument(id);
+  } catch (error) {
+    throw writeFailure(error);
+  }
+  if (!doc) throw new AppError('NOT_FOUND');
+
+  // The route checks the credits too; the service repeats it so that U27 holds for any caller.
+  if (input.cover && !input.credits.cover)
+    throw creditMissing('credits.imageCover');
+  if (input.gallery.length > input.credits.gallery.length) {
+    throw creditMissing('credits.images');
+  }
+
+  // Every file is checked and re-encoded before anything is stored, so one refused file stores nothing.
+  const coverWebp = input.cover
+    ? await normalize(input.cover, 'tour')
+    : undefined;
+  const galleryWebp: Buffer[] = [];
+  for (const bytes of input.gallery) {
+    galleryWebp.push(await normalize(bytes, 'tour'));
+  }
+
+  const storage = getDeps().storage;
+  const stored: string[] = [];
+  const replaced: string[] = [];
+  // Credits of the keys this upload added, by key. Kept keys keep their stored credit.
+  const added = new Map<string, PhotoCreditInput>();
+
+  const store = async (webp: Buffer): Promise<string> => {
+    const key = randomImageKey('tours');
+    await storage.put(key, webp, 'image/webp');
+    stored.push(key);
+    return key;
+  };
+
+  // Once a file is stored, any failure before the save removes what this request stored.
+  try {
+    let cover = doc.imageCover;
+    if (coverWebp && input.credits.cover) {
+      const key = await store(coverWebp);
+      if (cover) replaced.push(cover);
+      cover = key;
+      added.set(key, input.credits.cover);
+    }
+
+    // Gallery file n replaces slot n; a slot past the current end is appended (D-14).
+    const images = [...doc.images];
+    for (const [slot, webp] of galleryWebp.entries()) {
+      const credit = input.credits.gallery[slot];
+      if (!credit) throw creditMissing('credits.images');
+      const key = await store(webp);
+      const previous = images[slot];
+      if (previous !== undefined) {
+        replaced.push(previous);
+        images[slot] = key;
+      } else {
+        images.push(key);
+      }
+      added.set(key, credit);
+    }
+
+    // The cover first, then the gallery in order. Each key gets exactly one credit and no other
+    // credit is kept, so no credit names a photo the tour no longer has (U27).
+    const finalKeys = [cover, ...images].filter(
+      (key): key is string => key !== undefined,
+    );
+    const credits = new Map<string, PhotoCredit>();
+    for (const credit of doc.toObject().photoCredits) {
+      if (finalKeys.includes(credit.file) && !credits.has(credit.file)) {
+        credits.set(credit.file, credit);
+      }
+    }
+    for (const [key, credit] of added) {
+      credits.set(key, { ...credit, file: key });
+    }
+    doc.set({
+      imageCover: cover,
+      images,
+      photoCredits: finalKeys.flatMap((key) => credits.get(key) ?? []),
+    });
+
+    await doc.save();
+  } catch (error) {
+    await removePhotos(
+      id,
+      stored,
+      'stored upload not deleted after the upload failed',
+    );
+    throw writeFailure(error);
+  }
+  await getDeps().cache.invalidate('tours', `tour:${id}`);
+  await removePhotos(
+    id,
+    replaced,
+    'stored photo not deleted after its image was replaced',
+  );
+  return detailWithGuides(doc);
 }

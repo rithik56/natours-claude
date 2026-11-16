@@ -48,5 +48,11 @@ export const messages = {
   tours: {
     duplicateName: 'A tour with that name already exists.',
     hasBookings: "This tour has bookings, so it can't be deleted.",
+    noImage: 'Choose a photo to upload.',
+    creditMissing: 'Add a credit for each photo you upload.',
+    tooManyCovers: 'Upload one cover photo at a time.',
+    tooManyGalleryImages: 'A tour can have up to three gallery photos.',
+    creditsNotJson:
+      'The credits are not valid JSON. Check the credits and try again.',
   },
 } as const;

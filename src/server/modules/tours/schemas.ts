@@ -1,5 +1,7 @@
 import 'server-only';
+import { messages } from '@/lib/messages';
 import { fromIstDay } from '@/lib/ist';
+import { AppError } from '@/server/errors';
 import { z } from '@/server/validation';
 import type { CatalogueFilter, CatalogueQuery } from './catalogue-query';
 
@@ -311,6 +313,139 @@ export const tourCreateSchema = z.strictObject({
 });
 
 export type TourCreateInput = z.infer<typeof tourCreateSchema>;
+
+const HTTPS_URL = z
+  .string()
+  .trim()
+  .refine((value) => {
+    try {
+      return new URL(value).protocol === 'https:';
+    } catch {
+      return false;
+    }
+  });
+
+/**
+ * One photo's credit as an upload sends it (U27, D-15): the title, author, licence and both links
+ * are required, and `alt` is optional. The links must be https. Strict, so no other key is stored.
+ */
+const photoCreditInputSchema = z.strictObject({
+  title: z.string().trim().min(1),
+  author: z.string().trim().min(1),
+  license: z.string().trim().min(1),
+  licenseUrl: HTTPS_URL,
+  sourceUrl: HTTPS_URL,
+  alt: z.string().trim().max(150).optional(),
+});
+
+export type PhotoCreditInput = z.infer<typeof photoCreditInputSchema>;
+
+/** The JSON `credits` part of an images upload (S16, D-14): one credit per uploaded file, in order. */
+const imageCreditsSchema = z.strictObject({
+  imageCover: photoCreditInputSchema.optional(),
+  images: z.array(photoCreditInputSchema).optional(),
+});
+
+/** One upload, parsed: the cover and gallery bytes, each file with its credit. */
+export type ImagesInput = {
+  cover?: Uint8Array;
+  gallery: Uint8Array[];
+  credits: { cover?: PhotoCreditInput; gallery: PhotoCreditInput[] };
+};
+
+/** Refuses the upload with a 400 naming the part it concerns. It always throws. */
+function refuse(message: string, path: string): never {
+  throw new AppError('VALIDATION_ERROR', undefined, [{ path, message }]);
+}
+
+// A file part must be a file, not text. The narrowing holds after the refusal, which never returns.
+function filesIn(values: FormDataEntryValue[], part: string): File[] {
+  return values.map((value) => {
+    if (typeof value === 'string') {
+      refuse(messages.validation.invalidValue, part);
+    }
+    return value;
+  });
+}
+
+// The credits part is optional here: a missing part is refused by the count rules in parseImagesForm.
+function creditsIn(
+  value: FormDataEntryValue | null,
+): z.infer<typeof imageCreditsSchema> {
+  if (value === null) return {};
+  if (typeof value !== 'string') {
+    refuse(messages.validation.invalidValue, 'credits');
+  }
+  let json: unknown;
+  try {
+    json = JSON.parse(value);
+  } catch {
+    refuse(messages.tours.creditsNotJson, 'credits');
+  }
+  return imageCreditsSchema.parse(json);
+}
+
+/** The only parts an images upload may carry (S16). Any other part is refused by name. */
+const IMAGE_PARTS: ReadonlySet<string> = new Set([
+  'imageCover',
+  'images',
+  'credits',
+]);
+
+/** A tour has at most three gallery photos (B4, D-14). */
+const MAX_GALLERY_IMAGES = 3;
+
+/**
+ * Reads an images upload (S16, B4, D-14) into its files and credits. Rules: only the known parts,
+ * at least one file, at most one `imageCover`, at most three `images`, and exactly one credit for
+ * each uploaded file with no extra credit (U27). A bad part, count, missing credit or unreadable
+ * credits part is a 400 with a details path.
+ *
+ * @param form - The parsed multipart body.
+ * @returns The cover and gallery bytes, with the credit for each file.
+ * @throws AppError VALIDATION_ERROR for a part, count or credit that does not match the files.
+ */
+export async function parseImagesForm(form: FormData): Promise<ImagesInput> {
+  for (const part of new Set(form.keys())) {
+    if (!IMAGE_PARTS.has(part)) refuse(messages.validation.unknownField, part);
+  }
+
+  const covers = form.getAll('imageCover');
+  const gallery = form.getAll('images');
+  if (covers.length > 1) refuse(messages.tours.tooManyCovers, 'imageCover');
+  if (gallery.length > MAX_GALLERY_IMAGES) {
+    refuse(messages.tours.tooManyGalleryImages, 'images');
+  }
+  if (covers.length + gallery.length === 0) {
+    refuse(messages.tours.noImage, 'imageCover');
+  }
+
+  const credits = creditsIn(form.get('credits'));
+  const coverFiles = filesIn(covers, 'imageCover');
+  const galleryFiles = filesIn(gallery, 'images');
+
+  if (coverFiles.length === 1 && !credits.imageCover) {
+    refuse(messages.tours.creditMissing, 'credits.imageCover');
+  }
+  if (coverFiles.length === 0 && credits.imageCover) {
+    refuse(messages.validation.unknownField, 'credits.imageCover');
+  }
+  const galleryCredits = credits.images ?? [];
+  if (galleryCredits.length < galleryFiles.length) {
+    refuse(messages.tours.creditMissing, 'credits.images');
+  }
+  if (galleryCredits.length > galleryFiles.length) {
+    refuse(messages.validation.unknownField, 'credits.images');
+  }
+
+  const bytesOf = async (file: File) =>
+    new Uint8Array(await file.arrayBuffer());
+  return {
+    cover: coverFiles[0] ? await bytesOf(coverFiles[0]) : undefined,
+    gallery: await Promise.all(galleryFiles.map(bytesOf)),
+    credits: { cover: credits.imageCover, gallery: galleryCredits },
+  };
+}
 
 /**
  * Turns a parsed API query into a catalogue query. An absent sort is -createdAt

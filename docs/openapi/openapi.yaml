@@ -321,6 +321,125 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+  /tours/{id}/images:
+    put:
+      operationId: replaceTourImages
+      summary: Replace any subset of a tour's photos (lead guide or admin).
+      description: >-
+        A multipart body (S16, B4, D-14). `imageCover` takes 0 or 1 file. `images`
+        takes 0 to 3 files, and file n replaces gallery slot n; a slot past the
+        current end is appended, and the other slots keep their photos. At least
+        one file is needed. The JSON `credits` part carries one credit per uploaded
+        file: `imageCover` for the cover, and `images` in the order of the gallery
+        files. Each file is judged by its bytes, not its declared type, and is
+        re-encoded to WebP at most 2000 px wide with its metadata removed. Every
+        stored photo keeps exactly one credit (U27). Limits: 5 MB per file, 21 MB per
+        request and 40,000,000 input pixels. Twenty uploads per signed-in user per
+        hour (SEC-05). Clears `tours` and `tour:<id>`. Lead guides and admins only
+        (D-16, ADR 0037, ADR 0038).
+      parameters:
+        - $ref: '#/components/parameters/tourId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                imageCover:
+                  type: string
+                  format: binary
+                  description: The new cover. At most one.
+                images:
+                  type: array
+                  maxItems: 3
+                  items:
+                    type: string
+                    format: binary
+                  description: Gallery files, from slot 1. At most three.
+                credits:
+                  type: string
+                  description: >-
+                    JSON: `{ "imageCover": Credit, "images": [Credit, ...] }`. A
+                    Credit has `title`, `author`, `license`, `licenseUrl` and
+                    `sourceUrl` (both https), and an optional `alt` of at most 150
+                    characters. No other key is accepted.
+      responses:
+        '200':
+          description: The tour after the change, with its guides.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TourDetailEnvelope'
+        '400':
+          description: >-
+            No file, more than one cover, more than three gallery files, a file
+            without its credit, an extra credit, credits that are not JSON, or an
+            unknown part. The details name the part or the credit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: No one is signed in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '403':
+          description: The caller is not a lead guide or admin, or the Origin is another site's.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '404':
+          description: No tour has this id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '413':
+          description: >-
+            A file over 5 MB, a request over 21 MB, or an image over 40,000,000
+            pixels.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '415':
+          description: >-
+            The request is not multipart, or a file is not JPEG, PNG or WebP by its
+            bytes, or sharp cannot decode it.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '429':
+          description: >-
+            Twenty uploads in the hour for this user. The `Retry-After` header gives
+            the seconds to wait.
+          headers:
+            Retry-After:
+              description: Seconds until the next upload is allowed.
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
   /tours/top-5-cheap:
     get:
       operationId: getTop5Cheap

@@ -1,6 +1,6 @@
 # 0017. Required access and one error mapping for every route
 
-Status: Accepted
+Status: Accepted; amended by 0038 (bodies and uploads)
 Date: 9 Nov 2026
 Requirements: S1, S9, S10, B9, B10, D7, Q6
 Plan review: SEC-15, SEC-26, SEC-11, ARC-18; RESEARCH Open Question 1
@@ -25,7 +25,7 @@ Plan review: SEC-15, SEC-26, SEC-11, ARC-18; RESEARCH Open Question 1
 - **Error mapping (B9).** `toAppError` maps an `AppError` as it is, then Zod, an unreachable database, jose, Mongoose `CastError`, Mongoose `ValidationError`, duplicate key (11000) and the Stripe signature error, and everything else to a generic INTERNAL. It copies no driver message, key value, rejected value or stack (SEC-11); the original rides along as a non-enumerable `cause` for the logs. 4xx is logged as a warning and 5xx as an error, both with the request ID, and never with cookies, bodies or query strings. A thrown `redirect()` and the other Next control-flow errors are rethrown first with `unstable_rethrow`.
 - **Malformed ids.** A `CastError` gives 400 VALIDATION_ERROR naming the path. Services throw NOT_FOUND for a well-formed id that matches nothing (RESEARCH Open Question 1).
 - **Duplicate keys.** Code 11000 gives 409 CONFLICT with a detail naming only the field, taken from `keyPattern`.
-- **Bodies are JSON only** until Phase 4 adds multipart. A body schema with any other content type gives 415, and malformed JSON gives 400 with the invalid-JSON message.
+- **Bodies are JSON only** for a body schema. A body schema with any other content type gives 415, and malformed JSON gives 400 with the invalid-JSON message. ADR 0038 adds multipart uploads, with byte limits, and a 1 MB limit on JSON bodies.
 - **Query on pages versus routes.** `parseQuery` is for pages and falls back to defaults for bad fields. `withApi` validates the query strictly and answers 400.
 
 ## Consequences
@@ -34,4 +34,4 @@ Plan review: SEC-15, SEC-26, SEC-11, ARC-18; RESEARCH Open Question 1
 - A Phase 6 test can find every route by glob and check its declared access against the matrix.
 - `serverExternalPackages` for pino was not needed: `npm run build` bundles the logger as it is.
 - Rate limiting is wired to the adapter. Only the fake exists until Phase 5, so staging and production answer 500 on a rate-limited route (ADR 0016).
-- A request body is not size-limited here; Phase 4's upload work sets the limits.
+- A request body is limited by ADR 0038: 1 MB for JSON, and a per-route limit for uploads, counted before the handler runs.
