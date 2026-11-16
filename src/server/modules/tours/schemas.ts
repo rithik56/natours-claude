@@ -4,6 +4,7 @@ import { fromIstDay } from '@/lib/ist';
 import { AppError } from '@/server/errors';
 import { z } from '@/server/validation';
 import type { CatalogueFilter, CatalogueQuery } from './catalogue-query';
+import { slugify } from './slug';
 
 /** The sorts `/` offers (D-03). The API's default is -createdAt; the page's is -ratingsAverage. */
 export const PAGE_SORTS = [
@@ -229,7 +230,16 @@ export const monthlyPlanParamsSchema = z.strictObject({
 // The editable tour fields (B4, S4). Create and update share these rules, so a field means the
 // same thing on both routes. Every object is strict: an unknown key is a 400 naming its path.
 // Images, credits, the slug and the ratings are not in these schemas, so no JSON body can write them.
-const TOUR_NAME = z.string().trim().min(10).max(40);
+// The slug keeps only ASCII letters and digits (slugify), so a name with none of them would get an
+// empty slug and an unreachable /tour/ URL. It is refused here, before any write (WR-01).
+const TOUR_NAME = z
+  .string()
+  .trim()
+  .min(10)
+  .max(40)
+  .refine((name) => slugify(name).length > 0, {
+    message: messages.validation.invalidValue,
+  });
 const TOUR_TEXT = z.string().trim().min(1);
 const POSITIVE_WHOLE = z.number().int().min(1);
 const OBJECT_ID_HEX = /^[0-9a-f]{24}$/i;

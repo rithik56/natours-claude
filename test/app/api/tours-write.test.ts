@@ -526,6 +526,23 @@ describe('admin tour writes over JSON (F6, B4, D-13)', () => {
     });
   });
 
+  describe('stored data stays sound (WR-01, WR-05)', () => {
+    // A name with no ASCII letters or digits slugs to '', so the tour would have no reachable URL.
+    it('[WR-01] a name with no Latin letters or digits is 400 on create and on rename', async () => {
+      const { user } = await createUser({ role: 'admin' });
+      const name = 'नमस्ते भारत यात्रा';
+
+      const created = await create({ ...createBodyFor(HAMPI), name }, user);
+      expect(created.status).toBe(400);
+      expect(pathsOf(created.body as ErrorBody)).toEqual(['name']);
+
+      await createTour({ slug: VALLEY });
+      const renamed = await patch(seedIdOf(VALLEY), { name }, user);
+      expect(renamed.status).toBe(400);
+      expect(pathsOf(renamed.body as ErrorBody)).toEqual(['name']);
+    });
+  });
+
   describe('DELETE /api/v1/tours/[id] (F6, B4, D-16)', () => {
     afterEach(() => {
       vi.restoreAllMocks();
