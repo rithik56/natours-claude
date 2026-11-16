@@ -5,7 +5,7 @@ import { GOLDEN_TRIANGLE_SLUG, weekdayOf } from './dates';
 // seed/README.md, and stops on the first broken rule. Every check reads plain records with IST day
 // strings, so the rules run the same way on the seed files and on the stored documents.
 
-export type RuleTour = {
+type RuleTour = {
   _id: string;
   slug: string;
   duration: number;
@@ -16,9 +16,9 @@ export type RuleTour = {
   photoCredits: Array<{ file: string }>;
 };
 
-export type RuleUser = { _id: string; name: string; role: string };
+type RuleUser = { _id: string; name: string; role: string };
 
-export type RuleReview = {
+type RuleReview = {
   _id: string;
   review: string;
   rating: number;
@@ -26,7 +26,7 @@ export type RuleReview = {
   user: string;
 };
 
-export type RuleBooking = {
+type RuleBooking = {
   _id: string;
   tour: string;
   user: string;
@@ -46,7 +46,7 @@ export type SeedRuleInput = {
 export type SeedRuleViolation = { rule: string; detail: string };
 
 /** The counts the seed must store (seed/README.md, ADR 0030): 13 tours, 35 users, 52 reviews, 58 bookings, 52 credits. */
-export const EXPECTED_COUNTS = {
+const EXPECTED_COUNTS = {
   tours: 13,
   users: 35,
   reviews: 52,

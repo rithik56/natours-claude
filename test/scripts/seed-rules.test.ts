@@ -7,7 +7,10 @@ import {
   seedTourRecords,
   seedUserRecords,
 } from '../../scripts/seed/load.ts';
-import { checkSeedRules, type SeedRuleInput } from '../../scripts/seed/rules.ts';
+import {
+  checkSeedRules,
+  type SeedRuleInput,
+} from '../../scripts/seed/rules.ts';
 import { runSeed } from '../../scripts/seed/run.ts';
 import { useTestDatabase } from '../helpers/db';
 
@@ -50,7 +53,11 @@ function seedInput(): SeedRuleInput {
         file: `${PHOTO_KEY_PREFIX}${credit.file}`,
       })),
     })),
-    users: seedUserRecords().map(({ _id, name, role }) => ({ _id, name, role })),
+    users: seedUserRecords().map(({ _id, name, role }) => ({
+      _id,
+      name,
+      role,
+    })),
     reviews: seedReviewRecords().map(({ _id, review, rating, tour, user }) => ({
       _id,
       review,
@@ -89,7 +96,9 @@ describe('checkSeedRules', () => {
   it('[D10] upcoming-departure: a tour with no start date after today is reported', () => {
     const input = seedInput();
     const tour = must(
-      input.tours.find((entry) => entry.slug === 'meghalaya-living-root-bridges'),
+      input.tours.find(
+        (entry) => entry.slug === 'meghalaya-living-root-bridges',
+      ),
       'Meghalaya tour',
     );
     tour.startDates = ['2026-11-01', '2026-11-08'];
@@ -100,7 +109,8 @@ describe('checkSeedRules', () => {
     const input = seedInput();
     const review = must(input.reviews[0], 'review');
     input.bookings = input.bookings.filter(
-      (booking) => !(booking.tour === review.tour && booking.user === review.user),
+      (booking) =>
+        !(booking.tour === review.tour && booking.user === review.user),
     );
     expect(rulesBroken(input)).toContain('review-needs-past-booking');
   });
@@ -175,8 +185,12 @@ describe('checkSeedRules', () => {
   it('[D10] the guide-name heuristic reads only the seed files and finds every named guide assigned to the tour', () => {
     const guides = new Map(
       seedUserRecords()
-        .filter((person) => person.role === 'guide' || person.role === 'lead-guide')
-        .map((person) => [person._id, person.name.split(' ')[0] ?? ''] as const),
+        .filter(
+          (person) => person.role === 'guide' || person.role === 'lead-guide',
+        )
+        .map(
+          (person) => [person._id, person.name.split(' ')[0] ?? ''] as const,
+        ),
     );
     const assignments = new Map(
       seedTourRecords().map((tour) => [tour._id, tour.guides] as const),
@@ -185,7 +199,10 @@ describe('checkSeedRules', () => {
     for (const review of seedReviewRecords()) {
       const words = new Set(review.review.split(/[^A-Za-z]+/));
       for (const [guideId, firstName] of guides) {
-        if (words.has(firstName) && !assignments.get(review.tour)?.includes(guideId)) {
+        if (
+          words.has(firstName) &&
+          !assignments.get(review.tour)?.includes(guideId)
+        ) {
           unassigned.push(review._id);
         }
       }
@@ -198,11 +215,16 @@ describe('runSeed with a broken rule', () => {
   useTestDatabase();
 
   it('[D10] runSeed throws "seed rule failed: <rule>: <detail>" when a rule is broken', async () => {
-    forced.violation = { rule: 'counts', detail: 'tours: 12 stored, 13 expected' };
+    forced.violation = {
+      rule: 'counts',
+      detail: 'tours: 12 stored, 13 expected',
+    };
     try {
       await expect(
         runSeed({ reset: false, passwords: PASSWORDS, today: TODAY }),
-      ).rejects.toThrow('seed rule failed: counts: tours: 12 stored, 13 expected');
+      ).rejects.toThrow(
+        'seed rule failed: counts: tours: 12 stored, 13 expected',
+      );
     } finally {
       forced.violation = undefined;
     }

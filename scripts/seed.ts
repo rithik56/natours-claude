@@ -22,7 +22,9 @@ export function parseSeedArgs(argv: readonly string[]): SeedArgs {
       try {
         fromIstDay(value);
       } catch {
-        throw new Error(`--today must be a real YYYY-MM-DD day, not "${value}"`);
+        throw new Error(
+          `--today must be a real YYYY-MM-DD day, not "${value}"`,
+        );
       }
       today = value;
     } else {

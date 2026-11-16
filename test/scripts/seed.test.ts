@@ -139,7 +139,11 @@ describe('runSeed photos and tours', () => {
   useTestDatabase();
 
   it('[D10] loads 13 tours, 35 users, 52 reviews, 58 bookings and stores 52 photos', async () => {
-    const counts = await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
+    const counts = await runSeed({
+      reset: false,
+      passwords: PASSWORDS,
+      today: TODAY,
+    });
     expect(counts).toEqual({
       tours: 13,
       users: 35,
