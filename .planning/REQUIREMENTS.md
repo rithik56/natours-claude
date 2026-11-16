@@ -138,7 +138,7 @@
 - [x] **D7**: Logs are structured JSON (pino) in production and pretty-printed in development. Every log line and error response carries the request ID.
 - [ ] **D8**: A multi-stage Dockerfile on `node:24-slim` runs as a non-root user, with standalone output and the worker bundled by esbuild. `docker-compose.yml` runs `mongo`, `redis`, `mailpit`, `web` and `worker`.
 - [x] **D9**: Build output (`.next`, `dist`, `coverage`, Playwright reports) is gitignored.
-- [ ] **D10**: *(amended)* `npm run seed`:
+- [x] **D10**: *(amended)* `npm run seed`:
   - Loads `seed/` idempotently, has a `--reset` flag and refuses to run in production.
   - Sets every password from `SEED_USER_PASSWORD` and uploads the photos.
   - Rolls forward only the tour start dates that have passed. Past bookings and reviews never move.
@@ -422,7 +422,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | D7 | Phase 1 | Complete |
 | D8 | Phase 5 | Pending |
 | D9 | Phase 1 | Complete |
-| D10 | Phase 4 | Pending |
+| D10 | Phase 4 | Complete |
 | D11 | Phase 7 | Pending |
 | D12 | Phase 8 | Pending |
 | D13 | Phase 7 | Pending |
