@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fromIstDay } from '@/lib/ist';
 import { getDeps } from '@/server/deps';
 import {
+  distancesFrom,
   getById,
   getBySlug,
   getGuides,
@@ -10,6 +11,7 @@ import {
   getStats,
   list,
   monthOptions,
+  toursWithin,
 } from '@/server/modules/tours/service';
 import { Tour } from '@/server/modules/tours/model';
 import { User } from '@/server/modules/users/model';
@@ -410,6 +412,104 @@ describe('tours service', () => {
 
       expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
       expect((error as Error).cause).toBe(driverError);
+    });
+  });
+
+  describe('tours service: toursWithin and distancesFrom (B3)', () => {
+    // Connaught Place, Delhi, in the order the API takes them (lat, lng).
+    const DELHI = { lat: 28.6139, lng: 77.209 };
+
+    // The DB-down test replaces Tour.find, which createTour also calls, so restore it after each test.
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('[B3] the startLocation 2dsphere index exists, which $geoNear needs (QA-18)', async () => {
+      const indexes = await Tour.collection.indexes();
+
+      expect(indexes.map((index) => index.key)).toContainEqual({
+        startLocation: '2dsphere',
+      });
+    });
+
+    it('[B3] toursWithin returns the seed tours whose start lies inside 300 km, as summaries, by name', async () => {
+      await createWholeCatalogue();
+
+      const tours = await toursWithin({ ...DELHI, distance: 300, unit: 'km' });
+
+      expect(tours.map((tour) => tour.name)).toEqual([
+        'Golden Triangle Heritage',
+        'Kedarkantha Winter Trek',
+        'Rishikesh Ganga Rafting',
+        'Valley of Flowers Trek',
+      ]);
+      for (const tour of tours) {
+        expect(tour).not.toHaveProperty('guides');
+        expect(tour).toHaveProperty('startDates');
+      }
+    });
+
+    it('[B3] a radius that contains no start location gives []', async () => {
+      await createWholeCatalogue();
+
+      expect(
+        await toursWithin({ lat: 0, lng: 80, distance: 1, unit: 'km' }),
+      ).toEqual([]);
+    });
+
+    it('[B3] toursWithin refuses a failed read as SERVICE_UNAVAILABLE', async () => {
+      const driverError = Object.assign(new Error('connection reset'), {
+        name: 'MongoNetworkError',
+      });
+      vi.spyOn(Tour, 'find').mockImplementation(() => {
+        throw driverError;
+      });
+
+      const error = await toursWithin({
+        ...DELHI,
+        distance: 300,
+        unit: 'km',
+      }).catch((caught: unknown) => caught);
+
+      expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+    });
+
+    it('[B3] distancesFrom gives all 13 tours, nearest first, with Golden Triangle Heritage at about 4.7 km', async () => {
+      await createWholeCatalogue();
+
+      const distances = await distancesFrom({ ...DELHI, unit: 'km' });
+
+      expect(distances).toHaveLength(13);
+      expect(distances[0]?.name).toBe('Golden Triangle Heritage');
+      expect(distances[0]?.distance).toBeCloseTo(4.7, 1);
+      const values = distances.map((entry) => entry.distance);
+      expect(values).toEqual([...values].sort((a, b) => a - b));
+    });
+
+    it('[B3] distancesFrom rounds each distance to 2 decimals and returns only id, name, slug and distance', async () => {
+      await createWholeCatalogue();
+
+      const distances = await distancesFrom({ ...DELHI, unit: 'km' });
+
+      for (const entry of distances) {
+        expect(Math.round(entry.distance * 100) / 100).toBe(entry.distance);
+        expect(Object.keys(entry).sort()).toEqual([
+          'distance',
+          'id',
+          'name',
+          'slug',
+        ]);
+      }
+    });
+
+    it('[B3] distancesFrom in miles converts the kilometre distances', async () => {
+      await createWholeCatalogue();
+
+      const km = await distancesFrom({ ...DELHI, unit: 'km' });
+      const mi = await distancesFrom({ ...DELHI, unit: 'mi' });
+
+      expect(mi[0]?.name).toBe('Golden Triangle Heritage');
+      expect(mi[0]?.distance).toBeCloseTo((km[0]?.distance ?? 0) * 0.621371, 1);
     });
   });
 });
