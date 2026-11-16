@@ -43,6 +43,15 @@ ADR 0028 decided that India's boundary comes from the Survey of India outline, r
 
 **The rendering rule.** `rootMargin` for the slot's observer is 12rem converted to pixels from the root font size (192px at 16px). `IntersectionObserver` accepts only pixels or percentages in `rootMargin`, so the literal `12rem` throws and the observer never fires.
 
+**The JavaScript budget.** The tour page has its own entry in `docs/bundle-baseline.json`, and R9 as amended (ADR 0018) applies to it in two parts:
+
+- **Eager.** The gzipped script transfer size that Lighthouse CI measures for `/tour/valley-of-flowers-trek` must be at most the Phase 1 framework floor of 138,107 bytes plus 40,960 bytes. The floor is not re-measured for the tour page, because a fresh figure would hide the growth the delta allows.
+- **Lazy.** The Leaflet map is checked from the production build, not from Lighthouse. `scripts/measure-bundle.ts` sums the gzipped size of every `.js` and `.css` file under `.next/static` that contains the marker `leaflet-container`, and the sum must be at most 51,200 bytes. The allowance covers Leaflet 1.9.4's measured 42,661 bytes of gzipped JavaScript and 3,558 bytes of CSS (phase research), with room for the map component.
+
+`npm run bundle:check` checks every route in the baseline and names the route that is over budget. The `/` entry is unchanged.
+
+Measured on 16 Nov 2026 (`bundle:check` run with the production build): the lazy check passes at 46,567 bytes. The eager check for the tour route does not pass, at 197,870 bytes against 179,067. Lighthouse loaded the Leaflet chunk (44,569 bytes) during the run, with no scroll, so the map's observer fired at load: on the mobile preset (412 x 823) the slot appears to sit inside the 192 px margin of the first screen. That contradicts the assumption that the map never reaches Lighthouse. How the tour route's eager budget should treat the map is an open decision for the user; until it is made, `bundle:check` fails on this route.
+
 ## Consequences
 
 - A boundary file that fails to load, or does not parse, leaves the static route and the itinerary in place, with no message.

@@ -52,9 +52,9 @@ If a key is missing or invalid, the app exits at start-up and names the key. It 
 | `test:coverage` | `npm run test:coverage` | Runs it with coverage and the thresholds. |
 | `smoke` | `npm run smoke` | Starts the built app twice, once with a bad `SESSION_SECRET` and once with a good environment, and checks the exit, the headers and the CSP nonce. |
 | `ci:mongo` | `npm run ci:mongo` | Starts MongoDB from the test binary on `127.0.0.1`, port `CI_MONGO_PORT` (default 27017), until stopped. CI's `build` job uses it (ADR 0026). |
-| `lhci:collect` | `npm run lhci:collect` | Runs Lighthouse CI three times against `next start` on port 3300. |
-| `bundle:record` | `npm run bundle:record` | Collects, then rewrites `docs/bundle-baseline.json`. Run it locally and commit the result (ADR 0018). |
-| `bundle:check` | `npm run bundle:check` | Collects, then fails if the script size of `/` is over the recorded floor plus 40 KB. CI runs this one. |
+| `lhci:collect` | `npm run lhci:collect` | Runs Lighthouse CI three times for each route in `docs/bundle-baseline.json` against `next start` on port 3300. |
+| `bundle:record` | `npm run bundle:record` | Collects, then re-records the floor of `/` in `docs/bundle-baseline.json`. `-- --route <path>` re-records another route, and other entries are left as they are. Run it locally and commit the result (ADR 0018). |
+| `bundle:check` | `npm run bundle:check` | Collects, then fails naming any route over its budget: each page's script against its floor plus 40 KB, and the tour page's lazily loaded map against its 50 KB allowance (ADR 0034). CI runs this one. |
 
 `smoke` and the two bundle scripts need a fresh `npm run build`, a reachable MongoDB, and a database that `npm run seed` has loaded, because `smoke` checks a seeded photo under `/media`. They also need these variables set in the shell:
 

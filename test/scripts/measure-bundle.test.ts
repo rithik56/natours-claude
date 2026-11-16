@@ -7,11 +7,14 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
+import { randomBytes } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { gzipSync } from 'node:zlib';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   checkBudget,
+  lazyChunkBytes,
   median,
   scriptTransferSize,
 } from '../../scripts/measure-bundle.ts';
@@ -19,6 +22,9 @@ import {
 const SCRIPT = join(import.meta.dirname, '../../scripts/measure-bundle.ts');
 const FLOOR = 150_000;
 const DELTA = 40_960;
+const TOUR = '/tour/valley-of-flowers-trek';
+const TOUR_URL = `http://localhost:3300${TOUR}`;
+const MARKER = 'leaflet-container';
 const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.80 Safari/537.36';
 
@@ -100,25 +106,70 @@ describe('checkBudget', () => {
   });
 });
 
-describe('measure-bundle CLI', () => {
+describe('lazyChunkBytes', () => {
   let dir = '';
-  let reportsDir = '';
-  let baselinePath = '';
 
   beforeEach(() => {
-    dir = mkdtempSync(join(tmpdir(), 'measure-bundle-'));
-    reportsDir = join(dir, '.lighthouseci');
-    baselinePath = join(dir, 'bundle-baseline.json');
+    dir = mkdtempSync(join(tmpdir(), 'lazy-chunk-'));
   });
 
   afterEach(() => {
     rmSync(dir, { recursive: true, force: true });
   });
 
-  function run(mode: '--check' | '--record') {
+  it('[R8] counts only the gzipped JavaScript and CSS that contain the marker', () => {
+    mkdirSync(join(dir, 'chunks'), { recursive: true });
+    const marked = `var a="${MARKER}";${'x'.repeat(2_000)}`;
+    writeFileSync(join(dir, 'chunks', 'leaflet.js'), marked);
+    writeFileSync(join(dir, 'chunks', 'app.js'), 'y'.repeat(2_000));
+    writeFileSync(join(dir, 'chunks', 'plain.css'), 'z'.repeat(2_000));
+    writeFileSync(
+      join(dir, 'chunks', 'leaflet.js.map'),
+      `${MARKER}${'q'.repeat(2_000)}`,
+    );
+    expect(lazyChunkBytes(dir, MARKER)).toBe(
+      gzipSync(Buffer.from(marked)).length,
+    );
+  });
+
+  it('[R8] throws when the static folder has not been built', () => {
+    expect(() => lazyChunkBytes(join(dir, 'missing'), MARKER)).toThrow(
+      /npm run build/,
+    );
+  });
+});
+
+describe('measure-bundle CLI', () => {
+  let dir = '';
+  let reportsDir = '';
+  let baselinePath = '';
+  let staticDir = '';
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'measure-bundle-'));
+    reportsDir = join(dir, '.lighthouseci');
+    baselinePath = join(dir, 'bundle-baseline.json');
+    staticDir = join(dir, 'static');
+  });
+
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  function run(mode: '--check' | '--record', extra: string[] = []) {
     const result = spawnSync(
       process.execPath,
-      [SCRIPT, mode, '--reports-dir', reportsDir, '--baseline', baselinePath],
+      [
+        SCRIPT,
+        mode,
+        '--reports-dir',
+        reportsDir,
+        '--baseline',
+        baselinePath,
+        '--static-dir',
+        staticDir,
+        ...extra,
+      ],
       { encoding: 'utf8' },
     );
     return {
@@ -127,21 +178,28 @@ describe('measure-bundle CLI', () => {
     };
   }
 
-  function writeReports(path: string, sizes: number[]) {
+  function writeReports(url: string, sizes: number[]) {
     mkdirSync(reportsDir, { recursive: true });
+    const slug = url.replace(/[^a-z0-9]/gi, '_');
     sizes.forEach((size, index) => {
-      const file = join(reportsDir, `lhr-${String(index)}.json`);
-      writeFileSync(file, JSON.stringify(report(path, size)));
+      const file = join(reportsDir, `lhr-${slug}-${String(index)}.json`);
+      writeFileSync(file, JSON.stringify(report(url, size)));
     });
   }
 
-  function writeBaseline() {
-    const baseline = {
-      floorBytes: FLOOR,
-      budgetDeltaBytes: DELTA,
-      route: '/',
+  function entry(route: string, extra: Record<string, unknown> = {}) {
+    return { floorBytes: FLOOR, budgetDeltaBytes: DELTA, route, ...extra };
+  }
+
+  function writeBaseline(routes: Record<string, unknown>[] = [entry('/')]) {
+    writeFileSync(baselinePath, JSON.stringify({ routes }));
+  }
+
+  function readRoutes(): Record<string, unknown>[] {
+    const raw = JSON.parse(readFileSync(baselinePath, 'utf8')) as {
+      routes: Record<string, unknown>[];
     };
-    writeFileSync(baselinePath, JSON.stringify(baseline));
+    return raw.routes;
   }
 
   it('[R9] --check fails and names the reports when the folder is empty', () => {
@@ -184,6 +242,69 @@ describe('measure-bundle CLI', () => {
     expect(over.output.includes(String(FLOOR + DELTA))).toBe(true);
   });
 
+  it('[R9] --check reads the routes array and fails naming the one route over budget', () => {
+    writeBaseline([entry('/'), entry(TOUR)]);
+    writeReports('http://localhost:3300/', [FLOOR, FLOOR, FLOOR]);
+    writeReports(TOUR_URL, [FLOOR + DELTA + 1, FLOOR + DELTA + 1, FLOOR]);
+    const result = run('--check');
+    expect(result.status).toBe(1);
+    const overLine = result.output
+      .split('\n')
+      .find((line) => line.includes('over budget'));
+    expect(overLine).toContain(TOUR);
+    expect(result.output).toContain('bundle: ok');
+  });
+
+  it('[R8] --check passes the tour route when its marked chunks are within the lazy allowance', () => {
+    writeBaseline([
+      entry('/'),
+      entry(TOUR, { lazyAllowanceBytes: 1_000_000, lazyMarker: MARKER }),
+    ]);
+    writeReports('http://localhost:3300/', [FLOOR, FLOOR, FLOOR]);
+    writeReports(TOUR_URL, [FLOOR, FLOOR, FLOOR]);
+    mkdirSync(join(staticDir, 'chunks'), { recursive: true });
+    writeFileSync(
+      join(staticDir, 'chunks', 'leaflet.js'),
+      `${MARKER}\n${randomBytes(20_000).toString('hex')}`,
+    );
+    const result = run('--check');
+    expect(result.status).toBe(0);
+    expect(result.output).toContain('allowance of 1000000');
+  });
+
+  it('[R8] --check fails naming the tour route when its marked chunks exceed the lazy allowance', () => {
+    writeBaseline([
+      entry('/'),
+      entry(TOUR, { lazyAllowanceBytes: 1_000, lazyMarker: MARKER }),
+    ]);
+    writeReports('http://localhost:3300/', [FLOOR, FLOOR, FLOOR]);
+    writeReports(TOUR_URL, [FLOOR, FLOOR, FLOOR]);
+    mkdirSync(join(staticDir, 'chunks'), { recursive: true });
+    writeFileSync(
+      join(staticDir, 'chunks', 'leaflet.js'),
+      `${MARKER}\n${randomBytes(20_000).toString('hex')}`,
+    );
+    const result = run('--check');
+    expect(result.status).toBe(1);
+    const overLine = result.output
+      .split('\n')
+      .find((line) => line.includes('over budget'));
+    expect(overLine).toContain('lazy');
+    expect(overLine).toContain(TOUR);
+  });
+
+  it('[R8] --check fails when the lazy allowance has no build output to measure', () => {
+    writeBaseline([
+      entry('/'),
+      entry(TOUR, { lazyAllowanceBytes: 51_200, lazyMarker: MARKER }),
+    ]);
+    writeReports('http://localhost:3300/', [FLOOR, FLOOR, FLOOR]);
+    writeReports(TOUR_URL, [FLOOR, FLOOR, FLOOR]);
+    const result = run('--check');
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('npm run build');
+  });
+
   it('[R9] --record writes the median of three runs in any order', () => {
     for (const sizes of [
       [300, 100, 200],
@@ -193,8 +314,7 @@ describe('measure-bundle CLI', () => {
       writeReports('http://localhost:3300/', sizes);
       expect(run('--record').status).toBe(0);
       const raw = readFileSync(baselinePath, 'utf8');
-      const written = JSON.parse(raw) as Record<string, unknown>;
-      expect(written.floorBytes).toBe(200);
+      expect(readRoutes()[0]?.floorBytes).toBe(200);
       expect(raw.endsWith('}\n')).toBe(true);
     }
   });
@@ -202,10 +322,7 @@ describe('measure-bundle CLI', () => {
   it('[R9] --record keeps the provenance next to the figure', () => {
     writeReports('http://localhost:3300/', [310, 100, 200]);
     expect(run('--record').status).toBe(0);
-    const written = JSON.parse(readFileSync(baselinePath, 'utf8')) as Record<
-      string,
-      unknown
-    >;
+    const written = readRoutes()[0] ?? {};
     expect(written.budgetDeltaBytes).toBe(DELTA);
     expect(written.route).toBe('/');
     expect(written.preset).toBe('mobile');
@@ -216,6 +333,30 @@ describe('measure-bundle CLI', () => {
     expect(written.runBytes).toEqual([100, 200, 310]);
     expect(typeof written.measuredAt).toBe('string');
     expect(typeof written.next).toBe('string');
+  });
+
+  it('[R8] --record --route / leaves the tour entry untouched', () => {
+    const tour = entry(TOUR, {
+      lazyAllowanceBytes: 51_200,
+      lazyMarker: MARKER,
+      floorSource: 'Phase 1 framework floor of /',
+    });
+    writeBaseline([entry('/'), tour]);
+    writeReports('http://localhost:3300/', [310, 100, 200]);
+    expect(run('--record', ['--route', '/']).status).toBe(0);
+    const routes = readRoutes();
+    expect(routes).toHaveLength(2);
+    expect(routes[1]).toEqual(tour);
+    expect(routes[0]?.floorBytes).toBe(200);
+  });
+
+  it('[R8] --record --route adds an entry for a route that is not yet in the baseline', () => {
+    writeBaseline([entry('/')]);
+    writeReports(TOUR_URL, [120, 130, 140]);
+    expect(run('--record', ['--route', TOUR]).status).toBe(0);
+    const routes = readRoutes();
+    expect(routes.map((item) => item.route)).toEqual(['/', TOUR]);
+    expect(routes[1]?.floorBytes).toBe(130);
   });
 
   it('[R9] --record writes nothing when there are no reports', () => {

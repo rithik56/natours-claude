@@ -1,14 +1,26 @@
 {
-  "floorBytes": 138107,
-  "budgetDeltaBytes": 40960,
-  "route": "/",
-  "measuredAt": "2026-11-09T15:15:36.044Z",
-  "preset": "mobile",
-  "lighthouse": "13.6.0",
-  "chrome": "156.0.0.0",
-  "next": "16.4.5",
-  "runs": 3,
-  "statistic": "median",
-  "runBytes": [138107, 138107, 138107],
-  "command": "npm run bundle:record"
+  "routes": [
+    {
+      "floorBytes": 138107,
+      "budgetDeltaBytes": 40960,
+      "route": "/",
+      "measuredAt": "2026-11-09T15:15:36.044Z",
+      "preset": "mobile",
+      "lighthouse": "13.6.0",
+      "chrome": "156.0.0.0",
+      "next": "16.4.5",
+      "runs": 3,
+      "statistic": "median",
+      "runBytes": [138107, 138107, 138107],
+      "command": "npm run bundle:record"
+    },
+    {
+      "floorBytes": 138107,
+      "floorSource": "The Phase 1 framework floor of / (ADR 0018, recorded 9 Nov 2026). R9 measures each page against that shared floor, and the tour page did not exist then, so its floor is not re-measured: a fresh figure would hide the growth the 40 KB delta allows (ADR 0034).",
+      "budgetDeltaBytes": 40960,
+      "route": "/tour/valley-of-flowers-trek",
+      "lazyAllowanceBytes": 51200,
+      "lazyMarker": "leaflet-container"
+    }
+  ]
 }
