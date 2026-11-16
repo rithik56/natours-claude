@@ -193,6 +193,70 @@ export function monthOptionsFrom(
   return [...months].sort();
 }
 
+/** One row of the tour statistics (F1): the tours of one difficulty and their figures. */
+export type DifficultyStats = {
+  difficulty: Difficulty;
+  numTours: number;
+  /** The sum of the tours' rating counts. */
+  numRatings: number;
+  /** The mean of the tours' average ratings, to one decimal place. */
+  avgRating: number;
+  /** The mean price, in whole rupees. */
+  avgPrice: number;
+  minPrice: number;
+  maxPrice: number;
+};
+
+const DIFFICULTY_ORDER: readonly Difficulty[] = ['easy', 'medium', 'difficult'];
+
+function mean(values: readonly number[]): number {
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+/**
+ * Rounds half up to `places` decimal places. The product is first trimmed to 12
+ * significant digits, so a float such as 4.6499999999999995 rounds as 4.65 does.
+ */
+function roundHalfUp(value: number, places: number): number {
+  const scale = 10 ** places;
+  return Math.round(Number((value * scale).toPrecision(12))) / scale;
+}
+
+/**
+ * One row per difficulty that has tours, in the order easy, medium, difficult (F1).
+ * Pure: it reads the entries it is given and changes nothing, so the figures always
+ * agree with the catalogue the list reads.
+ *
+ * @param entries - Every catalogue tour, in any order.
+ * @returns The rows for the difficulties present; an empty array for an empty catalogue.
+ */
+export function statsFrom(
+  entries: readonly CatalogueEntry[],
+): DifficultyStats[] {
+  return DIFFICULTY_ORDER.flatMap((difficulty) => {
+    const group = entries.filter((entry) => entry.difficulty === difficulty);
+    if (group.length === 0) return [];
+    const prices = group.map((entry) => entry.price);
+    return [
+      {
+        difficulty,
+        numTours: group.length,
+        numRatings: group.reduce(
+          (sum, entry) => sum + entry.ratingsQuantity,
+          0,
+        ),
+        avgRating: roundHalfUp(
+          mean(group.map((entry) => entry.ratingsAverage)),
+          1,
+        ),
+        avgPrice: roundHalfUp(mean(prices), 0),
+        minPrice: Math.min(...prices),
+        maxPrice: Math.max(...prices),
+      },
+    ];
+  });
+}
+
 /**
  * The API's `fields` projection (B11). It copies TourSummary keys only, never the
  * stored document, so no hidden field can be asked for (T-04-14).

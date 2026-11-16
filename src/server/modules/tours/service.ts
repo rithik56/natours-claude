@@ -1,7 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
 import type { Types } from 'mongoose';
-import { toIstDay } from '@/lib/ist';
+import { istMonthBounds, toIstDay } from '@/lib/ist';
 import { now } from '@/server/clock';
 import { connectDb, isDbUnavailableError } from '@/server/db';
 import { getDeps } from '@/server/deps';
@@ -11,7 +11,9 @@ import { findActivePublicByIds } from '@/server/modules/users/service';
 import {
   applyCatalogueQuery,
   monthOptionsFrom,
+  statsFrom,
   type CatalogueQuery,
+  type DifficultyStats,
   type TourListResult,
 } from './catalogue-query';
 import {
@@ -93,6 +95,74 @@ export async function monthOptions(): Promise<string[]> {
 export async function listSlugs(): Promise<string[]> {
   const catalogue = await readCatalogue();
   return catalogue.map((tour) => tour.slug);
+}
+
+/**
+ * The tour statistics for GET /api/v1/tours/stats (F1): one row per difficulty.
+ * Computed in memory from the cached catalogue, so the stats always agree with the
+ * list and need no cache entry of their own (ADR 0031).
+ *
+ * @returns The rows for the difficulties present, easy, medium, difficult.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function getStats(): Promise<DifficultyStats[]> {
+  return statsFrom(await readCatalogue());
+}
+
+/** One month of the monthly plan (F2). */
+export type MonthlyPlanMonth = {
+  /** 1 for January to 12 for December, in IST. */
+  month: number;
+  /** Every start date of the year that falls in this month, one per departure. */
+  numTourStarts: number;
+  /** The distinct names of the tours that start in this month, sorted. */
+  tours: string[];
+};
+
+/**
+ * The year's tour starts grouped by IST month for GET /api/v1/tours/monthly-plan/[year]
+ * (F2). Every start date that falls in the calendar year counts, and months are cut in
+ * Asia/Kolkata, so 1 January 00:00 IST is in January (QA-10). The result is not cached,
+ * because its year comes from the URL (T-04-17).
+ *
+ * @param year - The four-digit year, already range-checked by the route (2000 to 2100).
+ * @returns The months that have a start, in month order.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function getMonthlyPlan(
+  year: number,
+): Promise<MonthlyPlanMonth[]> {
+  const { start } = istMonthBounds(`${year}-01`);
+  const { end } = istMonthBounds(`${year}-12`);
+  await connectDb();
+  try {
+    const rows = await Tour.aggregate<{
+      _id: number;
+      numTourStarts: number;
+      tours: string[];
+    }>([
+      { $unwind: '$startDates' },
+      { $match: { startDates: { $gte: start, $lt: end } } },
+      {
+        $group: {
+          _id: { $month: { date: '$startDates', timezone: 'Asia/Kolkata' } },
+          numTourStarts: { $sum: 1 },
+          tours: { $addToSet: '$name' },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    return rows.map((row) => ({
+      month: row._id,
+      numTourStarts: row.numTourStarts,
+      tours: [...row.tours].sort(),
+    }));
+  } catch (error) {
+    if (!isDbUnavailableError(error)) throw error;
+    const unavailable = new AppError('SERVICE_UNAVAILABLE');
+    unavailable.cause = error;
+    throw unavailable;
+  }
 }
 
 /**

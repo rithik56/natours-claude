@@ -153,6 +153,20 @@ export const apiListQuerySchema = z.strictObject({
   limit: positiveInteger.pipe(z.number().max(MAX_LIMIT)).optional(),
 });
 
+const YEAR_DIGITS = /^\d{4}$/;
+
+/**
+ * The path of GET /api/v1/tours/monthly-plan/[year] (F2): four digits, from 2000 to 2100.
+ * `abc`, `2027.5`, `1999` and `2101` are each a 400 before any read.
+ */
+export const monthlyPlanParamsSchema = z.strictObject({
+  year: z
+    .string()
+    .regex(YEAR_DIGITS)
+    .transform(Number)
+    .pipe(z.number().int().min(2000).max(2100)),
+});
+
 /**
  * Turns a parsed API query into a catalogue query. An absent sort is -createdAt
  * (B1); an absent page is 1 and an absent limit is 20. The API never clamps (B11).

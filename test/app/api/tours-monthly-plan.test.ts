@@ -94,10 +94,8 @@ describe('GET /api/v1/tours/monthly-plan/[year]', () => {
       });
       const { user } = await createUser({ role: 'admin' });
 
-      const plan2027 = (await getPlan('2027', { as: user }))
-        .body as PlanBody;
-      const plan2026 = (await getPlan('2026', { as: user }))
-        .body as PlanBody;
+      const plan2027 = (await getPlan('2027', { as: user })).body as PlanBody;
+      const plan2026 = (await getPlan('2026', { as: user })).body as PlanBody;
 
       expect(plan2027.data.plan).toEqual([
         { month: 1, numTourStarts: 1, tours: ['Thar Desert Camel Safari'] },
