@@ -30,7 +30,7 @@
   /* Neel in both themes, so the yellow line stands out on either surface. */
   .outline {
     stroke: var(--color-header-bg);
-    stroke-width: 7;
+    stroke-width: 8;
   }
 
   .line {
@@ -41,16 +41,24 @@
   .stop rect {
     fill: var(--color-accent);
     stroke: var(--color-header-bg);
-    stroke-width: 2;
+    stroke-width: var(--focus-ring-width);
   }
 
-  /* Highway yellow only ever carries Neel text, in both themes. */
+  /* Highway yellow only ever carries Neel text, in both themes. 600 is one of the site's two weights. */
   .stop text {
     fill: var(--color-text-on-accent);
     font-size: var(--step-0);
-    font-weight: 700;
+    font-weight: 600;
     text-anchor: middle;
     dominant-baseline: central;
+  }
+
+  /* The static route in a slot that a Leaflet map will replace (C3): drawn already, never animated. */
+  .still .outline,
+  .still .line {
+    animation: none;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
   }
 
   /* Reduced motion: the route is already drawn, and no animation plays at all. */

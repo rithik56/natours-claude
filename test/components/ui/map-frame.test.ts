@@ -19,7 +19,13 @@ function tokenPx(name: string): number {
     join(process.cwd(), 'src/styles/tokens.css'),
     'utf8',
   );
-  const match = new RegExp(`${name}:\\s*([\\d.]+)(px|rem)\\s*;`).exec(css);
+  const start = css.indexOf(`${name}:`);
+  if (start < 0) throw new Error(`${name} is not declared in tokens.css`);
+  const declaration = css.slice(
+    start + name.length + 1,
+    css.indexOf(';', start),
+  );
+  const match = /^\s*([\d.]+)(px|rem)\s*$/.exec(declaration);
   if (!match) throw new Error(`${name} is not a length in tokens.css`);
   const value = Number(match[1]);
   return match[2] === 'rem' ? value * 16 : value;

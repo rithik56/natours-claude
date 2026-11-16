@@ -20,7 +20,14 @@ const sameAuthorAndLicence = [
   },
 ];
 
-const render = (credits: typeof sameAuthorAndLicence) =>
+type Credit = {
+  authorName: string;
+  authorUrl?: string;
+  licenceName: string;
+  licenceUrl: string;
+};
+
+const render = (credits: Credit[]) =>
   renderToStaticMarkup(createElement(PhotoCredits, { credits }));
 
 describe('[U27] PhotoCredits', () => {

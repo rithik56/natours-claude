@@ -1,0 +1,32 @@
+@layer components {
+  /* Phone: the map slot above the day list. */
+  .route {
+    display: grid;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+
+  /* A fixed 5:3 box, so the static route and a later Leaflet map occupy the same space (D-07). */
+  .slot {
+    aspect-ratio: 5 / 3;
+    min-width: 0;
+  }
+
+  .slot > * {
+    height: 100%;
+    box-sizing: border-box;
+  }
+
+  .slot svg {
+    height: 100%;
+  }
+
+  /* From 64em: two equal columns, the slot top-aligned, the list at its natural height. */
+  @media (width >= 64em) {
+    .route {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: start;
+    }
+  }
+}

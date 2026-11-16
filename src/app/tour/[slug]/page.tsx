@@ -2,8 +2,14 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
+import {
+  TourGallery,
+  type GalleryPhoto,
+} from '@/components/features/tour-gallery';
+import { TourRoute } from '@/components/features/tour-route';
 import { FactsStrip } from '@/components/ui/facts-strip';
 import { Link } from '@/components/ui/link';
+import { PhotoCredits } from '@/components/ui/photo-credits';
 import { formatPrice } from '@/lib/format';
 import { getConfig } from '@/server/config';
 import { getDeps } from '@/server/deps';
@@ -20,6 +26,45 @@ const getTourPage = cache(getBySlug);
 /** The credit of the cover photo: the one whose file is the tour's imageCover. */
 function coverCredit(tour: TourDetail) {
   return tour.photoCredits.find((credit) => credit.file === tour.imageCover);
+}
+
+/**
+ * One credit row per photo, the cover first and then the gallery in its order (U27). Rows
+ * keep their place even when two photos share an author and licence.
+ */
+function creditRows(tour: TourDetail) {
+  return [tour.imageCover, ...tour.images].flatMap((file) => {
+    const credit = tour.photoCredits.find((entry) => entry.file === file);
+    return credit
+      ? [
+          {
+            authorName: credit.author,
+            licenceName: credit.license,
+            licenceUrl: credit.licenseUrl,
+          },
+        ]
+      : [];
+  });
+}
+
+/**
+ * The extra photos in the order of the tour's `images` array, each with its credit (D-09, U7).
+ * A photo with no credit is left out, because it could not be captioned (U27).
+ */
+function galleryPhotos(tour: TourDetail): GalleryPhoto[] {
+  const photos: GalleryPhoto[] = [];
+  for (const file of tour.images) {
+    const credit = tour.photoCredits.find((entry) => entry.file === file);
+    if (!credit) continue;
+    photos.push({
+      url: getDeps().storage.urlFor(file),
+      alt: credit.alt,
+      author: credit.author,
+      licence: credit.license,
+      licenceUrl: credit.licenseUrl,
+    });
+  }
+  return photos;
 }
 
 /** "6 days" or "1 day", as the description reads (copy: "{summary} {n} days, {price} per person."). */
@@ -77,6 +122,8 @@ export default async function TourPage({ params }: TourPageProps) {
   if (!tour) notFound();
 
   const cover = coverCredit(tour);
+  const photos = galleryPhotos(tour);
+  const credits = creditRows(tour);
   const paragraphs = (tour.description ?? '')
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
@@ -115,12 +162,31 @@ export default async function TourPage({ params }: TourPageProps) {
       {/* Reserved for the booking panel (plan 04-07): empty until then, so the aside column stays hidden. */}
       <div className={styles.aside} />
       <div className={styles.content}>
+        {tour.locations.length > 0 ? (
+          <section className={styles.section}>
+            <h2>Itinerary</h2>
+            <TourRoute locations={tour.locations} />
+          </section>
+        ) : null}
         {paragraphs.length > 0 ? (
           <section className={styles.description}>
             <h2>About this tour</h2>
             {paragraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
+          </section>
+        ) : null}
+        {photos.length > 0 ? (
+          <section className={styles.section}>
+            <h2>Photos</h2>
+            <TourGallery photos={photos} />
+          </section>
+        ) : null}
+        {credits.length > 0 ? (
+          <section className={styles.section}>
+            <h2>Photo credits</h2>
+            <PhotoCredits credits={credits} />
+            <Link href="/credits">Read the photo credits</Link>
           </section>
         ) : null}
       </div>

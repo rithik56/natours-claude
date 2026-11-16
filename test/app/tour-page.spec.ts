@@ -12,13 +12,14 @@ test('[U11] /tour/ladakh-high-passes has one h1, the cover with its credited cap
     page.getByRole('heading', { level: 1, name: 'Ladakh High Passes' }),
   ).toBeVisible();
 
-  const cover = page.locator('figure img').first();
-  await expect(cover).toHaveAttribute(
+  // The cover is the first figure on the page; the gallery figures come later in the document.
+  const coverFigure = page.locator('figure').first();
+  await expect(coverFigure.locator('img')).toHaveAttribute(
     'src',
     /\/_next\/image\?url=%2Fmedia%2Ftours%2Fladakh-high-passes-cover\.jpg/,
   );
-  await expect(page.locator('figure figcaption')).toContainText('Photo:');
-  await expect(page.locator('figure figcaption a')).toHaveAttribute(
+  await expect(coverFigure.locator('figcaption')).toContainText('Photo:');
+  await expect(coverFigure.locator('figcaption a')).toHaveAttribute(
     'target',
     '_blank',
   );
@@ -65,8 +66,10 @@ test.describe('[D-07] the static route holds its slot with JavaScript off', () =
     await route.scrollIntoViewIfNeeded();
     const after = await route.boundingBox();
 
+    // The page scrolls, so the viewport offset changes; the box itself must not.
     expect(before).not.toBeNull();
-    expect(after).toEqual(before);
+    expect(after?.width).toBe(before?.width);
+    expect(after?.height).toBe(before?.height);
   });
 });
 
