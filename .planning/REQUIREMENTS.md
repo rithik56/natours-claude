@@ -24,7 +24,7 @@
 - [x] **S1**: Every Route Handler, Server Action and protected page declares its access level, and anything undeclared is denied. An access-matrix test checks every API route and action as an anonymous visitor, `user`, `guide` and `admin`.
 - [ ] **S2**: There are no debug endpoints. `/healthz` returns only `{ status: 'ok' }`, and `/styleguide` is a 404 in production.
 - [x] **S3**: Sensitive fields never leave the server. API responses and Client Component props go through DTO mappers, and queue jobs carry only `{ to, firstName, url }`.
-- [ ] **S4**: No mass assignment. Strict input schemas list exactly the allowed fields, and admin user updates allow only `name`, `email`, `role` and `active`.
+- [x] **S4**: No mass assignment. Strict input schemas list exactly the allowed fields, and admin user updates allow only `name`, `email`, `role` and `active`.
 - [ ] **S5**: Ownership is enforced:
   - Only a review's author edits it; the author or an admin deletes it.
   - Bookings are readable only by their owner and admins.
@@ -118,7 +118,7 @@
 - [ ] **R7**: Site forms are `<form action={serverAction}>` and work without JavaScript. With JavaScript, `useActionState` and `useFormStatus` add field errors and a pending state.
 - [ ] **R8**: The route map loads through `next/dynamic` with `ssr: false`, called from a Client Component. Its fallback is the itinerary list at the same size, and Leaflet loads only on tour pages.
 - [x] **R9**: *(amended)* No page adds more than 40 KB gzipped of JavaScript over its Phase 0 baseline. Lighthouse CI measures this with `resource-summary:script:size` budgets on every page, and the tour page has its own budget that includes the lazily loaded map.
-- [ ] **R10**: Metadata and search:
+- [x] **R10**: Metadata and search:
   - Every page has `generateMetadata` (title, description, canonical URL), and tour pages use the cover photo for Open Graph.
   - `sitemap.ts` lists every tour.
   - `robots.ts` excludes `/me`, `/my-tours` and `/styleguide`.
@@ -362,7 +362,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | S1 | Phase 1 | Complete |
 | S2 | Phase 3 | Pending |
 | S3 | Phase 1 | Complete |
-| S4 | Phase 4 | Pending |
+| S4 | Phase 4 | Complete |
 | S5 | Phase 6 | Pending |
 | S6 | Phase 5 | Pending |
 | S7 | Phase 4 | Complete |
@@ -411,7 +411,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | R7 | Phase 5 | Pending |
 | R8 | Phase 4 | Pending |
 | R9 | Phase 1 | Complete |
-| R10 | Phase 4 | Pending |
+| R10 | Phase 4 | Complete |
 | R11 | Phase 7 | Pending |
 | D1 | Phase 5 | Pending |
 | D2 | Phase 4 | Pending |
