@@ -26,6 +26,9 @@
 /build
 /dist/
 
+# local uploads (ADR 0029)
+/.storage/
+
 # misc
 .DS_Store
 *.pem

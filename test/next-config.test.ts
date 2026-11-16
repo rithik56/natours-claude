@@ -28,4 +28,12 @@ describe('next.config security headers', () => {
   it('[D9] stops next dev writing an AGENTS.md into the repository', () => {
     expect(nextConfig.agentRules).toBe(false);
   });
+
+  it('[D2] lets next/image optimise only same-origin /media photos, with no remote host', () => {
+    expect(nextConfig.images?.localPatterns).toEqual([
+      { pathname: '/media/**', search: '' },
+    ]);
+    expect(nextConfig.images?.remotePatterns).toBeUndefined();
+    expect(nextConfig.images?.domains).toBeUndefined();
+  });
 });

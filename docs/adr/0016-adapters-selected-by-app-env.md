@@ -1,6 +1,6 @@
 # 0016. Adapters are selected by APP_ENV
 
-Status: Accepted
+Status: Accepted; amended by 0029 (storage in development and ci)
 Date: 9 Nov 2026
 Requirements: Q7, S3
 Plan review: ARC-02, ARC-03, ARC-24, QA-21, SEC-09

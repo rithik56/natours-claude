@@ -33,6 +33,8 @@ Every TypeScript block below is copied from the file named in its first line. Fu
 | `mailer.enqueue(template, { to, firstName, url, ...vars })` | `EmailQueue.enqueue(job)` takes exactly `{ template, to, firstName, url }`. Sending is a separate `Mailer.send`. | ADR 0016 |
 | Adapters in `queue/`, `storage/`, `stripe/` and `mailer/` folders; a `src/server/cache.ts` | All adapters, the cache included, are in `src/server/adapters/`. ADR 0012 still says `src/server/cache.ts`; the file is `src/server/adapters/cache.ts`. | ADR 0016 |
 | Config errors are Zod errors | `parseConfig` throws `ConfigError` | ADR 0010 |
+| Photos load from `images.remotePatterns` (D2) | `images.localPatterns` for `/media/**`, because photos are same-origin. No remote host, so the CSP is unchanged. | ADR 0029 |
+| Development storage is the in-memory fake | A disk adapter under `STORAGE_DIR`, so the seed and `next dev` share the photos. Test keeps the fake. | ADR 0029 |
 | A placeholder page for every route | Only `/`, `/healthz` and `/readyz` exist | ADR 0006 |
 | `docs/contracts.md` holds all of section 4 | Only the shared parts, written per phase | ADR 0005 |
 | Test helpers `createUser({ role?, active? })`, `createTour(overrides?)` | Factories copy real seed records and take an options object (section 9) | ADR 0024 |
@@ -515,6 +517,7 @@ An email job carries exactly `template`, `to`, `firstName` and `url`, so a whole
 // src/server/adapters/storage.ts
 export interface Storage {
   put(key: string, body: Buffer, contentType: string): Promise<void>;
+  get(key: string): Promise<StoredFile | null>;
   delete(key: string): Promise<void>;
   urlFor(key: string): string;
 }
@@ -526,10 +529,16 @@ export type FakeStorage = Storage & {
   reset(): void;
 };
 
+export function mediaUrlFor(key: string): string;
 export function createFakeStorage(): FakeStorage;
 ```
 
-A stored value, such as a tour's `imageCover` or a user's `photo`, is a storage key, never a URL. The fake's `urlFor(key)` is `${appOrigin}/storage/${encodeURIComponent(key)}`. Phase 4 decides the real media route (ARC-15).
+```ts
+// src/server/adapters/local-disk-storage.ts
+export function createLocalDiskStorage(rootDir: string): Storage;
+```
+
+A stored value, such as a tour's `imageCover` or a user's `photo`, is a storage key, never a URL. Every adapter's `urlFor(key)` is the root-relative `/media/<key>`, with each segment encoded. An absolute URL is `new URL(urlFor(key), APP_URL)`, never built from a request header (SEC-12). A key is one to four segments, each matching `^[a-z0-9][a-z0-9._-]*$`, and the disk adapter refuses anything else. `test` uses the fake, `development` and `ci` use the disk adapter at `STORAGE_DIR`, and `staging` and `production` throw until Phase 8 (ADR 0029, ARC-15).
 
 ```ts
 // src/server/adapters/stripe.ts
@@ -644,10 +653,10 @@ export function getDeps(): Deps;
 | `APP_ENV` | mailer, queue, storage, Stripe, rate limiter | cache |
 | --- | --- | --- |
 | `test` | fakes | the fake cache |
-| `development`, `ci` | fakes | `createNextCache()` |
+| `development`, `ci` | fakes, except storage, which is the disk adapter at `STORAGE_DIR` (ADR 0029) | `createNextCache()` |
 | `staging`, `production` | reading one throws `No real <name> adapter is configured yet (ADR 0016); <phase> adds it` | `createNextCache()` |
 
-The throwing getters name the phase that adds each real adapter: mailer, queue and rate limiter in Phase 5, Stripe in Phase 6, storage in Phase 4 or 8. The error is a plain `Error`, so `withApi` answers with the generic INTERNAL response and the message stays in the logs. A phase that adds a real adapter replaces its getter in the same change. There is no fallback path from production to a fake.
+The throwing getters name the phase that adds each real adapter: mailer, queue and rate limiter in Phase 5, Stripe in Phase 6, storage in Phase 8. The error is a plain `Error`, so `withApi` answers with the generic INTERNAL response and the message stays in the logs. A phase that adds a real adapter replaces its getter in the same change. There is no fallback path from production to a fake.
 
 ## 6. Data model
 
@@ -1015,6 +1024,9 @@ export function loadConfigOrExit(): void;
 | `CORS_ORIGINS` | comma-separated origins, each with no path. Also pass the Origin check on writes. | empty, which allows none |
 | `LOG_LEVEL` | `fatal`, `error`, `warn`, `info`, `debug`, `trace` or `silent` | `info` |
 | `APP_NOW` | optional ISO date or date and time. A value with no offset is IST. Refused in staging and production. | unset |
+| `STORAGE_DIR` | directory for the development and ci disk adapter, relative to the working directory (ADR 0029) | `.storage` |
+| `SEED_USER_PASSWORD` | the password for every seed user. Read only by `npm run seed`, which requires it. Development, test and ci only, never committed (SEC-27). | unset |
+| `SEED_ADMIN_PASSWORD` | the password for the seed admin. Read only by `npm run seed`, which requires it and needs at least 16 characters (SEC-27). | unset |
 
 The derived fields are `appOrigin` (the origin of `APP_URL`), `corsOrigins` (the parsed list) and `isProductionLike` (`APP_ENV` is `staging` or `production`). Later phases add their keys to `config-schema.ts` and `.env.example` together, and `npm run check:env` fails if they forget one.
 
@@ -1242,7 +1254,7 @@ Each is written into this file by the phase that builds it (ADR 0005).
 | `toursService.list(query)` returning `{ items, total }`, cached with a tag (R5); `toursService.getBySlug(slug)`; `toursService.getById(id)` | 4 |
 | `reviewsService.listForTour(tourId, page)`, cached with a tag | 4 |
 | `bookingsService.hasPaidBooking(userId, tourId)`, which the booking panel needs for "already booked", never cached | 4 |
-| `images.normalize(file, preset)`, and the real storage adapter | 4 (storage may wait for 8, ADR 0016) |
+| `images.normalize(file, preset)`, and the real storage adapter | 4 (the disk adapter and `/media` are in, ADR 0029; S3 waits for 8) |
 | The cache keys and tag names, and the shape of a list response in `data` (section 2.1) | 4 |
 | `Welcome` and `PasswordReset` email-template props, the mailer's SMTP implementation, the Redis rate limiter and the BullMQ queue | 5 |
 | `toAdminUser`, or a record of why there is none (ADR 0013) | 5 |

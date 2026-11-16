@@ -7,9 +7,10 @@ import {
   type RateLimiter,
 } from '@/server/adapters/rate-limit';
 import { createNextCache } from '@/server/adapters/real-cache';
+import { createLocalDiskStorage } from '@/server/adapters/local-disk-storage';
 import { createFakeStorage, type Storage } from '@/server/adapters/storage';
 import { createFakeStripe, type StripeClient } from '@/server/adapters/stripe';
-import { getConfig } from '@/server/config';
+import { getConfig, type Config } from '@/server/config';
 
 export type Deps = {
   mailer: Mailer;
@@ -45,20 +46,24 @@ function productionLikeDeps(): Deps {
       return noRealAdapter('Stripe', 'Phase 6');
     },
     get storage(): Storage {
-      return noRealAdapter('storage', 'Phase 4 or 8');
+      return noRealAdapter('storage', 'Phase 8');
     },
     cache: createNextCache(),
   };
 }
 
-function fakeDeps(appEnv: string): Deps {
+function fakeDeps(config: Config): Deps {
+  const isTest = config.APP_ENV === 'test';
   return {
     mailer: createFakeMailer(),
     emailQueue: createFakeEmailQueue(),
-    storage: createFakeStorage(),
+    // ADR 0029: development and ci write to disk, so the seed process and the web server share the files.
+    storage: isTest
+      ? createFakeStorage()
+      : createLocalDiskStorage(config.STORAGE_DIR),
     stripe: createFakeStripe(),
     rateLimiter: createFakeRateLimiter(),
-    cache: appEnv === 'test' ? createFakeCache() : createNextCache(),
+    cache: isTest ? createFakeCache() : createNextCache(),
   };
 }
 
@@ -66,9 +71,7 @@ function fakeDeps(appEnv: string): Deps {
 export function getDeps(): Deps {
   if (!deps) {
     const config = getConfig();
-    deps = config.isProductionLike
-      ? productionLikeDeps()
-      : fakeDeps(config.APP_ENV);
+    deps = config.isProductionLike ? productionLikeDeps() : fakeDeps(config);
   }
   return deps;
 }

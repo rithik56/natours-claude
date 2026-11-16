@@ -130,11 +130,19 @@ describe('fake storage', () => {
     expect([...(stored?.body ?? [])]).toEqual([1, 2, 3]);
   });
 
-  it('[Q7] urlFor gives an absolute URL on the APP_URL origin', () => {
+  it('[D2] urlFor gives a root-relative /media path with each segment encoded', () => {
     const storage = createFakeStorage();
-    expect(storage.urlFor('users/anjali.jpg')).toBe(
-      'http://localhost:3000/storage/users%2Fanjali.jpg',
-    );
+    expect(storage.urlFor('users/anjali.jpg')).toBe('/media/users/anjali.jpg');
+    expect(storage.urlFor('tours/a b.jpg')).toBe('/media/tours/a%20b.jpg');
+  });
+
+  it('[D2] get returns a copy of the stored file and null for a missing key', async () => {
+    const storage = createFakeStorage();
+    await storage.put('tours/a.jpg', Buffer.from([7]), 'image/jpeg');
+    const stored = await storage.get('tours/a.jpg');
+    expect(stored?.contentType).toBe('image/jpeg');
+    expect([...(stored?.body ?? [])]).toEqual([7]);
+    expect(await storage.get('tours/b.jpg')).toBeNull();
   });
 
   it('[Q7] delete removes the file and reset empties everything', async () => {

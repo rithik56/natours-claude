@@ -46,7 +46,7 @@ export const config = {
   matcher: [
     {
       source:
-        '/((?!api|webhooks|healthz|readyz|_next/static|_next/image|favicon.ico).*)',
+        '/((?!api|webhooks|healthz|readyz|media|_next/static|_next/image|favicon.ico).*)',
       missing: [
         { type: 'header', key: 'next-router-prefetch' },
         { type: 'header', key: 'purpose', value: 'prefetch' },
