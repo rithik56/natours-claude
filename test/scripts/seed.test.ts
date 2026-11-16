@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { describe, expect, it } from 'vitest';
+import { toIstDay } from '@/lib/ist';
 import { parseSeedArgs } from '../../scripts/seed.ts';
 import {
   seedBookingRecords,
@@ -24,6 +25,9 @@ const PASSWORDS = {
   user: 'seed-test-traveller-pass',
   admin: 'seed-test-admin-passphrase-2026',
 };
+
+// Pins the date roll so every database test is stable on any day it runs (ADR 0023).
+const TODAY = '2026-11-08';
 
 /** The four seed collections as stored, with password hashes, timestamps and every field. */
 async function snapshot(): Promise<Record<string, unknown[]>> {
@@ -53,8 +57,8 @@ describe('parseSeedArgs', () => {
     expect(parseSeedArgs(['--today=2026-11-08']).today).toBe('2026-11-08');
   });
 
-  it('[D10] refuses a --today that is not a real calendar day', () => {
-    expect(() => parseSeedArgs(['--today=2026-02-30'])).toThrow(RangeError);
+  it('[D10] refuses a --today that is not a real calendar day, and names the flag', () => {
+    expect(() => parseSeedArgs(['--today=2026-02-30'])).toThrow(/--today/);
   });
 
   it('[D10] refuses an unknown flag and names it', () => {
@@ -135,7 +139,7 @@ describe('runSeed photos and tours', () => {
   useTestDatabase();
 
   it('[D10] loads 13 tours, 35 users, 52 reviews, 58 bookings and stores 52 photos', async () => {
-    const counts = await runSeed({ reset: false, passwords: PASSWORDS });
+    const counts = await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
     expect(counts).toEqual({
       tours: 13,
       users: 35,
@@ -147,7 +151,7 @@ describe('runSeed photos and tours', () => {
   });
 
   it('[D2] uploads the 52 seed photos under tours/<file> as image/jpeg', async () => {
-    await runSeed({ reset: false, passwords: PASSWORDS });
+    await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
     for (const [key, file] of fakes.storage.files) {
       expect(key.startsWith('tours/')).toBe(true);
       expect(file.contentType).toBe('image/jpeg');
@@ -155,7 +159,7 @@ describe('runSeed photos and tours', () => {
   });
 
   it('[D2] every tour cover is a key the storage holds', async () => {
-    await runSeed({ reset: false, passwords: PASSWORDS });
+    await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
     const tours = await Tour.find().lean();
     for (const tour of tours) {
       expect(fakes.storage.files.has(tour.imageCover)).toBe(true);
@@ -163,18 +167,18 @@ describe('runSeed photos and tours', () => {
   });
 
   it('[D10] a second run changes nothing: every document of the four collections is deep-equal, passwords and timestamps included', async () => {
-    await runSeed({ reset: false, passwords: PASSWORDS });
+    await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
     const before = await snapshot();
-    await runSeed({ reset: false, passwords: PASSWORDS });
+    await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
     expect(await snapshot()).toEqual(before);
   });
 
   it('[D10] --reset rebuilds the seed after a tour is deleted, with the same tours, reviews and bookings', async () => {
-    await runSeed({ reset: false, passwords: PASSWORDS });
+    await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
     const before = await snapshot();
     await Tour.deleteOne({ slug: 'valley-of-flowers-trek' });
 
-    await runSeed({ reset: true, passwords: PASSWORDS });
+    await runSeed({ reset: true, passwords: PASSWORDS, today: TODAY });
 
     const after = await snapshot();
     expect(after.tours).toEqual(before.tours);
@@ -184,7 +188,7 @@ describe('runSeed photos and tours', () => {
   });
 
   it('[D10] keeps each review and booking createdAt equal to its seed value', async () => {
-    await runSeed({ reset: false, passwords: PASSWORDS });
+    await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
     const [review] = seedReviewRecords();
     const [booking] = seedBookingRecords();
     expect(review).toBeDefined();
@@ -198,7 +202,7 @@ describe('runSeed photos and tours', () => {
   });
 
   it('[D10] stores every user with the seed role and an email on the example.com domain', async () => {
-    await runSeed({ reset: false, passwords: PASSWORDS });
+    await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
     const seeded = seedUserRecords();
     const stored = await User.find().select('+active').lean();
     expect(stored).toHaveLength(seeded.length);
@@ -210,7 +214,7 @@ describe('runSeed photos and tours', () => {
   });
 
   it('[QA-18] builds the 2dsphere index and the unique indexes after a seed', async () => {
-    await runSeed({ reset: false, passwords: PASSWORDS });
+    await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
     const tourIndexes = await Tour.collection.indexes();
     const userIndexes = await User.collection.indexes();
     expect(
@@ -220,5 +224,41 @@ describe('runSeed photos and tours', () => {
       userIndexes.some((index) => index.key.email === 1 && index.unique),
     ).toBe(true);
     expect(seedTourRecords()).toHaveLength(13);
+  });
+
+  it('[D10] with --today 2026-11-08 stores every seed start date unchanged', async () => {
+    await runSeed({ reset: false, passwords: PASSWORDS, today: TODAY });
+    const stored = await Tour.find().lean();
+    for (const record of seedTourRecords()) {
+      const tour = stored.find((entry) => entry.slug === record.slug);
+      expect(tour?.startDates.map((day) => toIstDay(day))).toEqual(
+        record.startDates,
+      );
+    }
+  });
+
+  it('[D10] with --today 2027-12-01 stores only the passed Golden Triangle dates rolled, ascending, with the Friday rule applied', async () => {
+    await runSeed({ reset: false, passwords: PASSWORDS, today: '2027-12-01' });
+    const goldenTriangle = await Tour.findOne({
+      slug: 'golden-triangle-heritage',
+    }).lean();
+    expect(goldenTriangle?.startDates.map((day) => toIstDay(day))).toEqual([
+      '2028-01-30',
+      '2028-03-06',
+      '2028-11-27',
+    ]);
+  });
+
+  it('[D10] bookings and reviews never move: each startDate and createdAt equals the seed value after a roll', async () => {
+    await runSeed({ reset: false, passwords: PASSWORDS, today: '2027-12-01' });
+    for (const record of seedBookingRecords()) {
+      const stored = await Booking.findById(record._id).lean();
+      expect(toIstDay(stored?.startDate ?? new Date(0))).toBe(record.startDate);
+      expect(stored?.createdAt).toEqual(new Date(record.createdAt));
+    }
+    for (const record of seedReviewRecords()) {
+      const stored = await Review.findById(record._id).lean();
+      expect(stored?.createdAt).toEqual(new Date(record.createdAt));
+    }
   });
 });

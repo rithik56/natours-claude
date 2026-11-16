@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import bcrypt from 'bcryptjs';
 import { Types } from 'mongoose';
-import { fromIstDay } from '@/lib/ist';
+import { fromIstDay, type IstDay } from '@/lib/ist';
 import { getConfig } from '@/server/config';
 import { connectDb } from '@/server/db';
 import { getDeps } from '@/server/deps';
@@ -10,6 +10,7 @@ import { Booking } from '@/server/modules/bookings/model';
 import { Review } from '@/server/modules/reviews/model';
 import { Tour } from '@/server/modules/tours/model';
 import { User } from '@/server/modules/users/model';
+import { rollStartDates } from './dates';
 import {
   listSeedPhotos,
   PHOTO_KEY_PREFIX,
@@ -122,9 +123,15 @@ async function resetSeed(): Promise<void> {
 }
 
 // Create when missing, otherwise set the desired fields and save only when something changed.
-async function loadTours(): Promise<void> {
+// ADR 0023: only the start dates that have passed by `today` move, by whole years, and the Golden
+// Triangle Friday rule applies after the roll. Bookings and reviews are never rolled.
+async function loadTours(today: IstDay): Promise<void> {
   for (const [index, record] of seedTourRecords().entries()) {
-    const desired = toTourDocument(record, index);
+    const rolled = {
+      ...record,
+      startDates: rollStartDates(record.startDates, today, record.slug),
+    };
+    const desired = toTourDocument(rolled, index);
     const existing = await Tour.findById(desired._id);
     if (existing === null) {
       await Tour.create(desired);
@@ -207,9 +214,11 @@ async function loadBookings(): Promise<void> {
 export async function runSeed({
   reset,
   passwords,
+  today,
 }: {
   reset: boolean;
   passwords: SeedPasswords;
+  today: IstDay;
 }): Promise<SeedCounts> {
   assertSeedAllowed({ appEnv: getConfig().APP_ENV, reset });
   await connectDb();
@@ -222,7 +231,7 @@ export async function runSeed({
   ]);
   if (reset) await resetSeed();
   await uploadPhotos();
-  await loadTours();
+  await loadTours(today);
   await loadUsers(passwords);
   await loadReviews();
   await loadBookings();

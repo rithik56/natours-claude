@@ -1,25 +1,30 @@
 import { pathToFileURL } from 'node:url';
-import { fromIstDay } from '@/lib/ist';
+import { fromIstDay, type IstDay, toIstDay } from '@/lib/ist';
+import { now } from '@/server/clock';
 import { getConfig } from '@/server/config';
 import { disconnectDb } from '@/server/db';
 import { assertSeedAllowed, readSeedPasswords, runSeed } from './seed/run';
 
-export type SeedArgs = { reset: boolean; today: string | undefined };
+export type SeedArgs = { reset: boolean; today: IstDay | undefined };
 
 /**
- * Reads the seed flags. `--reset` wipes the seed data first, and `--today=YYYY-MM-DD` is a real
- * calendar day (it is wired into the date roll in a later plan). Any other argument is an error.
+ * Reads the seed flags. `--reset` wipes the seed data first. `--today=YYYY-MM-DD` pins the day the
+ * date roll measures against (ADR 0023); it must be a real calendar day. Any other argument is an error.
  */
 export function parseSeedArgs(argv: readonly string[]): SeedArgs {
   let reset = false;
-  let today: string | undefined;
+  let today: IstDay | undefined;
   for (const arg of argv) {
     if (arg === '--reset') {
       reset = true;
     } else if (arg.startsWith('--today=')) {
-      today = arg.slice('--today='.length);
-      // Throws RangeError unless the value is a real YYYY-MM-DD day.
-      fromIstDay(today);
+      const value = arg.slice('--today='.length);
+      try {
+        fromIstDay(value);
+      } catch {
+        throw new Error(`--today must be a real YYYY-MM-DD day, not "${value}"`);
+      }
+      today = value;
     } else {
       throw new Error(`unknown argument ${arg}`);
     }
@@ -43,8 +48,10 @@ async function main(): Promise<void> {
   // SEC-16 and SEC-27: both checks run before any connection is opened.
   assertSeedAllowed({ appEnv: config.APP_ENV, reset: args.reset });
   const passwords = readSeedPasswords(config);
+  // Without --today the roll measures against the one clock, so APP_NOW pins it too (ADR 0023).
+  const today = args.today ?? toIstDay(now());
   try {
-    const counts = await runSeed({ reset: args.reset, passwords });
+    const counts = await runSeed({ reset: args.reset, passwords, today });
     process.stdout.write(
       `seed: ${counts.tours} tours, ${counts.users} users, ${counts.reviews} reviews, ${counts.bookings} bookings, ${counts.photos} photos\n`,
     );
