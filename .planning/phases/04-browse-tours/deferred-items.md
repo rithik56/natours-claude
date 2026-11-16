@@ -11,3 +11,6 @@
 
 - The site header shifts the page on every route at 375px, so the cumulative layout shift is 0.139 on `/`, on `/styleguide` and on `/tour/ladakh-high-passes` alike. The shift is the header's height changing once it hydrates (its `main` moves up 134px and the brand and an SVG appear), and it happens with no streamed content on the page. It was measured, not fixed, in plan 04-07 (Task 3), because the header belongs to phase 3's shell. The 375px tour-page CLS check in `test/app/tour-page.spec.ts` is `test.fixme` until the header is stable (for example, reserve its height in the server markup). The 1280px check passes (under 0.1).
   status: open
+
+- `CreditPhoto` is exported from `src/server/modules/tours/dto.ts` (line 84) but nothing imports it, so `npx knip --no-progress` reports it and the CI checks job would fail on it. It is already on the base commit 04bda8b, and it is outside plan 04-11's files, so it was left alone. The same fix as `TourPhotoCredit` applies: drop the export keyword in a later plan that touches `dto.ts`. Found during plan 04-11 (Task 3, knip check).
+  status: open
