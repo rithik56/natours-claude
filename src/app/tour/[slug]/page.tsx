@@ -156,6 +156,8 @@ export default async function TourPage({
               alt={cover?.alt ?? tour.name}
               fill
               preload
+              // U7, C2: the cover is the page's one preloaded image, fetched at high priority as on `/`.
+              fetchPriority="high"
               sizes="(min-width: 64em) 70rem, 100vw"
               className={styles.image}
             />

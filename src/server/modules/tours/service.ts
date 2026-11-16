@@ -84,6 +84,18 @@ export async function monthOptions(): Promise<string[]> {
 }
 
 /**
+ * Every catalogue slug, in name order, for the sitemap (R10). Read from the cached
+ * catalogue, so the sitemap adds no database read of its own.
+ *
+ * @returns The slugs; an empty array when the catalogue is empty.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function listSlugs(): Promise<string[]> {
+  const catalogue = await readCatalogue();
+  return catalogue.map((tour) => tour.slug);
+}
+
+/**
  * Reads every tour's photos and credits for `/credits`, in seed order: createdAt
  * ascending, then id (U27). Only the fields the credits need are read.
  *

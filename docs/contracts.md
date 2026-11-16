@@ -1531,3 +1531,41 @@ Cache keys and tags:
 | Booking state | none: never cached (R5) | none | `findUpcomingPaid` |
 
 Decided (ADR 0039, 16 Nov 2026): the three sections are awaited, not streamed, so with JavaScript off the booking panel, the guides and the reviews show their real content. The no-JavaScript checks in `test/app/tour-page.spec.ts` are plain tests.
+
+### Credits, sitemap and robots (plan 04-10, ADR 0040)
+
+```ts
+// src/server/modules/tours/dto.ts (server-only)
+export type CreditPhoto = {
+  key: string; // the storage key, for example tours/ladakh-high-passes-cover.jpg
+  title: string;
+  sourceUrl: string; // the photo's page on Wikimedia Commons
+  author: string;
+  license: string;
+  licenseUrl: string;
+};
+export type CreditGroup = { name: string; slug: string; photos: CreditPhoto[] };
+export function toCreditGroup(tour): CreditGroup | null; // null when no photo has a credit
+
+// src/server/modules/tours/service.ts (server-only)
+export function listCredits(): Promise<CreditGroup[]>;
+export function listSlugs(): Promise<string[]>;
+
+// src/app/sitemap.ts and src/app/robots.ts
+export const dynamic = 'force-dynamic';
+```
+
+- `listCredits()` gives one group per catalogue tour, ordered by `createdAt` then id (the seed order). In each group the cover's credit comes first, then the gallery in `images` order. A photo with no credit is left out, and a tour with no credited photo has no group, so `/credits` never shows an empty group (U27).
+- `listSlugs()` gives every catalogue slug in name order, from the cached catalogue, so it adds no database read.
+- `/credits` (D-10) is a Server Component with no client JavaScript and no preloaded image. It has no `loading.tsx`, so it is sent whole and works with JavaScript off (ADR 0040). Its metadata: title "Photo credits", description "Author, licence and source for every photo on Natours.", canonical `${APP_URL}/credits`.
+- `GET /sitemap.xml` lists `${APP_URL}/`, `${APP_URL}/credits`, then `${APP_URL}/tour/<slug>` for every catalogue tour in name order. With no tours it lists only the first two. No entry has `lastModified`.
+- `GET /robots.txt` has one rule for `*` that disallows `/me`, `/my-tours` and `/styleguide`, and names `${APP_URL}/sitemap.xml`.
+- Both files are `force-dynamic`, so `next build` needs no database or environment (ARC-07). Every absolute URL comes from `getConfig().appOrigin`, never from the request (SEC-12). `npm run smoke` checks both on the built app.
+- Preloading (U7): one image per page has `fetchpriority="high"`, the first list row on `/` and the cover on a tour page. `/credits` has none; its 52 thumbnails are lazy.
+
+| Read | Key | Tag | Built by |
+|------|-----|-----|----------|
+| Photo credits of every catalogue tour | `['credits']` | `tours` | `listCredits` |
+| Catalogue slugs | the catalogue entry, `['catalogue']` | `tours` | `listSlugs` |
+
+Any tour write clears `tours`, so the credits are rebuilt with the catalogue. The credits entry has no `revalidate`; after `npm run seed`, restart the server, as for the catalogue.

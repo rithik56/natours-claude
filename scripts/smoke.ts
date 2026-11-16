@@ -202,7 +202,31 @@ async function checkTourPages(): Promise<void> {
   process.stdout.write('smoke: /tour/valley-of-flowers-trek answered 200\n');
 }
 
-/** A start with the inherited environment must serve the home page, /readyz, a seeded photo and tour pages. */
+/** GET path must answer 200 with a body that contains the expected text. */
+async function requireText(path: string, expected: string): Promise<void> {
+  const response = await fetch(`${ORIGIN}${path}`);
+  const body = await response.text();
+  if (response.status !== 200) {
+    throw new Error(
+      `GET ${path} answered ${String(response.status)}, expected 200`,
+    );
+  }
+  if (!body.includes(expected)) {
+    throw new Error(`GET ${path} does not contain ${expected}`);
+  }
+  process.stdout.write(`smoke: ${path} answered 200 with ${expected}\n`);
+}
+
+/**
+ * R10, ARC-07: the sitemap and robots are rendered per request on the built app, so they read
+ * the database and APP_URL at run time. The seed must be loaded first.
+ */
+async function checkSearchFiles(): Promise<void> {
+  await requireText('/sitemap.xml', '/tour/valley-of-flowers-trek');
+  await requireText('/robots.txt', 'Disallow: /me');
+}
+
+/** A start with the inherited environment must serve the home page, /readyz, a seeded photo, tour pages, the sitemap and robots. */
 async function checkServesGoodEnv(): Promise<void> {
   const app = startApp({ ...process.env });
   try {
@@ -218,6 +242,7 @@ async function checkServesGoodEnv(): Promise<void> {
     await checkProbeHeaders();
     await checkSeededPhoto();
     await checkTourPages();
+    await checkSearchFiles();
   } finally {
     await stopApp(app);
   }
