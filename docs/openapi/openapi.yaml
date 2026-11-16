@@ -130,6 +130,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+  /tours/top-5-cheap:
+    get:
+      operationId: getTop5Cheap
+      summary: The five cheapest tours, in ascending price.
+      description: >-
+        An alias that goes through the same query as GET /tours (B2): sorted by
+        price, then by rating descending, then name and id, limited to five. It
+        takes no parameters; any query parameter is a 400 VALIDATION_ERROR. With
+        fewer than five tours it returns all of them, and with none it returns
+        an empty list with a total of 0.
+      responses:
+        '200':
+          description: Up to five tours, with the page, limit and total.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TourListEnvelope'
+        '400':
+          description: The query carried a parameter; this route takes none.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                status: fail
+                error:
+                  code: VALIDATION_ERROR
+                  message: The query is not valid.
+                  requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a114
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
 components:
   parameters:
     tourId:
