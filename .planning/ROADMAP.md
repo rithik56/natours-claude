@@ -148,7 +148,41 @@ Plans:
   5. API clients can list tours with filters, `month`, `sort`, `fields` and pagination (`meta.total`), call `top-5-cheap`, `stats`, and the geo endpoints that return real documents for range-checked coordinates, and guides, lead guides and admins can read the monthly plan. Admins and lead guides can create, update and delete tours (409 if the tour has bookings, otherwise its reviews go too) and replace any subset of images through the separate images endpoint, while a JSON `PATCH` can never touch images or rating fields. Oversized or wrong-type uploads get 413 or 415, and every failure uses the standard error body. (F1, F2, F6, B2, B3, B4, S4, S16)
 **Review findings:** ARC-03, ARC-04, ARC-06, ARC-07, ARC-08, ARC-10, ARC-14, ARC-15, ARC-18, ARC-20 (m), DEL-16, DEL-27 (m), DES-02, DES-03, DES-04, DES-05, DES-06, DES-07, DES-11, DES-15 (m), DES-16 (m), DES-17 (m), DES-18 (m), DES-22 (m), QA-02, QA-03, QA-04, QA-06, QA-07, QA-08, QA-10, QA-11, QA-13 (m), QA-17, QA-18, QA-20, QA-21, SEC-05, SEC-07, SEC-12, SEC-16, SEC-17, SEC-19, SEC-24 (m), SEC-27 (m)
 **Carry-over findings:** ARC-02, QA-12 (cache design for R5, which closes in Phase 6; PROJECT.md Key Decisions says to settle it while planning this phase)
-**Plans:** TBD
+**Plans:** 13 plans in 10 waves
+
+Plans:
+**Wave 1**
+- [ ] 04-01-PLAN.md — Content gate: alt text end to end (D-15), all new copy, 52 alt texts, author fixes and mapshaper legitimacy, approved in one stop
+
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 04-02-PLAN.md — `npm run seed` loads the catalogue and uploads photos through a disk storage adapter served at `/media` (ADR 0029)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+- [ ] 04-03-PLAN.md — Seed `--today` date roll, README rule checks, seeding in CI and the Playwright app project (ADR 0030)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+- [ ] 04-04-PLAN.md — One cached catalogue feeds `/` and GET /api/v1/tours; allowlisted filters, sort, fields, paging (ADR 0031)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+- [ ] 04-05-PLAN.md — Filter form, count, empty state and pagination on `/`, JavaScript off
+- [ ] 04-06-PLAN.md — Tour page with real 404, static route and itinerary, gallery, credits, metadata; GET /api/v1/tours/[id] (ADR 0032)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+- [ ] 04-07-PLAN.md — Streamed booking panel, guides and paginated reviews; no pinned bar (ADR 0033)
+
+**Wave 7** *(blocked on Wave 6 completion)*
+- [ ] 04-08-PLAN.md — Lazy Leaflet route map with the Survey of India boundary; user picks the simplification (ADRs 0034, 0035)
+- [ ] 04-10-PLAN.md — `/credits`, sitemap, robots and metadata on every page
+
+**Wave 8** *(blocked on Wave 7 completion)*
+- [ ] 04-09-PLAN.md — Tour page JavaScript budget including the lazy map; apply the boundary choice
+- [ ] 04-11-PLAN.md — top-5-cheap, stats, monthly plan and geo endpoints
+
+**Wave 9** *(blocked on Wave 8 completion)*
+- [ ] 04-12-PLAN.md — Admin JSON create, update, delete; optional cover hidden until added (ADRs 0036, 0037)
+
+**Wave 10** *(blocked on Wave 9 completion)*
+- [ ] 04-13-PLAN.md — Images endpoint: multipart with byte limits, sharp re-encode, slots by position with credits (ADR 0038)
 **UI hint**: yes
 
 ### Phase 5: Accounts

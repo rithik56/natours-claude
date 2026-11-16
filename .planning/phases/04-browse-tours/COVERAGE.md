@@ -1,0 +1,1 @@
+No external API integration: Phase 4 builds its own public REST API (/api/v1/tours) and uses Leaflet as a bundled library with a self-served boundary file (ADR 0028, no tile host); the only outside data, the datameet india-soi.geojson, is downloaded once and committed, and no third-party API or SDK is called at runtime.
