@@ -329,7 +329,7 @@ const HTTPS_URL = z
  * One photo's credit as an upload sends it (U27, D-15): the title, author, licence and both links
  * are required, and `alt` is optional. The links must be https. Strict, so no other key is stored.
  */
-export const photoCreditInputSchema = z.strictObject({
+const photoCreditInputSchema = z.strictObject({
   title: z.string().trim().min(1),
   author: z.string().trim().min(1),
   license: z.string().trim().min(1),
@@ -341,7 +341,7 @@ export const photoCreditInputSchema = z.strictObject({
 export type PhotoCreditInput = z.infer<typeof photoCreditInputSchema>;
 
 /** The JSON `credits` part of an images upload (S16, D-14): one credit per uploaded file, in order. */
-export const imageCreditsSchema = z.strictObject({
+const imageCreditsSchema = z.strictObject({
   imageCover: photoCreditInputSchema.optional(),
   images: z.array(photoCreditInputSchema).optional(),
 });

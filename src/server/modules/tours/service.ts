@@ -30,7 +30,12 @@ import {
   type TourDetail,
   type TourSummary,
 } from './dto';
-import type { ImagesInput, TourCreateInput, TourUpdateInput } from './schemas';
+import type {
+  ImagesInput,
+  PhotoCreditInput,
+  TourCreateInput,
+  TourUpdateInput,
+} from './schemas';
 import { Tour, type TourDoc, type TourFields } from './model';
 
 type TourRecord = TourFields & { _id: Types.ObjectId };
@@ -609,6 +614,16 @@ export async function deleteTour(id: string): Promise<void> {
   );
 }
 
+/** One stored photo credit (U27), as the model keeps it. */
+type PhotoCredit = TourFields['photoCredits'][number];
+
+/** A 400 for a photo that arrived without its credit (U27). */
+function creditMissing(path: string): AppError {
+  return new AppError('VALIDATION_ERROR', undefined, [
+    { path, message: messages.tours.creditMissing },
+  ]);
+}
+
 /**
  * Replaces a tour's photos from an upload (S16, B4, D-13, D-14). Each file is checked and
  * re-encoded before anything is stored, stored under a random key, and given its credit. The
@@ -636,37 +651,87 @@ export async function replaceImages(
   }
   if (!doc) throw new AppError('NOT_FOUND');
 
+  // The route checks the credits too; the service repeats it so that U27 holds for any caller.
+  if (input.cover && !input.credits.cover)
+    throw creditMissing('credits.imageCover');
+  if (input.gallery.length > input.credits.gallery.length) {
+    throw creditMissing('credits.images');
+  }
+
+  // Every file is checked and re-encoded before anything is stored, so one refused file stores nothing.
+  const coverWebp = input.cover
+    ? await normalize(input.cover, 'tour')
+    : undefined;
+  const galleryWebp: Buffer[] = [];
+  for (const bytes of input.gallery) {
+    galleryWebp.push(await normalize(bytes, 'tour'));
+  }
+
   const storage = getDeps().storage;
   const stored: string[] = [];
   const replaced: string[] = [];
+  // Credits of the keys this upload added, by key. Kept keys keep their stored credit.
+  const added = new Map<string, PhotoCreditInput>();
 
-  if (input.cover) {
-    const credit = input.credits.cover;
-    if (!credit) {
-      throw new AppError('VALIDATION_ERROR', undefined, [
-        { path: 'credits.imageCover', message: messages.tours.creditMissing },
-      ]);
-    }
-    const webp = await normalize(input.cover, 'tour');
+  const store = async (webp: Buffer): Promise<string> => {
     const key = randomImageKey('tours');
     await storage.put(key, webp, 'image/webp');
     stored.push(key);
-    if (doc.imageCover) replaced.push(doc.imageCover);
-    doc.set({
-      imageCover: key,
-      photoCredits: doc.photoCredits
-        .filter((entry) => !replaced.includes(entry.file))
-        .concat({ ...credit, file: key }),
-    });
-  }
+    return key;
+  };
 
+  // Once a file is stored, any failure before the save removes what this request stored.
   try {
+    let cover = doc.imageCover;
+    if (coverWebp && input.credits.cover) {
+      const key = await store(coverWebp);
+      if (cover) replaced.push(cover);
+      cover = key;
+      added.set(key, input.credits.cover);
+    }
+
+    // Gallery file n replaces slot n; a slot past the current end is appended (D-14).
+    const images = [...doc.images];
+    for (const [slot, webp] of galleryWebp.entries()) {
+      const credit = input.credits.gallery[slot];
+      if (!credit) throw creditMissing('credits.images');
+      const key = await store(webp);
+      const previous = images[slot];
+      if (previous !== undefined) {
+        replaced.push(previous);
+        images[slot] = key;
+      } else {
+        images.push(key);
+      }
+      added.set(key, credit);
+    }
+
+    // The cover first, then the gallery in order. Each key gets exactly one credit and no other
+    // credit is kept, so no credit names a photo the tour no longer has (U27).
+    const finalKeys = [cover, ...images].filter(
+      (key): key is string => key !== undefined,
+    );
+    const credits = new Map<string, PhotoCredit>();
+    for (const credit of doc.toObject().photoCredits) {
+      if (finalKeys.includes(credit.file) && !credits.has(credit.file)) {
+        credits.set(credit.file, credit);
+      }
+    }
+    for (const [key, credit] of added) {
+      credits.set(key, { ...credit, file: key });
+    }
+    doc.set({
+      imageCover: cover,
+      images,
+      photoCredits: finalKeys.flatMap((key) => credits.get(key) ?? []),
+    });
+
     await doc.save();
   } catch (error) {
     await removePhotos(
       id,
       stored,
-      'stored upload not deleted after its save failed',
+      'stored upload not deleted after the upload failed',
     );
     throw writeFailure(error);
   }
