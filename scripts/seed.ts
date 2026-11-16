@@ -1,7 +1,8 @@
 import { pathToFileURL } from 'node:url';
 import { fromIstDay } from '@/lib/ist';
+import { getConfig } from '@/server/config';
 import { disconnectDb } from '@/server/db';
-import { runSeed } from './seed/run';
+import { assertSeedAllowed, readSeedPasswords, runSeed } from './seed/run';
 
 export type SeedArgs = { reset: boolean; today: string | undefined };
 
@@ -38,9 +39,15 @@ function loadLocalEnv(): void {
 async function main(): Promise<void> {
   loadLocalEnv();
   const args = parseSeedArgs(process.argv.slice(2));
+  const config = getConfig();
+  // SEC-16 and SEC-27: both checks run before any connection is opened.
+  assertSeedAllowed({ appEnv: config.APP_ENV, reset: args.reset });
+  const passwords = readSeedPasswords(config);
   try {
-    await runSeed({ reset: args.reset });
-    process.stdout.write('seed: done\n');
+    const counts = await runSeed({ reset: args.reset, passwords });
+    process.stdout.write(
+      `seed: ${counts.tours} tours, ${counts.users} users, ${counts.reviews} reviews, ${counts.bookings} bookings, ${counts.photos} photos\n`,
+    );
   } finally {
     await disconnectDb();
   }

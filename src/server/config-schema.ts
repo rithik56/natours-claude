@@ -75,6 +75,8 @@ const configSchema = z
       })
       .optional(),
     STORAGE_DIR: z.string(required('must be a string')).default('.storage'),
+    SEED_USER_PASSWORD: z.string(required('must be a string')).optional(),
+    SEED_ADMIN_PASSWORD: z.string(required('must be a string')).optional(),
   })
   .superRefine((config, ctx) => {
     const productionLike =

@@ -84,9 +84,9 @@ describe('assertSeedAllowed', () => {
   );
 
   it('[D10] (SEC-16) refuses --reset in staging', () => {
-    expect(() =>
-      assertSeedAllowed({ appEnv: 'staging', reset: true }),
-    ).toThrow(/--reset/);
+    expect(() => assertSeedAllowed({ appEnv: 'staging', reset: true })).toThrow(
+      /--reset/,
+    );
   });
 });
 
