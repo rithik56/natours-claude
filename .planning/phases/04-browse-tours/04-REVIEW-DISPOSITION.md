@@ -9,7 +9,7 @@ findings:
     title: "Tour write routes never answer the CORS preflight"
   - id: WR-01
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Non-Latin tour names produce an empty slug, and the second one collides"
   - id: WR-02
     severity: warning
@@ -25,7 +25,7 @@ findings:
     title: "The rate limit runs after the full upload is read and parsed"
   - id: WR-05
     severity: warning
-    disposition: open
+    disposition: fixed
     title: "Tour write schemas accept duplicate stop days and duplicate or unbounded guides"
   - id: IN-01
     severity: info
@@ -51,9 +51,9 @@ findings:
     severity: info
     disposition: open
     title: "GitHub Actions are pinned to major tags, not commit SHAs"
-open: 8
+open: 6
 total: 12
-recorded: 2026-11-16T17:12:53.353Z
+recorded: 2026-11-16T17:13:06.558Z
 ---
 
 # Phase 04: Code Review Disposition
@@ -61,11 +61,11 @@ recorded: 2026-11-16T17:12:53.353Z
 | Finding | Severity | Disposition | Source |
 |---------|----------|-------------|--------|
 | CR-01 | critical | fixed | 04-REVIEW-FIX.md |
-| WR-01 | warning | open | - |
+| WR-01 | warning | fixed | 04-REVIEW-FIX.md |
 | WR-02 | warning | skipped | 04-REVIEW-FIX.md |
 | WR-03 | warning | skipped | 04-REVIEW-FIX.md |
 | WR-04 | warning | fixed | 04-REVIEW-FIX.md |
-| WR-05 | warning | open | - |
+| WR-05 | warning | fixed | 04-REVIEW-FIX.md |
 | IN-01 | info | open | - |
 | IN-02 | info | open | - |
 | IN-03 | info | open | - |
