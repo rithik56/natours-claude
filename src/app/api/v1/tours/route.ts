@@ -1,3 +1,4 @@
+import { handlePreflight } from '@/server/api/origin';
 import { created, list as respondWithList } from '@/server/api/responses';
 import { withApi } from '@/server/api/with-api';
 import { projectFields } from '@/server/modules/tours/catalogue-query';
@@ -38,3 +39,6 @@ export const POST = withApi(
     body: tourCreateSchema,
   },
 );
+
+// CORS preflight (S10, contracts 2.3): an allowlisted browser origin asks before this JSON POST.
+export const OPTIONS = handlePreflight;

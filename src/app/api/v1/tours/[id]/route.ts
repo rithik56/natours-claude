@@ -1,3 +1,4 @@
+import { handlePreflight } from '@/server/api/origin';
 import { noContent, ok } from '@/server/api/responses';
 import { withApi } from '@/server/api/with-api';
 import { tourUpdateSchema } from '@/server/modules/tours/schemas';
@@ -50,3 +51,6 @@ export const DELETE = withApi(
     query: z.strictObject({}),
   },
 );
+
+// CORS preflight (S10, contracts 2.3): an allowlisted browser origin asks before PATCH and DELETE.
+export const OPTIONS = handlePreflight;

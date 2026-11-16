@@ -1,3 +1,4 @@
+import { handlePreflight } from '@/server/api/origin';
 import { ok } from '@/server/api/responses';
 import { withApi } from '@/server/api/with-api';
 import { parseImagesForm } from '@/server/modules/tours/schemas';
@@ -32,3 +33,6 @@ export const PUT = withApi(
     },
   },
 );
+
+// CORS preflight (S10, contracts 2.3): an allowlisted browser origin asks before this multipart PUT.
+export const OPTIONS = handlePreflight;
