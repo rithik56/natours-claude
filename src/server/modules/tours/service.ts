@@ -15,8 +15,10 @@ import {
   type TourListResult,
 } from './catalogue-query';
 import {
+  toCreditGroup,
   toTourDetail,
   toTourSummary,
+  type CreditGroup,
   type TourDetail,
   type TourSummary,
 } from './dto';
@@ -79,6 +81,42 @@ export async function list(query: CatalogueQuery): Promise<TourListResult> {
 export async function monthOptions(): Promise<string[]> {
   const catalogue = await readCatalogue();
   return monthOptionsFrom(catalogue, toIstDay(now()));
+}
+
+/**
+ * Reads every tour's photos and credits for `/credits`, in seed order: createdAt
+ * ascending, then id (U27). Only the fields the credits need are read.
+ *
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+async function loadCredits(): Promise<CreditGroup[]> {
+  await connectDb();
+  try {
+    const records = await Tour.find()
+      .sort({ createdAt: 1, _id: 1 })
+      .select({ name: 1, slug: 1, imageCover: 1, images: 1, photoCredits: 1 })
+      .lean<TourRecord[]>();
+    return records.flatMap((record) => toCreditGroup(record) ?? []);
+  } catch (error) {
+    if (!isDbUnavailableError(error)) throw error;
+    const unavailable = new AppError('SERVICE_UNAVAILABLE');
+    unavailable.cause = error;
+    throw unavailable;
+  }
+}
+
+/**
+ * Lists the photo credits for `/credits` (U27, D-10): one group per catalogue
+ * tour, in createdAt then id order, each with the cover's credit first and then
+ * the gallery in `images` order. A tour with no credited photo has no group.
+ * Cached under `['credits']` with the `tours` tag, so any tour write clears it
+ * along with the catalogue (ADR 0031).
+ *
+ * @returns The credit groups; an empty array when the catalogue is empty.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function listCredits(): Promise<CreditGroup[]> {
+  return getDeps().cache.cached(loadCredits, ['credits'], ['tours'])();
 }
 
 /**

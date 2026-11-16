@@ -23,7 +23,10 @@ type StoredTour = {
 };
 
 /** The keys a tour's photos have in the database: the storage prefix `tours/` (QA-03). */
-function storedKeysOf(tour: { imageCover: string; images: string[] }): string[] {
+function storedKeysOf(tour: {
+  imageCover: string;
+  images: string[];
+}): string[] {
   return [tour.imageCover, ...tour.images].map((file) => `tours/${file}`);
 }
 
@@ -81,7 +84,9 @@ describe('photo credits (U27)', () => {
     const groups = await listCredits();
 
     for (const group of groups) {
-      const record = seedTourCredits().find((tour) => tour.name === group.name)!;
+      const record = seedTourCredits().find(
+        (tour) => tour.name === group.name,
+      )!;
       expect(
         group.photos.map((photo) => photo.key),
         group.name,
@@ -151,20 +156,26 @@ describe('photo credits (U27)', () => {
     const records = await Tour.find().lean<StoredTour[]>();
     const groups = await listCredits();
 
+    // Stored keys already carry the tours/ prefix, so they compare as they are.
     for (const record of records) {
       const photos = [record.imageCover, ...record.images];
       for (const file of photos) {
         expect(
-          record.photoCredits.filter((credit) => credit.file === `tours/${file}`)
-            .length,
+          record.photoCredits.filter((credit) => credit.file === file).length,
           `${record.name}: ${file}`,
         ).toBe(1);
       }
+      const extra = record.photoCredits
+        .map((credit) => credit.file)
+        .filter((file) => !photos.includes(file));
+      expect(extra, record.name).toEqual([]);
       const group = groups.find((entry) => entry.name === record.name);
-      expect(group?.photos.map((photo) => photo.key).sort(), record.name).toEqual(
-        storedKeysOf(record).sort(),
-      );
+      expect(
+        group?.photos.map((photo) => photo.key),
+        record.name,
+      ).toEqual(photos);
     }
+    expect(groups).toHaveLength(records.length);
   });
 
   it('[U27] a tour with no credits renders no group', async () => {

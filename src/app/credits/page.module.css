@@ -1,0 +1,21 @@
+@layer components {
+  .page {
+    display: grid;
+    gap: var(--space-6);
+    padding-bottom: var(--space-8);
+  }
+
+  .header {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .heading {
+    margin: 0;
+  }
+
+  .intro {
+    margin: 0;
+    max-width: 65ch;
+  }
+}
