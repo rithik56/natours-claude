@@ -183,6 +183,8 @@ type CreateReviewOptions = {
   tour: TourDoc;
   rating?: number;
   review?: string;
+  /** Sets the review's creation instant, so tests control newest-first order (D-08). */
+  createdAt?: Date;
 };
 
 /**
@@ -204,6 +206,7 @@ export async function createReview(
     user: options.user._id,
     review: options.review ?? record.review,
     rating: options.rating ?? record.rating,
+    ...(options.createdAt !== undefined ? { createdAt: options.createdAt } : {}),
   });
 }
 
