@@ -80,6 +80,54 @@ export type TourDetail = TourSummary & {
   photoCredits: TourPhotoCredit[];
 };
 
+/** One photo's credit on `/credits` (U27). The key is the storage key the photo is served from. */
+export type CreditPhoto = {
+  key: string;
+  title: string;
+  sourceUrl: string;
+  author: string;
+  license: string;
+  licenseUrl: string;
+};
+
+/** One tour's block on `/credits`: its credited photos, the cover first (U27). */
+export type CreditGroup = {
+  name: string;
+  slug: string;
+  photos: CreditPhoto[];
+};
+
+type CreditSource = Pick<
+  TourFields,
+  'name' | 'slug' | 'imageCover' | 'images' | 'photoCredits'
+>;
+
+/**
+ * Maps one tour to its credits: the cover first, then the gallery in `images`
+ * order (U27). A photo with no credit is left out, because it could not be
+ * captioned. A tour with no credited photo gives null, so the page renders no
+ * empty group.
+ */
+export function toCreditGroup(tour: CreditSource): CreditGroup | null {
+  const photos = [tour.imageCover, ...tour.images].flatMap((key) => {
+    const credit = tour.photoCredits.find((entry) => entry.file === key);
+    if (!credit) return [];
+    return [
+      {
+        key,
+        title: credit.title,
+        sourceUrl: credit.sourceUrl,
+        author: credit.author,
+        license: credit.license,
+        licenseUrl: credit.licenseUrl,
+      },
+    ];
+  });
+  return photos.length > 0
+    ? { name: tour.name, slug: tour.slug, photos }
+    : null;
+}
+
 const IMAGE_EXTENSION = /\.(jpe?g|png|webp)$/i;
 
 /**
