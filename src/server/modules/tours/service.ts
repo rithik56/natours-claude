@@ -1,7 +1,7 @@
 import 'server-only';
 import { cache } from 'react';
 import type { Types } from 'mongoose';
-import { toIstDay } from '@/lib/ist';
+import { istMonthBounds, toIstDay } from '@/lib/ist';
 import { now } from '@/server/clock';
 import { connectDb, isDbUnavailableError } from '@/server/db';
 import { getDeps } from '@/server/deps';
@@ -11,7 +11,9 @@ import { findActivePublicByIds } from '@/server/modules/users/service';
 import {
   applyCatalogueQuery,
   monthOptionsFrom,
+  statsFrom,
   type CatalogueQuery,
+  type DifficultyStats,
   type TourListResult,
 } from './catalogue-query';
 import {
@@ -93,6 +95,168 @@ export async function monthOptions(): Promise<string[]> {
 export async function listSlugs(): Promise<string[]> {
   const catalogue = await readCatalogue();
   return catalogue.map((tour) => tour.slug);
+}
+
+/**
+ * The tour statistics for GET /api/v1/tours/stats (F1): one row per difficulty.
+ * Computed in memory from the cached catalogue, so the stats always agree with the
+ * list and need no cache entry of their own (ADR 0031).
+ *
+ * @returns The rows for the difficulties present, easy, medium, difficult.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function getStats(): Promise<DifficultyStats[]> {
+  return statsFrom(await readCatalogue());
+}
+
+/** One month of the monthly plan (F2). */
+export type MonthlyPlanMonth = {
+  /** 1 for January to 12 for December, in IST. */
+  month: number;
+  /** Every start date of the year that falls in this month, one per departure. */
+  numTourStarts: number;
+  /** The distinct names of the tours that start in this month, sorted. */
+  tours: string[];
+};
+
+/**
+ * The year's tour starts grouped by IST month for GET /api/v1/tours/monthly-plan/[year]
+ * (F2). Every start date that falls in the calendar year counts, and months are cut in
+ * Asia/Kolkata, so 1 January 00:00 IST is in January (QA-10). The result is not cached,
+ * because its year comes from the URL (T-04-17).
+ *
+ * @param year - The four-digit year, already range-checked by the route (2000 to 2100).
+ * @returns The months that have a start, in month order.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function getMonthlyPlan(
+  year: number,
+): Promise<MonthlyPlanMonth[]> {
+  const { start } = istMonthBounds(`${year}-01`);
+  const { end } = istMonthBounds(`${year}-12`);
+  await connectDb();
+  try {
+    const rows = await Tour.aggregate<{
+      _id: number;
+      numTourStarts: number;
+      tours: string[];
+    }>([
+      { $unwind: '$startDates' },
+      { $match: { startDates: { $gte: start, $lt: end } } },
+      {
+        $group: {
+          _id: { $month: { date: '$startDates', timezone: 'Asia/Kolkata' } },
+          numTourStarts: { $sum: 1 },
+          tours: { $addToSet: '$name' },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    return rows.map((row) => ({
+      month: row._id,
+      numTourStarts: row.numTourStarts,
+      tours: [...row.tours].sort(),
+    }));
+  } catch (error) {
+    if (!isDbUnavailableError(error)) throw error;
+    const unavailable = new AppError('SERVICE_UNAVAILABLE');
+    unavailable.cause = error;
+    throw unavailable;
+  }
+}
+
+/** A point in the API's order: latitude and longitude, already range-checked by the route. */
+export type GeoPoint = { lat: number; lng: number };
+
+/** The radius of the Earth in each unit, so a distance becomes radians for $centerSphere (B3). */
+const EARTH_RADIUS: Record<'mi' | 'km', number> = { mi: 3963.2, km: 6378.1 };
+
+/** Metres to each unit, for $geoNear's distanceMultiplier (B3). */
+const METRES_TO: Record<'mi' | 'km', number> = {
+  mi: 0.000621371,
+  km: 0.001,
+};
+
+/**
+ * The tours whose start location lies inside a circle around a point (B3), as
+ * summaries, by name. Not cached: the point comes from the URL (T-04-17). MongoDB
+ * wants longitude first, so the point is passed as [lng, lat].
+ *
+ * @param input - The point, the radius and its unit (mi or km).
+ * @returns The tours inside the radius; an empty array when none is.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function toursWithin(
+  input: GeoPoint & { distance: number; unit: 'mi' | 'km' },
+): Promise<TourSummary[]> {
+  const radius = input.distance / EARTH_RADIUS[input.unit];
+  await connectDb();
+  try {
+    const records = await Tour.find({
+      startLocation: {
+        $geoWithin: { $centerSphere: [[input.lng, input.lat], radius] },
+      },
+    })
+      .sort({ name: 1, _id: 1 })
+      .lean<TourRecord[]>();
+    return records.map(toTourSummary);
+  } catch (error) {
+    if (!isDbUnavailableError(error)) throw error;
+    const unavailable = new AppError('SERVICE_UNAVAILABLE');
+    unavailable.cause = error;
+    throw unavailable;
+  }
+}
+
+/** One tour and its distance from a point (B3). */
+export type TourDistance = {
+  id: string;
+  name: string;
+  slug: string;
+  /** In the requested unit, rounded to 2 decimal places. */
+  distance: number;
+};
+
+/**
+ * Every tour's distance from a point, nearest first (B3), from a `$geoNear` that is the
+ * first stage of the pipeline and uses the startLocation 2dsphere index. It returns
+ * documents, never a query plan (B3). Not cached, for the same reason as toursWithin.
+ *
+ * @param input - The point and the unit the distances come back in (mi or km).
+ * @returns Every tour, sorted by distance ascending.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function distancesFrom(
+  input: GeoPoint & { unit: 'mi' | 'km' },
+): Promise<TourDistance[]> {
+  await connectDb();
+  try {
+    return await Tour.aggregate<TourDistance>([
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [input.lng, input.lat] },
+          key: 'startLocation',
+          distanceField: 'distance',
+          distanceMultiplier: METRES_TO[input.unit],
+          spherical: true,
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          id: { $toString: '$_id' },
+          name: 1,
+          slug: 1,
+          distance: { $round: ['$distance', 2] },
+        },
+      },
+    ]);
+  } catch (error) {
+    if (!isDbUnavailableError(error)) throw error;
+    const unavailable = new AppError('SERVICE_UNAVAILABLE');
+    unavailable.cause = error;
+    throw unavailable;
+  }
 }
 
 /**

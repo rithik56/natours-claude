@@ -1,12 +1,17 @@
 import { Types } from 'mongoose';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { fromIstDay } from '@/lib/ist';
 import { getDeps } from '@/server/deps';
 import {
+  distancesFrom,
   getById,
   getBySlug,
   getGuides,
+  getMonthlyPlan,
+  getStats,
   list,
   monthOptions,
+  toursWithin,
 } from '@/server/modules/tours/service';
 import { Tour } from '@/server/modules/tours/model';
 import { User } from '@/server/modules/users/model';
@@ -311,6 +316,238 @@ describe('tours service', () => {
 
       expect(unknown).toMatchObject({ code: 'NOT_FOUND' });
       expect(malformed).toMatchObject({ code: 'NOT_FOUND' });
+    });
+  });
+
+  describe('tours service: getStats and getMonthlyPlan (F1, F2)', () => {
+    it('[F1] getStats gives the seed rows, computed from the cached catalogue', async () => {
+      await createWholeCatalogue();
+
+      const rows = await getStats();
+
+      expect(rows.map((row) => row.difficulty)).toEqual([
+        'easy',
+        'medium',
+        'difficult',
+      ]);
+      expect(rows[0]).toEqual({
+        difficulty: 'easy',
+        numTours: 6,
+        numRatings: 24,
+        avgRating: 4.7,
+        avgPrice: 27999,
+        minPrice: 16999,
+        maxPrice: 38999,
+      });
+    });
+
+    it('[F1] two parallel getStats calls return identical rows', async () => {
+      await createWholeCatalogue();
+
+      const [first, second] = await Promise.all([getStats(), getStats()]);
+
+      expect(second).toEqual(first);
+    });
+
+    it('[F2] getMonthlyPlan groups the seed 2027 starts by IST month, in month order', async () => {
+      await createWholeCatalogue();
+
+      const plan = await getMonthlyPlan(2027);
+
+      expect(plan.map((month) => month.month)).toEqual([
+        1, 2, 3, 4, 6, 7, 8, 9, 10,
+      ]);
+      expect(plan.map((month) => month.numTourStarts)).toEqual([
+        6, 5, 4, 4, 2, 3, 2, 2, 1,
+      ]);
+    });
+
+    it('[F2] a 1 January 2027 departure is in January of the 2027 plan, and not in the 2026 plan', async () => {
+      await createTour({
+        slug: 'thar-desert-camel-safari',
+        overrides: { startDates: [fromIstDay('2027-01-01')] },
+      });
+
+      expect(await getMonthlyPlan(2027)).toEqual([
+        { month: 1, numTourStarts: 1, tours: ['Thar Desert Camel Safari'] },
+      ]);
+      expect(await getMonthlyPlan(2026)).toEqual([]);
+    });
+
+    it('[F2] a tour with two starts in one month counts both and lists its name once', async () => {
+      await createTour({
+        slug: 'thar-desert-camel-safari',
+        overrides: {
+          startDates: [fromIstDay('2027-01-03'), fromIstDay('2027-01-20')],
+        },
+      });
+
+      expect(await getMonthlyPlan(2027)).toEqual([
+        { month: 1, numTourStarts: 2, tours: ['Thar Desert Camel Safari'] },
+      ]);
+    });
+
+    it('[F2] two parallel getMonthlyPlan calls return identical plans', async () => {
+      await createWholeCatalogue();
+
+      const [first, second] = await Promise.all([
+        getMonthlyPlan(2027),
+        getMonthlyPlan(2027),
+      ]);
+
+      expect(second).toEqual(first);
+    });
+
+    it('[B10] a failed plan read is refused as SERVICE_UNAVAILABLE, with the driver error as the cause', async () => {
+      const driverError = Object.assign(new Error('connection reset'), {
+        name: 'MongoNetworkError',
+      });
+      vi.spyOn(Tour, 'aggregate').mockImplementation(() => {
+        throw driverError;
+      });
+
+      const error = await getMonthlyPlan(2027).catch(
+        (caught: unknown) => caught,
+      );
+
+      expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+      expect((error as Error).cause).toBe(driverError);
+    });
+  });
+
+  describe('tours service: toursWithin and distancesFrom (B3)', () => {
+    // Connaught Place, Delhi, in the order the API takes them (lat, lng).
+    const DELHI = { lat: 28.6139, lng: 77.209 };
+
+    // The DB-down test replaces Tour.find, which createTour also calls, so restore it after each test.
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('[B3] the startLocation 2dsphere index exists, which $geoNear needs (QA-18)', async () => {
+      const indexes = await Tour.collection.indexes();
+
+      expect(indexes.map((index) => index.key)).toContainEqual({
+        startLocation: '2dsphere',
+      });
+    });
+
+    it('[B3] toursWithin returns the seed tours whose start lies inside 300 km, as summaries, by name', async () => {
+      await createWholeCatalogue();
+
+      const tours = await toursWithin({ ...DELHI, distance: 300, unit: 'km' });
+
+      expect(tours.map((tour) => tour.name)).toEqual([
+        'Golden Triangle Heritage',
+        'Kedarkantha Winter Trek',
+        'Rishikesh Ganga Rafting',
+        'Valley of Flowers Trek',
+      ]);
+      for (const tour of tours) {
+        expect(tour).not.toHaveProperty('guides');
+        expect(tour).toHaveProperty('startDates');
+      }
+    });
+
+    it('[B3] a radius that contains no start location gives []', async () => {
+      await createWholeCatalogue();
+
+      expect(
+        await toursWithin({ lat: 0, lng: 80, distance: 1, unit: 'km' }),
+      ).toEqual([]);
+    });
+
+    it('[B3] toursWithin refuses a failed read as SERVICE_UNAVAILABLE', async () => {
+      const driverError = Object.assign(new Error('connection reset'), {
+        name: 'MongoNetworkError',
+      });
+      vi.spyOn(Tour, 'find').mockImplementation(() => {
+        throw driverError;
+      });
+
+      const error = await toursWithin({
+        ...DELHI,
+        distance: 300,
+        unit: 'km',
+      }).catch((caught: unknown) => caught);
+
+      expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+    });
+
+    it('[B3] distancesFrom gives all 13 tours, nearest first, with Golden Triangle Heritage at about 4.7 km', async () => {
+      await createWholeCatalogue();
+
+      const distances = await distancesFrom({ ...DELHI, unit: 'km' });
+
+      expect(distances).toHaveLength(13);
+      expect(distances[0]?.name).toBe('Golden Triangle Heritage');
+      expect(distances[0]?.distance).toBeCloseTo(4.7, 1);
+      const values = distances.map((entry) => entry.distance);
+      expect(values).toEqual([...values].sort((a, b) => a - b));
+    });
+
+    it('[B3] distancesFrom rounds each distance to 2 decimals and returns only id, name, slug and distance', async () => {
+      await createWholeCatalogue();
+
+      const distances = await distancesFrom({ ...DELHI, unit: 'km' });
+
+      for (const entry of distances) {
+        expect(Math.round(entry.distance * 100) / 100).toBe(entry.distance);
+        expect(Object.keys(entry).sort()).toEqual([
+          'distance',
+          'id',
+          'name',
+          'slug',
+        ]);
+      }
+    });
+
+    it('[B3] distancesFrom in miles converts the kilometre distances', async () => {
+      await createWholeCatalogue();
+
+      const km = await distancesFrom({ ...DELHI, unit: 'km' });
+      const mi = await distancesFrom({ ...DELHI, unit: 'mi' });
+
+      expect(mi[0]?.name).toBe('Golden Triangle Heritage');
+      expect(mi[0]?.distance).toBeCloseTo((km[0]?.distance ?? 0) * 0.621371, 1);
+    });
+
+    it('[B10] distancesFrom refuses a failed read as SERVICE_UNAVAILABLE, with the driver error as the cause', async () => {
+      const driverError = Object.assign(new Error('connection reset'), {
+        name: 'MongoNetworkError',
+      });
+      vi.spyOn(Tour, 'aggregate').mockImplementation(() => {
+        throw driverError;
+      });
+
+      const error = await distancesFrom({ ...DELHI, unit: 'km' }).catch(
+        (caught: unknown) => caught,
+      );
+
+      expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+      expect((error as Error).cause).toBe(driverError);
+    });
+
+    it('[B10] a failed read that is not a database outage is passed on unchanged, so it is not hidden as 503', async () => {
+      const bug = new Error('a bad pipeline stage');
+      vi.spyOn(Tour, 'find').mockImplementation(() => {
+        throw bug;
+      });
+      vi.spyOn(Tour, 'aggregate').mockImplementation(() => {
+        throw bug;
+      });
+
+      const near = await toursWithin({
+        ...DELHI,
+        distance: 300,
+        unit: 'km',
+      }).catch((caught: unknown) => caught);
+      const plan = await getMonthlyPlan(2027).catch(
+        (caught: unknown) => caught,
+      );
+
+      expect(near).toBe(bug);
+      expect(plan).toBe(bug);
     });
   });
 });

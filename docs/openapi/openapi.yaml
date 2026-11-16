@@ -130,6 +130,271 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+  /tours/top-5-cheap:
+    get:
+      operationId: getTop5Cheap
+      summary: The five cheapest tours, in ascending price.
+      description: >-
+        An alias that goes through the same query as GET /tours (B2): sorted by
+        price, then by rating descending, then name and id, limited to five. It
+        takes no parameters; any query parameter is a 400 VALIDATION_ERROR. With
+        fewer than five tours it returns all of them, and with none it returns
+        an empty list with a total of 0.
+      responses:
+        '200':
+          description: Up to five tours, with the page, limit and total.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TourListEnvelope'
+        '400':
+          description: The query carried a parameter; this route takes none.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                status: fail
+                error:
+                  code: VALIDATION_ERROR
+                  message: The query is not valid.
+                  requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a114
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /tours/stats:
+    get:
+      operationId: getTourStats
+      summary: Tour statistics, one row per difficulty.
+      description: >-
+        Public (F1). Computed in memory from the cached catalogue, so it always
+        agrees with the list, and two parallel calls return the same body. Rows
+        come in the order easy, medium, difficult, and only the difficulties
+        that have tours appear. `avgRating` is the mean of the tours' average
+        ratings, to one decimal place. `avgPrice` is the mean price in whole
+        rupees.
+      responses:
+        '200':
+          description: One row per difficulty that has tours.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TourStatsEnvelope'
+        '400':
+          description: The query carried a parameter; this route takes none.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /tours/monthly-plan/{year}:
+    get:
+      operationId: getMonthlyPlan
+      summary: The year's tour starts, grouped by IST month.
+      description: >-
+        For guides, lead guides and admins only (F2). An anonymous caller gets
+        401 UNAUTHENTICATED and a user gets 403 FORBIDDEN. Every start date in
+        the year counts, and months are cut in Asia/Kolkata, so a 1 January
+        departure is in January (QA-10). Months come in order, and only months
+        with a start appear. The plan is not cached.
+      parameters:
+        - name: year
+          in: path
+          required: true
+          description: Four digits, from 2000 to 2100. Anything else is a 400.
+          schema:
+            type: string
+            pattern: '^\d{4}$'
+            example: '2027'
+      responses:
+        '200':
+          description: The plan for the year.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlyPlanEnvelope'
+        '400':
+          description: The year is not four digits from 2000 to 2100, or the query carried a parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '401':
+          description: No one is signed in.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                status: fail
+                error:
+                  code: UNAUTHENTICATED
+                  message: Sign in to continue.
+                  requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a115
+        '403':
+          description: The signed-in user is not a guide, lead guide or admin.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                status: fail
+                error:
+                  code: FORBIDDEN
+                  message: You do not have permission to do that.
+                  requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a116
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /tours/within/{distance}/center/{latlng}/unit/{unit}:
+    get:
+      operationId: getToursWithin
+      summary: The tours whose start lies within a radius of a point.
+      description: >-
+        Public (B3). Returns tour summaries as documents, never a query plan,
+        sorted by name. The point is `lat,lng`: latitude −90 to 90 and longitude
+        −180 to 180, both ends included. The distance is above 0 and at most
+        20000, in the unit. A radius with no start location gives `tours: []`.
+        The response is not paginated.
+      parameters:
+        - name: distance
+          in: path
+          required: true
+          description: A number above 0 and at most 20000, in the unit.
+          schema:
+            type: number
+            exclusiveMinimum: 0
+            maximum: 20000
+            example: 300
+        - name: latlng
+          in: path
+          required: true
+          description: Latitude then longitude, comma separated, such as 28.6139,77.209.
+          schema:
+            type: string
+            example: '28.6139,77.209'
+        - name: unit
+          in: path
+          required: true
+          description: mi for miles or km for kilometres.
+          schema:
+            type: string
+            enum: [mi, km]
+      responses:
+        '200':
+          description: The tours inside the radius, by name.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WithinEnvelope'
+        '400':
+          description: A coordinate, the distance or the unit is out of range or malformed. MongoDB is not queried.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                status: fail
+                error:
+                  code: VALIDATION_ERROR
+                  message: The request is not valid.
+                  requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a117
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /tours/distances/{latlng}/unit/{unit}:
+    get:
+      operationId: getTourDistances
+      summary: Every tour's distance from a point, nearest first.
+      description: >-
+        Public (B3). Each entry is `{ id, name, slug, distance }`, with the
+        distance rounded to 2 decimal places in the unit. The first stage of the
+        query is a $geoNear on the start location, so the result is documents
+        and never a query plan. The response is not paginated.
+      parameters:
+        - name: latlng
+          in: path
+          required: true
+          description: Latitude then longitude, comma separated, such as 28.6139,77.209.
+          schema:
+            type: string
+            example: '28.6139,77.209'
+        - name: unit
+          in: path
+          required: true
+          description: mi for miles or km for kilometres.
+          schema:
+            type: string
+            enum: [mi, km]
+      responses:
+        '200':
+          description: Every tour, nearest first.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DistancesEnvelope'
+        '400':
+          description: A coordinate or the unit is out of range or malformed. MongoDB is not queried.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                status: fail
+                error:
+                  code: VALIDATION_ERROR
+                  message: The request is not valid.
+                  requestId: 0b2f6f46-5a62-4a26-9c2b-61f8c0d7a118
+        '500':
+          description: An unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '503':
+          description: MongoDB cannot be reached (B10).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
 components:
   parameters:
     tourId:
@@ -479,6 +744,142 @@ components:
                 $ref: '#/components/schemas/TourSummary'
         meta:
           $ref: '#/components/schemas/TourListMeta'
+    DifficultyStats:
+      description: One difficulty's figures (F1). Prices are whole rupees.
+      type: object
+      required:
+        [
+          difficulty,
+          numTours,
+          numRatings,
+          avgRating,
+          avgPrice,
+          minPrice,
+          maxPrice,
+        ]
+      properties:
+        difficulty:
+          type: string
+          enum: [easy, medium, difficult]
+        numTours:
+          type: integer
+          example: 6
+        numRatings:
+          type: integer
+          description: The sum of the tours' rating counts.
+          example: 24
+        avgRating:
+          type: number
+          description: The mean average rating, to one decimal place.
+          example: 4.7
+        avgPrice:
+          type: integer
+          description: The mean price, in whole rupees.
+          example: 27999
+        minPrice:
+          type: integer
+          example: 16999
+        maxPrice:
+          type: integer
+          example: 38999
+    TourStatsEnvelope:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: string
+          enum: [success]
+        data:
+          type: object
+          required: [stats]
+          properties:
+            stats:
+              type: array
+              items:
+                $ref: '#/components/schemas/DifficultyStats'
+    MonthlyPlanMonth:
+      description: One month of the year's plan (F2), in IST.
+      type: object
+      required: [month, numTourStarts, tours]
+      properties:
+        month:
+          type: integer
+          minimum: 1
+          maximum: 12
+          example: 1
+        numTourStarts:
+          type: integer
+          description: Every start date that falls in this month, one per departure.
+          example: 6
+        tours:
+          type: array
+          description: The distinct names of the tours that start in this month, sorted.
+          items:
+            type: string
+    MonthlyPlanEnvelope:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: string
+          enum: [success]
+        data:
+          type: object
+          required: [plan]
+          properties:
+            plan:
+              type: array
+              items:
+                $ref: '#/components/schemas/MonthlyPlanMonth'
+    WithinEnvelope:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: string
+          enum: [success]
+        data:
+          type: object
+          required: [tours]
+          properties:
+            tours:
+              type: array
+              items:
+                $ref: '#/components/schemas/TourSummary'
+    TourDistance:
+      description: A tour and its distance from a point (B3). Only these four keys.
+      type: object
+      required: [id, name, slug, distance]
+      properties:
+        id:
+          type: string
+          example: 5c8a1d5b0190b214360dc057
+        name:
+          type: string
+          example: Golden Triangle Heritage
+        slug:
+          type: string
+          example: golden-triangle-heritage
+        distance:
+          type: number
+          description: In the requested unit, rounded to 2 decimal places.
+          example: 4.68
+    DistancesEnvelope:
+      type: object
+      required: [status, data]
+      properties:
+        status:
+          type: string
+          enum: [success]
+        data:
+          type: object
+          required: [distances]
+          properties:
+            distances:
+              type: array
+              description: Every tour, nearest first.
+              items:
+                $ref: '#/components/schemas/TourDistance'
     ErrorDetail:
       type: object
       required: [path, message]

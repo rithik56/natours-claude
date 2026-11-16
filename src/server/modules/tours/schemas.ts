@@ -153,6 +153,76 @@ export const apiListQuerySchema = z.strictObject({
   limit: positiveInteger.pipe(z.number().max(MAX_LIMIT)).optional(),
 });
 
+const SIGNED_WHOLE = /^-?\d+$/;
+const SIGNED_FRACTION = /^-?\d+\.\d+$/;
+
+// One coordinate: a whole number or a decimal, with an optional minus sign. No exponent, no spaces.
+function isCoordinate(value: string): boolean {
+  return SIGNED_WHOLE.test(value) || SIGNED_FRACTION.test(value);
+}
+
+/** The largest radius either unit accepts (B3, T-04-29): a nonsense radius is a 400, not a planet-wide query. */
+const MAX_DISTANCE = 20000;
+
+/**
+ * A `lat,lng` path segment (B3). Latitude is −90 to 90 and longitude −180 to 180, and the
+ * ends are accepted. Anything else is refused here, before MongoDB sees it (T-04-29).
+ * Yields `{ lat, lng }`.
+ */
+const latlngSchema = z
+  .string()
+  .refine((value) => {
+    const parts = value.split(',');
+    return parts.length === 2 && parts.every(isCoordinate);
+  })
+  .transform((value) => {
+    const [lat, lng] = value.split(',').map(Number);
+    return { lat, lng };
+  })
+  .pipe(
+    z.object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+    }),
+  );
+
+/** A radius: a number above 0 and at most 20,000, in the unit the path names (B3). */
+const distanceSchema = z
+  .string()
+  .refine((value) => WHOLE_NUMBER.test(value) || FRACTION.test(value))
+  .transform(Number)
+  .pipe(z.number().gt(0).max(MAX_DISTANCE));
+
+/** The distance unit: miles or kilometres, and nothing else (B3). */
+const unitSchema = z.enum(['mi', 'km']);
+
+/** The path of GET /api/v1/tours/within/[distance]/center/[latlng]/unit/[unit] (B3). */
+export const withinParamsSchema = z.strictObject({
+  distance: distanceSchema,
+  latlng: latlngSchema,
+  unit: unitSchema,
+});
+
+/** The path of GET /api/v1/tours/distances/[latlng]/unit/[unit] (B3). */
+export const distancesParamsSchema = z.strictObject({
+  latlng: latlngSchema,
+  unit: unitSchema,
+});
+
+const YEAR_DIGITS = /^\d{4}$/;
+
+/**
+ * The path of GET /api/v1/tours/monthly-plan/[year] (F2): four digits, from 2000 to 2100.
+ * `abc`, `2027.5`, `1999` and `2101` are each a 400 before any read.
+ */
+export const monthlyPlanParamsSchema = z.strictObject({
+  year: z
+    .string()
+    .regex(YEAR_DIGITS)
+    .transform(Number)
+    .pipe(z.number().int().min(2000).max(2100)),
+});
+
 /**
  * Turns a parsed API query into a catalogue query. An absent sort is -createdAt
  * (B1); an absent page is 1 and an absent limit is 20. The API never clamps (B11).

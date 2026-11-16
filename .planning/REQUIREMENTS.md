@@ -11,8 +11,8 @@
 
 ### Features without a plan ID (F)
 
-- [ ] **F1**: Anyone can see tour statistics (`GET /api/v1/tours/stats`)
-- [ ] **F2**: Guides, lead guides and admins can see a year's monthly plan (`GET /api/v1/tours/monthly-plan/[year]`)
+- [x] **F1**: Anyone can see tour statistics (`GET /api/v1/tours/stats`)
+- [x] **F2**: Guides, lead guides and admins can see a year's monthly plan (`GET /api/v1/tours/monthly-plan/[year]`)
 - [ ] **F3**: A visitor can sign up, log in and log out, through the site's forms and through `/api/v1/auth` (§1.4, §1.6)
 - [ ] **F4**: A logged-in user can change their password from `/me` or `PATCH /api/v1/auth/password`, and gets a new session cookie
 - [ ] **F5**: Admins can list, view, update and deactivate users through `/api/v1/users`
@@ -30,7 +30,7 @@
   - Bookings are readable only by their owner and admins.
   - The acting user's ID always comes from the session.
 - [ ] **S6**: *(amended)* Deactivated users are left out of queries and can't log in, and their existing sessions stop working on their next request to a page, action or the API. `requireUser`, `requireRole`, `withApi` and `action()` always go through `getCurrentUser()`, which reads the user and their role from the database.
-- [ ] **S7**: No injection. All input is Zod-validated, login fields must be strings, and tour filters are built from an allowlist of fields and operators.
+- [x] **S7**: No injection. All input is Zod-validated, login fields must be strings, and tour filters are built from an allowlist of fields and operators.
 - [ ] **S8**: The password field is selected only in the login and change-password services, and never appears in `getCurrentUser()` or in any props.
 - [x] **S9**: Cookies and origin checks:
   - The session cookie is httpOnly, secure in production, `sameSite: 'lax'` and `path: '/'`, and logout deletes it with the same options.
@@ -71,8 +71,8 @@
 ### Correctness (B)
 
 - [ ] **B1**: `sort` is a comma-separated string, checked against an allowlist and defaulting to `-createdAt`.
-- [ ] **B2**: The `top-5-cheap` alias sets the validated query that the query builder reads.
-- [ ] **B3**: Geo endpoints return documents. Coordinates are parsed as numbers and range-checked: latitude −90 to 90, longitude −180 to 180, distance above 0, unit `mi` or `km`.
+- [x] **B2**: The `top-5-cheap` alias sets the validated query that the query builder reads.
+- [x] **B3**: Geo endpoints return documents. Coordinates are parsed as numbers and range-checked: latitude −90 to 90, longitude −180 to 180, distance above 0, unit `mi` or `km`.
 - [ ] **B4**: Tour images are updated through their own endpoint, which accepts any subset of the files. A JSON `PATCH /tours/[id]` never touches images.
 - [x] **B5**: Schema rules match the domain: `duration` isn't unique and `slug` is. Dates come from timestamps, never `default: Date.now()`.
 - [ ] **B6**: The review service recalculates ratings after create, update and delete:
@@ -352,8 +352,8 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| F1 | Phase 4 | Pending |
-| F2 | Phase 4 | Pending |
+| F1 | Phase 4 | Complete |
+| F2 | Phase 4 | Complete |
 | F3 | Phase 5 | Pending |
 | F4 | Phase 5 | Pending |
 | F5 | Phase 5 | Pending |
@@ -365,7 +365,7 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | S4 | Phase 4 | Pending |
 | S5 | Phase 6 | Pending |
 | S6 | Phase 5 | Pending |
-| S7 | Phase 4 | Pending |
+| S7 | Phase 4 | Complete |
 | S8 | Phase 5 | Pending |
 | S9 | Phase 1 | Complete |
 | S10 | Phase 1 | Complete |
@@ -383,8 +383,8 @@ Which phases cover which requirements. See `.planning/ROADMAP.md` for the phase 
 | S22 | Phase 5 | Pending |
 | S23 | Phase 5 | Pending |
 | B1 | Phase 4 | Pending |
-| B2 | Phase 4 | Pending |
-| B3 | Phase 4 | Pending |
+| B2 | Phase 4 | Complete |
+| B3 | Phase 4 | Complete |
 | B4 | Phase 4 | Pending |
 | B5 | Phase 1 | Complete |
 | B6 | Phase 6 | Pending |

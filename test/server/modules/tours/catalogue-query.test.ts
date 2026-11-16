@@ -3,6 +3,7 @@ import {
   applyCatalogueQuery,
   monthOptionsFrom,
   nextBookableDate,
+  statsFrom,
   type CatalogueEntry,
   type CatalogueQuery,
 } from '@/server/modules/tours/catalogue-query';
@@ -350,5 +351,72 @@ describe('monthOptionsFrom and nextBookableDate', () => {
       nextBookableDate(['2026-11-08', '2026-11-21', '2026-12-05'], TODAY),
     ).toBe('2026-11-21');
     expect(nextBookableDate(['2026-11-08'], TODAY)).toBeNull();
+  });
+});
+
+describe('statsFrom: one row per difficulty (F1)', () => {
+  it('[F1] gives the rows for the difficulties present, in the order easy, medium, difficult', () => {
+    expect(statsFrom(seedEntries()).map((row) => row.difficulty)).toEqual([
+      'easy',
+      'medium',
+      'difficult',
+    ]);
+  });
+
+  it('[F1] counts tours and ratings, rounds the averages, and gives the price bounds', () => {
+    // avgRating for easy and difficult is exactly 4.65, which rounds half up to 4.7.
+    expect(statsFrom(seedEntries())).toEqual([
+      {
+        difficulty: 'easy',
+        numTours: 6,
+        numRatings: 24,
+        avgRating: 4.7,
+        avgPrice: 27999,
+        minPrice: 16999,
+        maxPrice: 38999,
+      },
+      {
+        difficulty: 'medium',
+        numTours: 5,
+        numRatings: 20,
+        avgRating: 4.5,
+        avgPrice: 19999,
+        minPrice: 12999,
+        maxPrice: 32999,
+      },
+      {
+        difficulty: 'difficult',
+        numTours: 2,
+        numRatings: 8,
+        avgRating: 4.7,
+        avgPrice: 35499,
+        minPrice: 27999,
+        maxPrice: 42999,
+      },
+    ]);
+  });
+
+  it('[F1] leaves out a difficulty that has no tours', () => {
+    const onlyEasy = seedEntries().filter(
+      (entry) => entry.difficulty === 'easy',
+    );
+
+    expect(statsFrom(onlyEasy).map((row) => row.difficulty)).toEqual(['easy']);
+  });
+
+  it('[F1] an empty catalogue gives no rows', () => {
+    expect(statsFrom([])).toEqual([]);
+  });
+
+  it('[F1] rounds an average at exactly .5 up, for both the rating and the price', () => {
+    const base = byName(seedEntries(), 'Thar Desert Camel Safari');
+
+    const rows = statsFrom([
+      { ...base, ratingsAverage: 4.4, price: 1000 },
+      { ...base, ratingsAverage: 4.5, price: 1001 },
+    ]);
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ avgRating: 4.5, avgPrice: 1001 });
   });
 });
