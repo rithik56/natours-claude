@@ -1,10 +1,13 @@
 import { Types } from 'mongoose';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { fromIstDay } from '@/lib/ist';
 import { getDeps } from '@/server/deps';
 import {
   getById,
   getBySlug,
   getGuides,
+  getMonthlyPlan,
+  getStats,
   list,
   monthOptions,
 } from '@/server/modules/tours/service';
@@ -311,6 +314,102 @@ describe('tours service', () => {
 
       expect(unknown).toMatchObject({ code: 'NOT_FOUND' });
       expect(malformed).toMatchObject({ code: 'NOT_FOUND' });
+    });
+  });
+
+  describe('tours service: getStats and getMonthlyPlan (F1, F2)', () => {
+    it('[F1] getStats gives the seed rows, computed from the cached catalogue', async () => {
+      await createWholeCatalogue();
+
+      const rows = await getStats();
+
+      expect(rows.map((row) => row.difficulty)).toEqual([
+        'easy',
+        'medium',
+        'difficult',
+      ]);
+      expect(rows[0]).toEqual({
+        difficulty: 'easy',
+        numTours: 6,
+        numRatings: 24,
+        avgRating: 4.7,
+        avgPrice: 27999,
+        minPrice: 16999,
+        maxPrice: 38999,
+      });
+    });
+
+    it('[F1] two parallel getStats calls return identical rows', async () => {
+      await createWholeCatalogue();
+
+      const [first, second] = await Promise.all([getStats(), getStats()]);
+
+      expect(second).toEqual(first);
+    });
+
+    it('[F2] getMonthlyPlan groups the seed 2027 starts by IST month, in month order', async () => {
+      await createWholeCatalogue();
+
+      const plan = await getMonthlyPlan(2027);
+
+      expect(plan.map((month) => month.month)).toEqual([
+        1, 2, 3, 4, 6, 7, 8, 9, 10,
+      ]);
+      expect(plan.map((month) => month.numTourStarts)).toEqual([
+        6, 5, 4, 4, 2, 3, 2, 2, 1,
+      ]);
+    });
+
+    it('[F2] a 1 January 2027 departure is in January of the 2027 plan, and not in the 2026 plan', async () => {
+      await createTour({
+        slug: 'thar-desert-camel-safari',
+        overrides: { startDates: [fromIstDay('2027-01-01')] },
+      });
+
+      expect(await getMonthlyPlan(2027)).toEqual([
+        { month: 1, numTourStarts: 1, tours: ['Thar Desert Camel Safari'] },
+      ]);
+      expect(await getMonthlyPlan(2026)).toEqual([]);
+    });
+
+    it('[F2] a tour with two starts in one month counts both and lists its name once', async () => {
+      await createTour({
+        slug: 'thar-desert-camel-safari',
+        overrides: {
+          startDates: [fromIstDay('2027-01-03'), fromIstDay('2027-01-20')],
+        },
+      });
+
+      expect(await getMonthlyPlan(2027)).toEqual([
+        { month: 1, numTourStarts: 2, tours: ['Thar Desert Camel Safari'] },
+      ]);
+    });
+
+    it('[F2] two parallel getMonthlyPlan calls return identical plans', async () => {
+      await createWholeCatalogue();
+
+      const [first, second] = await Promise.all([
+        getMonthlyPlan(2027),
+        getMonthlyPlan(2027),
+      ]);
+
+      expect(second).toEqual(first);
+    });
+
+    it('[B10] a failed plan read is refused as SERVICE_UNAVAILABLE, with the driver error as the cause', async () => {
+      const driverError = Object.assign(new Error('connection reset'), {
+        name: 'MongoNetworkError',
+      });
+      vi.spyOn(Tour, 'aggregate').mockImplementation(() => {
+        throw driverError;
+      });
+
+      const error = await getMonthlyPlan(2027).catch(
+        (caught: unknown) => caught,
+      );
+
+      expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+      expect((error as Error).cause).toBe(driverError);
     });
   });
 });
