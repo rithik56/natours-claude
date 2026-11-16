@@ -284,3 +284,20 @@ test.describe('[U10] with JavaScript off on the desktop', () => {
     ).toBeVisible();
   });
 });
+
+test('[R10] / has the approved title and description, and a canonical of the origin plus / whatever the query', async ({
+  page,
+}) => {
+  await page.goto('/?difficulty=easy');
+
+  await expect(page).toHaveTitle('Small-group tours across India');
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    'content',
+    'Small-group tours across India, from the high passes of Ladakh to the backwaters of Kerala.',
+  );
+  const origin = new URL(page.url()).origin;
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    `${origin}/`,
+  );
+});
