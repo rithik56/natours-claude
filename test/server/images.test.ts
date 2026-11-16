@@ -5,6 +5,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 import { normalize, randomImageKey } from '@/server/images';
+import { pixelBombPng } from '../helpers/images';
 
 const SEED_PHOTOS = path.resolve(import.meta.dirname, '../../seed/img/tours');
 
@@ -86,6 +87,15 @@ describe('normalize (S16)', () => {
 
     await expect(normalize(fake, 'tour')).rejects.toMatchObject({
       code: 'UNSUPPORTED_MEDIA_TYPE',
+    });
+  });
+
+  it('[S16] a PNG declaring 16,000 by 16,000 pixels is refused with PAYLOAD_TOO_LARGE before it is decoded', async () => {
+    const bomb = await pixelBombPng();
+
+    await expect(normalize(bomb, 'tour')).rejects.toMatchObject({
+      code: 'PAYLOAD_TOO_LARGE',
+      status: 413,
     });
   });
 

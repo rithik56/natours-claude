@@ -158,6 +158,17 @@ describe('admin tour writes over JSON (F6, B4, D-13)', () => {
   useTestDatabase();
 
   describe('PATCH /api/v1/tours/[id]', () => {
+    it('[S16] a JSON body above 1 MB is 413 before it is parsed (SEC-17)', async () => {
+      await createTour({ slug: VALLEY });
+      const { user: admin } = await createUser({ role: 'admin' });
+      const padded = { summary: 'x'.repeat(1_100_000) };
+
+      const response = await patch(seedIdOf(VALLEY), padded, admin);
+
+      expect(response.status).toBe(413);
+      expect((response.body as ErrorBody).error.code).toBe('PAYLOAD_TOO_LARGE');
+    });
+
     describe('who may write (F6, D-16)', () => {
       it('[F6] an anonymous caller gets 401 UNAUTHENTICATED', async () => {
         await createTour({ slug: VALLEY });

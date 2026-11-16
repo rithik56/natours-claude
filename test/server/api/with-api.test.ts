@@ -986,4 +986,52 @@ describe('withApi', () => {
       expect(UUID.test(result.headers.get('x-request-id') ?? '')).toBe(true);
     });
   });
+
+  describe('upload (S16, SEC-17)', () => {
+    const uploads = withApi(
+      async ({ form }) => ok({ names: [...(form?.keys() ?? [])] }),
+      { access: 'public', upload: { maxBytes: 4096 } },
+    );
+
+    it('[S16] a non-multipart body is refused with 415 before the handler runs', async () => {
+      const result = await callRoute(
+        { POST: uploads },
+        { method: 'POST', path: '/x', body: { a: 1 } },
+      );
+
+      expect(result.status).toBe(415);
+      expect(errorOf(result.body).code).toBe('UNSUPPORTED_MEDIA_TYPE');
+    });
+
+    it('[S16] a multipart body reaches the handler as parsed form parts', async () => {
+      const form = new FormData();
+      form.append(
+        'imageCover',
+        new File(['x'], 'a.jpg', { type: 'image/jpeg' }),
+      );
+
+      const result = await callRoute(
+        { POST: uploads },
+        { method: 'POST', path: '/x', body: form },
+      );
+
+      expect(result.status).toBe(200);
+      expect((result.body as { data: { names: string[] } }).data.names).toEqual(
+        ['imageCover'],
+      );
+    });
+
+    it('[S16] a multipart body over the route limit is refused with 413', async () => {
+      const form = new FormData();
+      form.append('imageCover', new File([new Uint8Array(5000)], 'big.jpg'));
+
+      const result = await callRoute(
+        { POST: uploads },
+        { method: 'POST', path: '/x', body: form },
+      );
+
+      expect(result.status).toBe(413);
+      expect(errorOf(result.body).code).toBe('PAYLOAD_TOO_LARGE');
+    });
+  });
 });
