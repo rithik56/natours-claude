@@ -32,6 +32,7 @@ Every decision that departs from `plan.md`, and every project-level decision, is
 | 0026 | [The CI build job runs MongoDB from the test binary](0026-ci-build-job-uses-the-test-mongod-binary.md) | Accepted |
 | 0027 | [Model operations that skip validators are refused](0027-model-operations-that-skip-validators-are-refused.md) | Accepted |
 | 0028 | [Map-tile provider and boundary compliance](0028-map-tile-provider-and-boundary-compliance.md) | Accepted |
+| 0029 | [Disk storage in development and ci, and the media route](0029-disk-storage-and-the-media-route.md) | Accepted |
 
 ## Format
 
