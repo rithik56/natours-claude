@@ -16,7 +16,7 @@ export type PageQuery = {
 /** D-03: rating order is the default sort on `/`. */
 export const DEFAULT_SORT = '-ratingsAverage';
 /** U10: twelve tours per page on `/`. */
-export const DEFAULT_LIMIT = 12;
+const DEFAULT_LIMIT = 12;
 
 // The fixed order every shared URL uses, so the same query always reads the same way.
 const KEY_ORDER = [
