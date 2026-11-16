@@ -47,6 +47,7 @@ If a key is missing or invalid, the app exits at start-up and names the key. It 
 | `check:client` | `npm run check:client` | Fails a `'use client'` file with no `// client: <reason>` line, and a client file that imports server-only code (R2, R6). |
 | `check:conventions` | `npm run check:conventions` | Kebab-case file names, issue-linked TODO and FIXME comments, no commented-out code, `server-only` first in `src/server` (ADR 0009). |
 | `check:env` | `npm run check:env` | Every config key is in `.env.example`, no secret-named key has a value, and no `NEXT_PUBLIC_` name contains SECRET, KEY or PASSWORD (S18, ADR 0010). |
+| `seed` | `npm run seed` | Loads the seed data into `MONGODB_URI` and uploads its photos. Takes `--reset` and `--today=YYYY-MM-DD` (see Seed data). |
 | `test` | `npm test` | Runs the Vitest suite once. |
 | `test:coverage` | `npm run test:coverage` | Runs it with coverage and the thresholds. |
 | `smoke` | `npm run smoke` | Starts the built app twice, once with a bad `SESSION_SECRET` and once with a good environment, and checks the exit, the headers and the CSP nonce. |
@@ -55,7 +56,7 @@ If a key is missing or invalid, the app exits at start-up and names the key. It 
 | `bundle:record` | `npm run bundle:record` | Collects, then rewrites `docs/bundle-baseline.json`. Run it locally and commit the result (ADR 0018). |
 | `bundle:check` | `npm run bundle:check` | Collects, then fails if the script size of `/` is over the recorded floor plus 40 KB. CI runs this one. |
 
-`smoke` and the two bundle scripts need a fresh `npm run build`, a reachable MongoDB and these variables set in the shell:
+`smoke` and the two bundle scripts need a fresh `npm run build`, a reachable MongoDB, and a database that `npm run seed` has loaded, because `smoke` checks a seeded photo under `/media`. They also need these variables set in the shell:
 
 ```sh
 APP_ENV=ci APP_URL=http://localhost:3210 MONGODB_URI=mongodb://127.0.0.1:27017/natours SESSION_SECRET="$(openssl rand -base64 48)" npm run smoke
@@ -112,6 +113,16 @@ Configuration comes from environment variables, validated at start-up by `src/se
 
 `APP_ENV` is not `NODE_ENV`. Next sets `NODE_ENV` to `production` for every build, so it cannot tell a local run from a deployment. `APP_ENV` decides which adapters are used and whether the session cookie is `secure`, and it has no default, so a deployment that forgets it refuses to start (ADR 0010). Later phases add their keys to the schema and to `.env.example` together.
 
+## Seed data
+
+`npm run seed` loads the content in `seed/` into the database named by `MONGODB_URI`: 13 tours, 35 users, 52 reviews and 58 bookings, with their 52 photos uploaded to storage. Every document has a fixed `_id`, so running the seed again changes nothing.
+
+- `npm run seed -- --reset` deletes the four collections first, then loads the seed again. It runs only where `APP_ENV` is `development`, `test` or `ci`.
+- `npm run seed -- --today=YYYY-MM-DD` pins the day the seed measures against. A start date on or before that day has passed and moves forward by whole years, and a Golden Triangle departure whose day 4 would fall on a Friday moves one day earlier. Bookings and reviews never move. Without `--today` the day is today, or the day `APP_NOW` pins (ADR 0023, ADR 0030).
+- After loading, the seed checks the rules in `seed/README.md`, and stops naming the first rule that breaks.
+- The seed needs `SEED_USER_PASSWORD` (at least 8 characters) and `SEED_ADMIN_PASSWORD` (at least 16 characters) in `.env.local`, together with `STORAGE_DIR` (default `.storage`), where the photos are written. The seed refuses `APP_ENV=production` before it connects to anything.
+- Restart `next dev` after reseeding. The catalogue is also cached, and the cache expires within an hour.
+
 ## Testing
 
 `npm test` runs Vitest against one in-memory MongoDB, with a separate database for each test file, so files run in parallel and need no Docker. The first run downloads the MongoDB binary. The version is pinned in `package.json` under `config.mongodbMemoryServer`.
@@ -122,6 +133,7 @@ Configuration comes from environment variables, validated at start-up by `src/se
 - A test that proves a requirement carries its ID in the name, for example `it('[S14] ...')`.
 - `npm run test:coverage` enforces 75% of lines across `src/server/` and 85% for each `service.ts` file. The real adapters are excluded (ADR 0024).
 - `test/examples/` holds one example each for a Server Action, a page data function and a service shared by an action and a Route Handler. Copy the one you need.
+- The app specs (`npm run test:design:app`) need MongoDB at `MONGODB_URI` and a seeded database. Their `seed` project runs `npm run seed -- --reset --today=2026-11-08` first, so it resets the seed data in that database. Use a development database you can reset. Stop any running `next dev` before you run them, so the pinned clock (`APP_NOW=2026-11-08T10:00:00+05:30`) applies to the server the specs use. Their Playwright defaults are in `test/app/e2e-env.ts`.
 
 ## Quality gates
 

@@ -1,6 +1,6 @@
 # 0023. The seed rolls forward only start dates that have passed
 
-Status: Accepted
+Status: Accepted; details in 0030
 Date: 9 Nov 2026
 Requirements: D10, B19
 Plan review: QA-01, DEL-03, ARC-19, DES-01; PROJECT.md Key Decision 9

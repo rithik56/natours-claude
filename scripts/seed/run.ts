@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import bcrypt from 'bcryptjs';
 import { Types } from 'mongoose';
-import { fromIstDay } from '@/lib/ist';
+import { fromIstDay, type IstDay, toIstDay } from '@/lib/ist';
 import { getConfig } from '@/server/config';
 import { connectDb } from '@/server/db';
 import { getDeps } from '@/server/deps';
@@ -10,6 +10,8 @@ import { Booking } from '@/server/modules/bookings/model';
 import { Review } from '@/server/modules/reviews/model';
 import { Tour } from '@/server/modules/tours/model';
 import { User } from '@/server/modules/users/model';
+import { rollStartDates } from './dates';
+import { checkSeedRules, type SeedRuleInput } from './rules';
 import {
   listSeedPhotos,
   PHOTO_KEY_PREFIX,
@@ -99,12 +101,68 @@ function withoutId<T extends { _id: unknown }>(doc: T): Omit<T, '_id'> {
 }
 
 // D10: the upload goes through the same storage adapter the app reads, so `/media` serves the bytes (D2).
-async function uploadPhotos(): Promise<void> {
+// Returns the keys it stored, so the rule check can prove every credited photo is among them.
+async function uploadPhotos(): Promise<string[]> {
   const { storage } = getDeps();
+  const keys: string[] = [];
   for (const file of listSeedPhotos()) {
     const bytes = readFileSync(path.join(SEED_DIRECTORY, 'img', 'tours', file));
-    await storage.put(`${PHOTO_KEY_PREFIX}${file}`, bytes, 'image/jpeg');
+    const key = `${PHOTO_KEY_PREFIX}${file}`;
+    await storage.put(key, bytes, 'image/jpeg');
+    keys.push(key);
   }
+  return keys;
+}
+
+function seedObjectIds(records: ReadonlyArray<{ _id: string }>): Types.ObjectId[] {
+  return records.map((record) => new Types.ObjectId(record._id));
+}
+
+// ADR 0030: the rules read back only the documents this seed loads, by their fixed _ids, so app data
+// a developer adds to the same database never breaks the seed's own rules.
+async function readStoredSeed(
+  today: IstDay,
+  storedKeys: string[],
+): Promise<SeedRuleInput> {
+  const [tours, users, reviews, bookings] = await Promise.all([
+    Tour.find({ _id: { $in: seedObjectIds(seedTourRecords()) } }).lean(),
+    User.find({ _id: { $in: seedObjectIds(seedUserRecords()) } }).lean(),
+    Review.find({ _id: { $in: seedObjectIds(seedReviewRecords()) } }).lean(),
+    Booking.find({ _id: { $in: seedObjectIds(seedBookingRecords()) } }).lean(),
+  ]);
+  return {
+    tours: tours.map((tour) => ({
+      _id: String(tour._id),
+      slug: tour.slug,
+      duration: tour.duration,
+      startDates: tour.startDates.map((day) => toIstDay(day)),
+      ratingsAverage: tour.ratingsAverage,
+      ratingsQuantity: tour.ratingsQuantity,
+      guides: tour.guides.map((guide) => String(guide)),
+      photoCredits: tour.photoCredits.map((credit) => ({ file: credit.file })),
+    })),
+    users: users.map((person) => ({
+      _id: String(person._id),
+      name: person.name,
+      role: person.role,
+    })),
+    reviews: reviews.map((review) => ({
+      _id: String(review._id),
+      review: review.review,
+      rating: review.rating,
+      tour: String(review.tour),
+      user: String(review.user),
+    })),
+    bookings: bookings.map((booking) => ({
+      _id: String(booking._id),
+      tour: String(booking.tour),
+      user: String(booking.user),
+      status: booking.status,
+      startDate: toIstDay(booking.startDate),
+    })),
+    storedKeys,
+    today,
+  };
 }
 
 // Reset deletes every seed document and every seed photo, so the load below rebuilds exactly the seed.
@@ -122,9 +180,15 @@ async function resetSeed(): Promise<void> {
 }
 
 // Create when missing, otherwise set the desired fields and save only when something changed.
-async function loadTours(): Promise<void> {
+// ADR 0023: only the start dates that have passed by `today` move, by whole years, and the Golden
+// Triangle Friday rule applies after the roll. Bookings and reviews are never rolled.
+async function loadTours(today: IstDay): Promise<void> {
   for (const [index, record] of seedTourRecords().entries()) {
-    const desired = toTourDocument(record, index);
+    const rolled = {
+      ...record,
+      startDates: rollStartDates(record.startDates, today, record.slug),
+    };
+    const desired = toTourDocument(rolled, index);
     const existing = await Tour.findById(desired._id);
     if (existing === null) {
       await Tour.create(desired);
@@ -207,9 +271,11 @@ async function loadBookings(): Promise<void> {
 export async function runSeed({
   reset,
   passwords,
+  today,
 }: {
   reset: boolean;
   passwords: SeedPasswords;
+  today: IstDay;
 }): Promise<SeedCounts> {
   assertSeedAllowed({ appEnv: getConfig().APP_ENV, reset });
   await connectDb();
@@ -221,16 +287,22 @@ export async function runSeed({
     Booking.syncIndexes(),
   ]);
   if (reset) await resetSeed();
-  await uploadPhotos();
-  await loadTours();
+  const storedKeys = await uploadPhotos();
+  await loadTours(today);
   await loadUsers(passwords);
   await loadReviews();
   await loadBookings();
+  // seed/README.md rules (ADR 0030): the first broken rule stops the run, and its name is in the message.
+  const stored = await readStoredSeed(today, storedKeys);
+  const [violation] = checkSeedRules(stored);
+  if (violation) {
+    throw new Error(`seed rule failed: ${violation.rule}: ${violation.detail}`);
+  }
   return {
-    tours: await Tour.countDocuments(),
-    users: await User.countDocuments(),
-    reviews: await Review.countDocuments(),
-    bookings: await Booking.countDocuments(),
-    photos: listSeedPhotos().length,
+    tours: stored.tours.length,
+    users: stored.users.length,
+    reviews: stored.reviews.length,
+    bookings: stored.bookings.length,
+    photos: stored.storedKeys.length,
   };
 }
