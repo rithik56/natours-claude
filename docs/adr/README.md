@@ -33,6 +33,7 @@ Every decision that departs from `plan.md`, and every project-level decision, is
 | 0027 | [Model operations that skip validators are refused](0027-model-operations-that-skip-validators-are-refused.md) | Accepted |
 | 0028 | [Map-tile provider and boundary compliance](0028-map-tile-provider-and-boundary-compliance.md) | Accepted |
 | 0029 | [Disk storage in development and ci, and the media route](0029-disk-storage-and-the-media-route.md) | Accepted |
+| 0030 | [The seed's guards, passwords, date roll and post-checks](0030-seed-guards-passwords-and-date-roll.md) | Accepted |
 
 ## Format
 

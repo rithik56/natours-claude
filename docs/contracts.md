@@ -1256,6 +1256,7 @@ Each is written into this file by the phase that builds it (ADR 0005).
 | `bookingsService.hasPaidBooking(userId, tourId)`, which the booking panel needs for "already booked", never cached | 4 |
 | `images.normalize(file, preset)`, and the real storage adapter | 4 (the disk adapter and `/media` are in, ADR 0029; S3 waits for 8) |
 | The cache keys and tag names, and the shape of a list response in `data` (section 2.1) | 4 |
+| `npm run seed` with `--reset` and `--today=YYYY-MM-DD`: the date roll (`rollStartDates`), and the seed/README.md rules (`checkSeedRules`) that stop a run and name the first broken rule (ADR 0023, ADR 0030) | 4 |
 | `Welcome` and `PasswordReset` email-template props, the mailer's SMTP implementation, the Redis rate limiter and the BullMQ queue | 5 |
 | `toAdminUser`, or a record of why there is none (ADR 0013) | 5 |
 | `BookingConfirmed` email-template props, which need the tour, date and price beyond `{ to, firstName, url }` (SEC-09, ADR 0016) | 6 |
