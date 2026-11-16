@@ -1,5 +1,5 @@
-// F6, S4, B4: the admin tour writes over JSON. PATCH changes only the editable fields, for a lead guide or an admin;
-// POST and DELETE follow in the same file (plan 04-12). Every refusal is in the standard envelope.
+// The admin tour writes over JSON, covering requirements F6, S4 and B4 and decision D-16. The three
+// writes are POST, PATCH and DELETE on the tour routes, and every refusal is in the standard error envelope.
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as collection from '@/app/api/v1/tours/route';
 import * as route from '@/app/api/v1/tours/[id]/route';

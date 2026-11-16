@@ -1,7 +1,12 @@
-import { ok } from '@/server/api/responses';
+import { noContent, ok } from '@/server/api/responses';
 import { withApi } from '@/server/api/with-api';
 import { tourUpdateSchema } from '@/server/modules/tours/schemas';
-import { getById, getGuides, updateTour } from '@/server/modules/tours/service';
+import {
+  deleteTour,
+  getById,
+  getGuides,
+  updateTour,
+} from '@/server/modules/tours/service';
 import { z } from '@/server/validation';
 
 // A tour id is 24 hex characters. Anything else is a 400 before any read (B12, contracts 2.3).
@@ -29,5 +34,19 @@ export const PATCH = withApi(
     params: tourParams,
     query: z.strictObject({}),
     body: tourUpdateSchema,
+  },
+);
+
+// DELETE /api/v1/tours/[id] (plan.md 4.1, F6, D-16): lead guides and admins only. A tour with any
+// booking is a 409 and is left untouched; otherwise it goes with its reviews and photos (204).
+export const DELETE = withApi(
+  async ({ params }) => {
+    await deleteTour(params.id);
+    return noContent();
+  },
+  {
+    access: { roles: ['lead-guide', 'admin'] },
+    params: tourParams,
+    query: z.strictObject({}),
   },
 );

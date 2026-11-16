@@ -172,10 +172,28 @@ describe('reviews service: listForTour', () => {
       expect(await Review.countDocuments({ tour: other._id })).toBe(1);
     });
 
-    it('[F6] a tour with no reviews deletes none', async () => {
+    it('[F6] a tour with no reviews deletes none, and a malformed id deletes none', async () => {
       const tour = await createTour({ slug: 'valley-of-flowers-trek' });
 
       expect(await deleteForTour(String(tour._id))).toBe(0);
+      expect(await deleteForTour('not-an-id')).toBe(0);
+    });
+
+    it('[B10] a delete that fails with a network error is refused as SERVICE_UNAVAILABLE, with the driver error as the cause', async () => {
+      const tour = await createTour({ slug: 'valley-of-flowers-trek' });
+      const driverError = Object.assign(new Error('connection reset'), {
+        name: 'MongoNetworkError',
+      });
+      vi.spyOn(Review, 'deleteMany').mockImplementationOnce(() => {
+        throw driverError;
+      });
+
+      const error = await deleteForTour(String(tour._id)).catch(
+        (caught: unknown) => caught,
+      );
+
+      expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+      expect((error as Error).cause).toBe(driverError);
     });
   });
 });

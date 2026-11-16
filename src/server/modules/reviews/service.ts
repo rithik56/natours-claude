@@ -99,3 +99,26 @@ export async function listForTour(
     totalPages,
   };
 }
+
+/**
+ * Deletes every review of one tour and returns how many were removed (F6). It runs after the tour
+ * itself is gone, so no review is left pointing at a deleted tour (T-04-34). The caller clears the
+ * `reviews:<tourId>` tag once this has finished.
+ *
+ * @param tourId - The tour's id. A malformed id has no reviews, so nothing is deleted.
+ * @returns The number of reviews removed; zero when the tour had none.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function deleteForTour(tourId: string): Promise<number> {
+  if (!OBJECT_ID.test(tourId)) return 0;
+  await connectDb();
+  try {
+    const result = await Review.deleteMany({ tour: tourId });
+    return result.deletedCount;
+  } catch (error) {
+    if (!isDbUnavailableError(error)) throw error;
+    const unavailable = new AppError('SERVICE_UNAVAILABLE');
+    unavailable.cause = error;
+    throw unavailable;
+  }
+}

@@ -512,7 +512,7 @@ describe('withApi', () => {
       expect(errorOf(result.body).details).toEqual([
         { path: 'name', message: messages.validation.required },
         { path: 'email', message: messages.validation.invalidEmail },
-        { path: '', message: messages.validation.unknownField },
+        { path: 'extra', message: messages.validation.unknownField },
       ]);
       expect(JSON.stringify(result.body)).not.toMatch(
         /Invalid input|expected|too_small|invalid_type|Unrecognized/i,

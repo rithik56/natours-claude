@@ -7,6 +7,9 @@ import { now } from '@/server/clock';
 import { connectDb, isDbUnavailableError } from '@/server/db';
 import { getDeps } from '@/server/deps';
 import { AppError } from '@/server/errors';
+import { getLogger } from '@/server/logger';
+import { countForTour } from '@/server/modules/bookings/service';
+import { deleteForTour } from '@/server/modules/reviews/service';
 import type { PublicUser } from '@/server/modules/users/dto';
 import { findActivePublicByIds } from '@/server/modules/users/service';
 import {
@@ -544,4 +547,61 @@ export async function updateTour(
   }
   await getDeps().cache.invalidate('tours', `tour:${id}`);
   return detailWithGuides(doc);
+}
+
+/**
+ * Removes a deleted tour's stored photos, one key at a time (F6). A key that cannot be removed is
+ * logged and the next one is tried: the tour is already gone, so a photo that stays is a storage
+ * clean-up for an operator, not a failed request.
+ */
+async function removePhotos(
+  tourId: string,
+  keys: Array<string | undefined>,
+): Promise<void> {
+  const storage = getDeps().storage;
+  for (const key of keys) {
+    if (!key) continue;
+    try {
+      await storage.delete(key);
+    } catch (error) {
+      getLogger().error(
+        { tourId, key, err: error },
+        'stored photo not deleted after its tour was removed',
+      );
+    }
+  }
+}
+
+/**
+ * Deletes a tour that has no booking (F6, T-04-34), with its reviews and its stored photos. A
+ * tour with any booking is refused before anything is removed, so no booking can point at a
+ * deleted tour through the API. The tour goes first, then its reviews, then its photos, best
+ * effort (ADR 0036 and ADR 0037). The tags `tours`, `tour:<id>` and `reviews:<id>` are cleared
+ * once the database work has finished, even when it fails part way.
+ *
+ * @param id - The tour's 24-character hex id, already checked by the route.
+ * @throws AppError NOT_FOUND when no tour has the id, which includes a second delete of the same tour.
+ * @throws AppError CONFLICT with the approved message when the tour has any booking; nothing is removed.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function deleteTour(id: string): Promise<void> {
+  let doc: TourDoc | null;
+  try {
+    doc = await loadDocument(id);
+  } catch (error) {
+    throw writeFailure(error);
+  }
+  if (!doc) throw new AppError('NOT_FOUND');
+  if ((await countForTour(id)) > 0) {
+    throw new AppError('CONFLICT', messages.tours.hasBookings);
+  }
+  try {
+    await Tour.deleteOne({ _id: doc._id });
+    await deleteForTour(id);
+  } catch (error) {
+    throw writeFailure(error);
+  } finally {
+    await getDeps().cache.invalidate('tours', `tour:${id}`, `reviews:${id}`);
+  }
+  await removePhotos(id, [doc.imageCover, ...doc.images]);
 }

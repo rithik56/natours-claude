@@ -164,5 +164,22 @@ describe('bookings service: findUpcomingPaid', () => {
       expect(await countForTour(String(tour._id))).toBe(0);
       expect(await countForTour('not-an-id')).toBe(0);
     });
+
+    it('[B10] a count that fails with a network error is refused as SERVICE_UNAVAILABLE, with the driver error as the cause', async () => {
+      const tour = await createTour({ slug: 'valley-of-flowers-trek' });
+      const driverError = Object.assign(new Error('connection reset'), {
+        name: 'MongoNetworkError',
+      });
+      vi.spyOn(Booking, 'countDocuments').mockImplementationOnce(() => {
+        throw driverError;
+      });
+
+      const error = await countForTour(String(tour._id)).catch(
+        (caught: unknown) => caught,
+      );
+
+      expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+      expect((error as Error).cause).toBe(driverError);
+    });
   });
 });

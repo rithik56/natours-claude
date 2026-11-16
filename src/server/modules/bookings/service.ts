@@ -53,3 +53,25 @@ export async function findUpcomingPaid(
     throw unavailable;
   }
 }
+
+/**
+ * How many bookings a tour has, paid and refunded alike (F6). The tour delete asks this before it
+ * removes anything, so a tour with any booking is refused and no booking can point at a deleted
+ * tour through the API (T-04-34). Not cached: it is a count taken at the moment of a delete.
+ *
+ * @param tourId - The tour's id. A malformed id has no bookings.
+ * @returns The number of bookings for the tour, zero when there are none.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function countForTour(tourId: string): Promise<number> {
+  if (!Types.ObjectId.isValid(tourId)) return 0;
+  await connectDb();
+  try {
+    return await Booking.countDocuments({ tour: tourId });
+  } catch (error) {
+    if (!isDbUnavailableError(error)) throw error;
+    const unavailable = new AppError('SERVICE_UNAVAILABLE');
+    unavailable.cause = error;
+    throw unavailable;
+  }
+}
