@@ -176,7 +176,33 @@ async function checkSeededPhoto(): Promise<void> {
   }
 }
 
-/** A start with the inherited environment must serve the home page, /readyz and a seeded photo. */
+/**
+ * R4, U11: a missing slug is a real 404 from the built app (no loading.tsx, ADR 0032), and a
+ * seeded slug answers 200 with its name in the body. The seed must be loaded first.
+ */
+async function checkTourPages(): Promise<void> {
+  const missing = await fetch(`${ORIGIN}/tour/does-not-exist`);
+  await missing.arrayBuffer();
+  if (missing.status !== 404) {
+    throw new Error(
+      `GET /tour/does-not-exist answered ${String(missing.status)}, expected 404`,
+    );
+  }
+  process.stdout.write('smoke: /tour/does-not-exist answered 404\n');
+  const seeded = await fetch(`${ORIGIN}/tour/valley-of-flowers-trek`);
+  const html = await seeded.text();
+  if (seeded.status !== 200) {
+    throw new Error(
+      `GET /tour/valley-of-flowers-trek answered ${String(seeded.status)}, expected 200; run npm run seed first`,
+    );
+  }
+  if (!html.includes('Valley of Flowers Trek')) {
+    throw new Error('GET /tour/valley-of-flowers-trek does not name the tour');
+  }
+  process.stdout.write('smoke: /tour/valley-of-flowers-trek answered 200\n');
+}
+
+/** A start with the inherited environment must serve the home page, /readyz, a seeded photo and tour pages. */
 async function checkServesGoodEnv(): Promise<void> {
   const app = startApp({ ...process.env });
   try {
@@ -191,6 +217,7 @@ async function checkServesGoodEnv(): Promise<void> {
     if (first === second) throw new Error('two requests to / shared one nonce');
     await checkProbeHeaders();
     await checkSeededPhoto();
+    await checkTourPages();
   } finally {
     await stopApp(app);
   }
