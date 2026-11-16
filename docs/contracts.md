@@ -39,6 +39,8 @@ Every TypeScript block below is copied from the file named in its first line. Fu
 | `docs/contracts.md` holds all of section 4 | Only the shared parts, written per phase | ADR 0005 |
 | Test helpers `createUser({ role?, active? })`, `createTour(overrides?)` | Factories copy real seed records and take an options object (section 9) | ADR 0024 |
 | A `src/components/ui/` contract (section 4.6) | Not written yet. Phase 3 adds it. | ADR 0005 |
+| `getBySlug` throws NOT_FOUND for an unknown slug (plan.md 4.4) | Returns `null`; the tour page calls `notFound()`. `getById` throws NOT_FOUND for the API. | ADR 0031 |
+| A `loading.tsx` on every route segment (R4) | None under `src/app/tour/[slug]` or at `src/app/loading.tsx`: a loading boundary turns a missing slug into HTTP 200. Streaming sits inside the page, after the 404 decision. | ADR 0032 |
 
 ## 2. REST format and errors
 
@@ -1395,3 +1397,47 @@ Services clear tags after the write has finished and been awaited, through `getD
 | Seed run | 4 | none from the CLI, which cannot clear them; the `revalidate` time and a restart cover it |
 
 Operators: after `npm run seed`, restart `next dev` or `next start`, or wait up to an hour, before the list shows the reseeded tours. The Phase 4 test suite asserts `fakes.cache.invalidated` for each Phase 4 row once those writes exist.
+
+### Tour page, detail and guides (plan 04-06, ADR 0032)
+
+```ts
+// src/server/modules/tours/service.ts (server-only)
+export function getBySlug(slug: string): Promise<TourDetail | null>; // null for an unknown slug
+export function getById(id: string): Promise<TourDetail>; // throws NOT_FOUND
+export function getGuides(
+  tourId: string,
+  guideIds: string[],
+): Promise<PublicUser[]>;
+
+// src/server/modules/tours/dto.ts (server-only)
+export type TourDetail = TourSummary & {
+  description: string | null;
+  images: string[];
+  locations: Array<{ day: number; description: string; coordinates: number[] }>;
+  guideIds: string[]; // the tour's guides in its own order; no guide objects
+  photoCredits: TourPhotoCredit[]; // alt is always text (D-15)
+};
+export function toTourDetail(tour): TourDetail; // reads ids only, so it needs no populate
+
+// src/server/modules/users/service.ts (server-only)
+export function findActivePublicByIds(ids: string[]): Promise<PublicUser[]>;
+```
+
+Rules:
+
+- `getBySlug` looks the slug up in the cached catalogue first. An unknown slug returns `null` before any per-tour cache entry exists (T-04-17). The tour page and its `generateMetadata` share one call per request through React `cache()`.
+- `getGuides` reads the guides through `findActivePublicByIds`, so the tours module never imports the user model. The lead guide comes first, then the others in the tour's `guideIds` order (B12). Deactivated and missing guides are left out. A tour whose guides are all missing gets `[]` and does not throw.
+- `findActivePublicByIds` selects only `name`, `photo` and `role`, maps through `toPublicUser` (no email, S3), and skips malformed ids.
+- `getById` is uncached, so an id from the URL never creates a cache entry (T-04-17). The route refuses a malformed id with 400 VALIDATION_ERROR before the service runs. The service answers NOT_FOUND for any id it cannot find.
+- A guide's name is stored text, rendered as JSX text and never as HTML (S21).
+
+Cache keys and tags:
+
+| Read | Key | Tag | Lifetime | Built by |
+|------|-----|-----|----------|----------|
+| Tour detail | `['tour-detail', id]` | `tour:<id>` | Next's default | `getBySlug` |
+| Tour guides | `['tour-guides', id]` | `tour:<id>` | Next's default | `getGuides` |
+
+A tour update or an image change clears `tour:<id>` (the write-to-tag table above). A change to a guide's name, photo or role clears `tour:<id>` for each tour the guide works on, as the user row of that table says.
+
+API: `GET /api/v1/tours/[id]` answers `{ status: 'success', data: { tour } }`. `tour` is the `TourDetail` with `guides` added: each guide is `{ id, name, photo, role }`, in the order above. A malformed id is 400 VALIDATION_ERROR and an unknown id is 404 NOT_FOUND, both in the standard envelope (section 2.3).

@@ -2,16 +2,41 @@ import styles from './map-frame.module.css';
 
 export type RouteStop = { day: number; lat: number; lng: number };
 
-type MapFrameProps = { locations: RouteStop[] };
+type MapFrameProps = {
+  locations: RouteStop[];
+  /** false holds the route still (no draw animation). The tour page uses it under the Leaflet map (C3). */
+  animate?: boolean;
+};
 
 // The drawing area, in SVG user units. The same 400 by 240 box the Phase 2 mockup used.
 const WIDTH = 400;
 const HEIGHT = 240;
-const PADDING = 28;
-const MARKER_WIDTH = 22;
-const MARKER_HEIGHT = 18;
+
+/**
+ * The drawing sizes as numbers, because a Server Component cannot read a custom property.
+ * Each value equals the token it names (UI-SPEC C6). The unit test in
+ * test/components/ui/map-frame.test.ts reads tokens.css and fails if they drift.
+ */
+export const FRAME_TOKENS = {
+  /** --space-5 (24px): the space around the route inside the drawing. */
+  padding: 24,
+  /** --space-3 (12px): the diagonal shift that keeps two stops on one point both visible. */
+  nudge: 12,
+  /** 1.5rem: the width of a day marker. */
+  markerWidth: 24,
+  /** 1.25rem: the height of a day marker. */
+  markerHeight: 20,
+  /** The Neel outline under the route. */
+  outlineWidth: 8,
+  /** The Highway yellow route line. */
+  lineWidth: 4,
+} as const;
+
+const PADDING = FRAME_TOKENS.padding;
+const MARKER_WIDTH = FRAME_TOKENS.markerWidth;
+const MARKER_HEIGHT = FRAME_TOKENS.markerHeight;
 // Two stops at the same place (Leh on day 1 and day 8) are nudged apart by this much.
-const COLLISION_NUDGE = 14;
+const COLLISION_NUDGE = FRAME_TOKENS.nudge;
 
 type Placed = RouteStop & { x: number; y: number };
 
@@ -59,9 +84,9 @@ function placeMarkers(projected: Placed[]): Placed[] {
   });
 }
 
-// A static, server-rendered route. The only motion is the CSS draw in map-frame.module.css.
-// Phase 4's RouteMap replaces the data source with a real Leaflet map.
-export function MapFrame({ locations }: MapFrameProps) {
+// A static, server-rendered route. The only motion is the CSS draw in map-frame.module.css, and
+// `animate={false}` holds it still. The Leaflet map (plan 04-08) replaces this drawing in the same box.
+export function MapFrame({ locations, animate = true }: MapFrameProps) {
   if (locations.length === 0) return null;
 
   const stops = [...locations].sort((a, b) => a.day - b.day);
@@ -79,7 +104,7 @@ export function MapFrame({ locations }: MapFrameProps) {
   return (
     <div className={styles.frame}>
       <svg
-        className={styles.route}
+        className={animate ? styles.route : `${styles.route} ${styles.still}`}
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         role="img"
         aria-label={`Route map: ${stops.length} stops, days ${first} to ${last}`}

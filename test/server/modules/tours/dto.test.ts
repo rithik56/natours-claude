@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { toTourDetail, toTourSummary } from '@/server/modules/tours/dto';
 import { Tour, type TourDoc } from '@/server/modules/tours/model';
-import { User } from '@/server/modules/users/model';
 import { useTestDatabase } from '../../../helpers/db';
 import { createTour } from '../../../helpers/factories';
 import { seedTours, seedUsers } from '../../../helpers/seed';
@@ -34,7 +33,7 @@ const SUMMARY_KEYS = [
 const DETAIL_KEYS = [
   ...SUMMARY_KEYS,
   'description',
-  'guides',
+  'guideIds',
   'images',
   'locations',
   'photoCredits',
@@ -96,29 +95,38 @@ describe('tour DTOs', () => {
     expect(Array.isArray(summary.startLocation.coordinates)).toBe(true);
   });
 
-  it('[S3] toTourDetail returns exactly the documented keys with PublicUser guides', async () => {
+  it('[B12] toTourDetail returns exactly the documented keys, with the guides as ids and no guide objects', async () => {
+    const record = seedTours()[0]!;
+    const tour = await createTour({ slug: record.slug, withGuides: true });
+
+    const detail = toTourDetail(tour);
+
+    expect(Object.keys(detail).sort()).toEqual(DETAIL_KEYS);
+    expect(detail).not.toHaveProperty('guides');
+    expect(detail.guideIds).toEqual(record.guides);
+  });
+
+  it('[B12] toTourDetail reads the guide ids of a populated tour too, in the tour order', async () => {
     const record = seedTours()[0]!;
     const tour = await createTour({ slug: record.slug, withGuides: true });
     const populated = await Tour.findById(tour._id).populate('guides');
 
     const detail = toTourDetail(populated!);
 
-    expect(Object.keys(detail).sort()).toEqual(DETAIL_KEYS);
-    expect(detail.guides.map((guide) => guide.id)).toEqual(record.guides);
-    for (const guide of detail.guides) {
-      expect(Object.keys(guide).sort()).toEqual([
-        'id',
-        'name',
-        'photo',
-        'role',
-      ]);
-    }
+    expect(detail.guideIds).toEqual(record.guides);
     const names = seedUsers()
       .filter((person) => record.guides.includes(person._id))
       .map((person) => person.name);
-    expect(detail.guides.map((guide) => guide.name).sort()).toEqual(
-      names.sort(),
-    );
+    expect(names.length).toBe(record.guides.length);
+  });
+
+  it('[B12] toTourDetail gives [] guide ids for a tour with no guides', async () => {
+    const tour = await createTour();
+    tour.guides = [];
+
+    const detail = toTourDetail(tour);
+
+    expect(detail.guideIds).toEqual([]);
   });
 
   it('[R6] toTourDetail keeps the order of images, locations and photoCredits', async () => {
@@ -187,38 +195,10 @@ describe('tour DTOs', () => {
     expect(credit?.alt).toBe('Pangong Tso VM');
   });
 
-  it('[S3] toTourDetail throws when guides are not populated', async () => {
-    const tour = await createTour();
-
-    expect(() => toTourDetail(tour)).toThrow(/guides/);
-  });
-
-  it('[S3] toTourDetail throws the not-populated error, not a TypeError, when a guide no longer exists (WR-02)', async () => {
-    const tour = await createTour({ withGuides: true });
-    await User.deleteOne({ _id: tour.guides[0] });
-    const populated = await Tour.findById(tour._id).populate({
-      path: 'guides',
-      options: { retainNullValues: true },
-    });
-    expect(populated!.guides).toContain(null);
-
-    let thrown: unknown;
-    try {
-      toTourDetail(populated!);
-    } catch (error) {
-      thrown = error;
-    }
-
-    expect(thrown).toBeInstanceOf(Error);
-    expect(thrown).not.toBeInstanceOf(TypeError);
-    expect((thrown as Error).message).toMatch(/guides/);
-  });
-
   it('[S3] toTourDetail output is JSON-stable and carries no email', async () => {
     const tour = await createTour({ withGuides: true });
-    const populated = await Tour.findById(tour._id).populate('guides');
 
-    const detail = toTourDetail(populated!);
+    const detail = toTourDetail(tour);
 
     expect(JSON.parse(JSON.stringify(detail))).toEqual(detail);
     expect(JSON.stringify(detail)).not.toContain('example.com');

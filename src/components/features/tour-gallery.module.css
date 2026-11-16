@@ -1,0 +1,41 @@
+@layer components {
+  /* One column on a phone, three from 64em (D-09). */
+  .gallery {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .photo {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+  }
+
+  /* The box holds its 4:3 shape before the photo loads, so the layout does not collapse. */
+  .frame {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+  }
+
+  .image {
+    object-fit: cover;
+  }
+
+  .caption {
+    color: var(--color-text-muted);
+    font-size: var(--step-0);
+    line-height: 1.55;
+  }
+
+  @media (width >= 64em) {
+    .gallery {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+}

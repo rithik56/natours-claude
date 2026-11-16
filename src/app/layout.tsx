@@ -7,10 +7,17 @@ import { anekLatin } from '../styles/fonts';
 import { Footer } from '@/components/ui/footer';
 import { Header } from '@/components/ui/header';
 import { SkipLink } from '@/components/ui/skip-link';
+import { getConfig } from '@/server/config';
 
-export const metadata: Metadata = {
-  title: 'Natours',
-};
+// ARC-07: built inside generateMetadata, never at module scope, so the root metadata
+// needs APP_URL only when a page is rendered. Pages set their own title and social tags.
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    metadataBase: new URL(getConfig().appOrigin),
+    title: { default: 'Natours', template: '%s | Natours' },
+    openGraph: { siteName: 'Natours', locale: 'en_IN', type: 'website' },
+  };
+}
 
 export default async function RootLayout({
   children,

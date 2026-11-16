@@ -35,6 +35,7 @@ Every decision that departs from `plan.md`, and every project-level decision, is
 | 0029 | [Disk storage in development and ci, and the media route](0029-disk-storage-and-the-media-route.md) | Accepted |
 | 0030 | [The seed's guards, passwords, date roll and post-checks](0030-seed-guards-passwords-and-date-roll.md) | Accepted |
 | 0031 | [One cached catalogue, queried in memory](0031-one-cached-catalogue-queried-in-memory.md) | Accepted |
+| 0032 | [No loading.tsx on the tour page or at the root](0032-no-loading-file-on-the-tour-page.md) | Accepted |
 
 ## Format
 

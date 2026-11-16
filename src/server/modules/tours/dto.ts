@@ -1,9 +1,7 @@
 import 'server-only';
+import type { Types } from 'mongoose';
 import { toIstDay, type IstDay } from '@/lib/ist';
-import { toPublicUser, type PublicUser } from '@/server/modules/users/dto';
 import type { TourFields } from './model';
-
-type GuideSource = Parameters<typeof toPublicUser>[0];
 
 type SummarySource = Pick<
   TourFields,
@@ -27,6 +25,9 @@ type SummarySource = Pick<
   >;
 };
 
+/** A guide reference: an id, as stored. Populated guides are not read here (B12). */
+type GuideRef = Types.ObjectId | { _id: Types.ObjectId };
+
 type DetailSource = SummarySource &
   Pick<TourFields, 'description' | 'images' | 'photoCredits'> & {
     locations: Array<
@@ -35,7 +36,7 @@ type DetailSource = SummarySource &
         'day' | 'description' | 'coordinates'
       >
     >;
-    guides: Array<GuideSource | { toString(): string }>;
+    guides: GuideRef[];
   };
 
 /** A tour as the catalogue and cards show it (S3, R6). */
@@ -66,12 +67,16 @@ type TourPhotoCredit = Omit<TourFields['photoCredits'][number], 'alt'> & {
   alt: string;
 };
 
-/** A tour as its detail page shows it. */
+/**
+ * A tour as its detail page and API show it. The guides are not in here: they
+ * stream in on their own, so the tour document itself needs no populate (plan 04-06, RESEARCH
+ * Pattern 6). `guideIds` keeps the tour's guides order for that later read.
+ */
 export type TourDetail = TourSummary & {
   description: string | null;
   images: string[];
   locations: Array<{ day: number; description: string; coordinates: number[] }>;
-  guides: PublicUser[];
+  guideIds: string[];
   photoCredits: TourPhotoCredit[];
 };
 
@@ -124,32 +129,16 @@ export function toTourSummary(tour: SummarySource): TourSummary {
   };
 }
 
-// Mongoose populates a missing reference (a deleted guide) as null when nulls
-// are retained, and typeof null is 'object', so the null check must come
-// before the `in` checks. How a tour with a missing guide is shown is a
-// Phase 4 service decision; until then it fails with the "not populated" error.
-function isGuideRecord(
-  guide: GuideSource | { toString(): string } | null,
-): guide is GuideSource {
-  return (
-    typeof guide === 'object' &&
-    guide !== null &&
-    'name' in guide &&
-    'role' in guide
-  );
+/** The id of one stored guide reference, in the tour's own order. */
+function guideIdOf(guide: GuideRef): string {
+  return String('_id' in guide ? guide._id : guide);
 }
 
 /**
- * Maps a tour for its detail page. The guides must be populated: an id in
- * their place is a programming error, so it throws.
+ * Maps a tour for its detail page. The tour is read without a populate, so its
+ * guides are ids: `guideIds` keeps their order, and `getGuides` reads the people.
  */
 export function toTourDetail(tour: DetailSource): TourDetail {
-  const guides = tour.guides.map((guide) => {
-    if (!isGuideRecord(guide)) {
-      throw new Error('toTourDetail needs the tour guides to be populated');
-    }
-    return toPublicUser(guide);
-  });
   return {
     ...toTourSummary(tour),
     description: tour.description ?? null,
@@ -159,7 +148,7 @@ export function toTourDetail(tour: DetailSource): TourDetail {
       description: stop.description,
       coordinates: [...stop.coordinates],
     })),
-    guides,
+    guideIds: tour.guides.map(guideIdOf),
     photoCredits: tour.photoCredits.map((credit) => ({
       file: credit.file,
       title: credit.title,
