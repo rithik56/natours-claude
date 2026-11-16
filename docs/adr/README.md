@@ -38,6 +38,7 @@ Every decision that departs from `plan.md`, and every project-level decision, is
 | 0032 | [No loading.tsx on the tour page or at the root](0032-no-loading-file-on-the-tour-page.md) | Accepted |
 | 0033 | [The booking panel sits in the page flow on a phone, and "booked" means an upcoming paid booking](0033-booking-panel-in-the-page-flow.md) | Accepted |
 | 0039 | [The tour page awaits its booking, guides and reviews instead of streaming them](0039-tour-page-awaits-instead-of-streaming.md) | Accepted |
+| 0040 | [The credits page has no loading.tsx, so it shows with JavaScript off](0040-credits-page-has-no-loading-file.md) | Accepted |
 
 ## Format
 

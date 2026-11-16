@@ -1,6 +1,6 @@
 # 0032. No loading.tsx on the tour page or at the root
 
-Status: Accepted. Decision 2 is amended by ADR 0039 for the tour page: its sections are awaited, not streamed.
+Status: Accepted. Decision 2 is amended by ADR 0039 for the tour page: its sections are awaited, not streamed. Decision 3 is amended by ADR 0040: `/credits` has no `loading.tsx` either, so it works with JavaScript off.
 Date: 16 Nov 2026
 Requirements: R4, U11
 Plan review: none
