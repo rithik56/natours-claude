@@ -6,10 +6,10 @@ current_phase_name: Browse tours
 current_plan: 7
 status: executing
 stopped_at: Phase 4 UI-SPEC approved
-last_updated: "2026-11-16T13:53:39.003Z"
+last_updated: "2026-11-16T15:46:51.021Z"
 last_activity: 2026-11-16
 last_activity_desc: Phase 04 execution resumed (wave continue)
-state_head: 6cd148d8a1951fb9ba7843c43d724b06aa381ec1
+state_head: e5773797f7256e71e8d89b0053661966ef4df3f7
 progress:
   total_phases: 8
   completed_phases: 2
@@ -135,6 +135,7 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 261115-tjm | Phase 03 design gate follow-ups: add missing product strings to copy.md and fix FactsStrip mobile wrapping | 2026-11-15 | ca055e3 | [261115-tjm-phase-03-design-gate-follow-ups-add-miss](./quick/261115-tjm-phase-03-design-gate-follow-ups-add-miss/) |
 | 261116-ohv | Make TourPhotoCredit module-private so knip and the CI checks job pass | 2026-11-16 | 109a3e7 | [261116-ohv-make-tourphotocredit-module-private-so-k](./quick/261116-ohv-make-tourphotocredit-module-private-so-k/) |
+| 3 | Keep CreditPhoto module-private so knip passes | 2026-11-16 | e577379 | — |
 
 ## Deferred Items
 
