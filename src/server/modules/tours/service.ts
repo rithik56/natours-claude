@@ -1,7 +1,8 @@
 import 'server-only';
 import { cache } from 'react';
 import type { Types } from 'mongoose';
-import { istMonthBounds, toIstDay } from '@/lib/ist';
+import { messages } from '@/lib/messages';
+import { fromIstDay, istMonthBounds, toIstDay } from '@/lib/ist';
 import { now } from '@/server/clock';
 import { connectDb, isDbUnavailableError } from '@/server/db';
 import { getDeps } from '@/server/deps';
@@ -24,7 +25,8 @@ import {
   type TourDetail,
   type TourSummary,
 } from './dto';
-import { Tour, type TourFields } from './model';
+import type { TourUpdateInput } from './schemas';
+import { Tour, type TourDoc, type TourFields } from './model';
 
 type TourRecord = TourFields & { _id: Types.ObjectId };
 
@@ -388,4 +390,126 @@ export async function getGuides(
     ['tour-guides', tourId],
     [`tour:${tourId}`],
   )(guideIds);
+}
+
+/** A tour with its guides, as the write routes answer it (B13): the same shape as GET by id. */
+export type TourWithGuides = TourDetail & { guides: PublicUser[] };
+
+/** Reads a tour document by id for a write. A malformed id is absent, not an error. */
+async function loadDocument(id: string): Promise<TourDoc | null> {
+  if (!OBJECT_ID.test(id)) return null;
+  await connectDb();
+  const doc = await Tour.findById(id);
+  return doc;
+}
+
+/**
+ * Maps the validated input onto the model: start dates become 00:00 IST instants, and
+ * the two points become GeoJSON (B19). Only the keys the caller sent are returned, so
+ * an update never touches a field it does not name.
+ */
+function toModelFields(input: TourUpdateInput): Record<string, unknown> {
+  const { startDates, startLocation, locations, ...rest } = input;
+  return {
+    ...rest,
+    ...(startDates && { startDates: startDates.map((day) => fromIstDay(day)) }),
+    ...(startLocation && {
+      startLocation: { type: 'Point', ...startLocation },
+    }),
+    ...(locations && {
+      locations: locations.map((stop) => ({ type: 'Point', ...stop })),
+    }),
+  };
+}
+
+/**
+ * Every guide id must name an active user with the role guide or lead-guide (B12). A
+ * missing, deactivated or other-role id is a 400 on the guides path, so no tour can list
+ * a visitor, an admin or a missing account as its guide.
+ *
+ * @throws AppError VALIDATION_ERROR on the guides path when any id is not a guide.
+ */
+async function assertGuides(ids: string[] | undefined): Promise<void> {
+  if (!ids || ids.length === 0) return;
+  const people = await findActivePublicByIds(ids);
+  const guides = new Set(
+    people
+      .filter(
+        (person) => person.role === 'guide' || person.role === 'lead-guide',
+      )
+      .map((person) => person.id),
+  );
+  if (ids.some((id) => !guides.has(id))) {
+    throw new AppError('VALIDATION_ERROR', undefined, [
+      { path: 'guides', message: messages.validation.invalidValue },
+    ]);
+  }
+}
+
+/** A write that hits the unique name or slug index gets the approved 409 (copy.md). */
+function isDuplicateKey(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    (error as { code?: unknown }).code === 11000
+  );
+}
+
+/**
+ * Maps a failed write. A duplicate name or slug is the approved CONFLICT; an outage
+ * is SERVICE_UNAVAILABLE with the driver error as cause (B10); anything else is
+ * returned unchanged, so validator errors reach the error mapper as they are.
+ */
+function writeFailure(error: unknown): unknown {
+  if (isDuplicateKey(error)) {
+    return new AppError('CONFLICT', messages.tours.duplicateName);
+  }
+  if (isDbUnavailableError(error)) {
+    const unavailable = new AppError('SERVICE_UNAVAILABLE');
+    unavailable.cause = error;
+    return unavailable;
+  }
+  return error;
+}
+
+/** The saved tour with its guides, read after the cache has been cleared for it. */
+async function detailWithGuides(doc: TourDoc): Promise<TourWithGuides> {
+  const detail = toTourDetail(doc.toObject() as unknown as TourRecord);
+  return { ...detail, guides: await getGuides(detail.id, detail.guideIds) };
+}
+
+/**
+ * Changes some of one tour's editable fields (B4, QA-04). The tour is loaded, the
+ * fields are set and the document is saved, so the validators and the slug hook run:
+ * a rename regenerates the slug. The tags `tours` and `tour:<id>` are cleared once the
+ * save has finished.
+ *
+ * @param id - The tour's 24-character hex id, already checked by the route.
+ * @param input - The fields to change, validated by `tourUpdateSchema`.
+ * @returns The tour after the change, with its guides.
+ * @throws AppError NOT_FOUND when no tour has the id.
+ * @throws AppError CONFLICT with the approved message when the name or slug is taken.
+ * @throws AppError VALIDATION_ERROR on the guides path when a guide id is not a guide.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function updateTour(
+  id: string,
+  input: TourUpdateInput,
+): Promise<TourWithGuides> {
+  let doc: TourDoc | null;
+  try {
+    doc = await loadDocument(id);
+  } catch (error) {
+    throw writeFailure(error);
+  }
+  if (!doc) throw new AppError('NOT_FOUND');
+  await assertGuides(input.guides);
+  doc.set(toModelFields(input));
+  try {
+    await doc.save();
+  } catch (error) {
+    throw writeFailure(error);
+  }
+  await getDeps().cache.invalidate('tours', `tour:${id}`);
+  return detailWithGuides(doc);
 }
