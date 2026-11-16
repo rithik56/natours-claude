@@ -18,7 +18,7 @@ const { validation } = messages;
 
 const MAX_IMAGES = 3;
 
-/** One photo's credit (U27). Every field is required. */
+/** One photo's credit (U27). Every field is required except `alt` (D-15). */
 interface PhotoCredit {
   file: string;
   title: string;
@@ -26,6 +26,7 @@ interface PhotoCredit {
   license: string;
   licenseUrl: string;
   sourceUrl: string;
+  alt?: string;
 }
 
 /** A GeoJSON Point, with longitude first. */
@@ -112,6 +113,11 @@ const photoCreditSchema = new Schema<PhotoCredit>(
     license: requiredText,
     licenseUrl: requiredText,
     sourceUrl: requiredText,
+    alt: {
+      type: String,
+      trim: true,
+      maxlength: [150, validation.tooLong(150)],
+    },
   },
   { _id: false },
 );

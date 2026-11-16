@@ -58,14 +58,45 @@ export type TourSummary = {
   };
 };
 
+/** A photo credit as a page shows it: `alt` is always text (D-15). */
+export type TourPhotoCredit = Omit<
+  TourFields['photoCredits'][number],
+  'alt'
+> & { alt: string };
+
 /** A tour as its detail page shows it. */
 export type TourDetail = TourSummary & {
   description: string | null;
   images: string[];
   locations: Array<{ day: number; description: string; coordinates: number[] }>;
   guides: PublicUser[];
-  photoCredits: TourFields['photoCredits'];
+  photoCredits: TourPhotoCredit[];
 };
+
+const IMAGE_EXTENSION = /\.(jpe?g|png|webp)$/i;
+
+/**
+ * The alt text a credit shows when no alt is stored (D-15). The cover uses the
+ * tour name; any other photo uses its title, without the file extension, with
+ * underscores as spaces.
+ */
+function fallbackAlt(
+  credit: TourFields['photoCredits'][number],
+  tour: Pick<SummarySource, 'name' | 'imageCover'>,
+): string {
+  if (credit.file === tour.imageCover) return tour.name;
+  return credit.title.replace(IMAGE_EXTENSION, '').replace(/_/g, ' ').trim();
+}
+
+function altFor(
+  credit: TourFields['photoCredits'][number],
+  tour: Pick<SummarySource, 'name' | 'imageCover'>,
+): string {
+  if (typeof credit.alt === 'string' && credit.alt.trim().length > 0) {
+    return credit.alt;
+  }
+  return fallbackAlt(credit, tour);
+}
 
 /** Maps a tour for lists and cards. Every array keeps the document's order (R6). */
 export function toTourSummary(tour: SummarySource): TourSummary {
@@ -133,6 +164,7 @@ export function toTourDetail(tour: DetailSource): TourDetail {
       license: credit.license,
       licenseUrl: credit.licenseUrl,
       sourceUrl: credit.sourceUrl,
+      alt: altFor(credit, tour),
     })),
   };
 }

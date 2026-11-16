@@ -183,6 +183,16 @@ describe('tours data layer', () => {
       await expect(tour.validate()).rejects.toThrow(/startDates/);
     });
 
+    it('[U27] accepts a photo credit alt of 150 characters and rejects 151', async () => {
+      const tour = await createTour();
+
+      tour.photoCredits[0]!.alt = 'a'.repeat(150);
+      await expect(tour.validate()).resolves.toBeUndefined();
+
+      tour.photoCredits[0]!.alt = 'a'.repeat(151);
+      await expect(tour.validate()).rejects.toThrow(/alt/);
+    });
+
     it('rejects out-of-range coordinates, an unknown difficulty and a short name', async () => {
       const tour = await createTour();
 
