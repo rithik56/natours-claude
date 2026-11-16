@@ -70,17 +70,43 @@ jobs:
           echo "MongoDB did not accept a connection on 127.0.0.1:27017 within 60 seconds" >&2
           cat "$RUNNER_TEMP/ci-mongo.log" >&2
           exit 1
+      # T-04-08: generated per run, masked before they leave this step, and passed only as step outputs
+      # to the steps that need them. They never enter the job environment, so the build below stays secret-free.
+      - name: Generate the session secret and the seed passwords
+        id: secrets
+        shell: bash
+        run: |
+          session_secret="$(openssl rand -base64 48)"
+          seed_user_password="$(openssl rand -base64 32)"
+          seed_admin_password="$(openssl rand -base64 32)"
+          for value in "$session_secret" "$seed_user_password" "$seed_admin_password"; do
+            echo "::add-mask::$value"
+          done
+          {
+            echo "session_secret=$session_secret"
+            echo "seed_user_password=$seed_user_password"
+            echo "seed_admin_password=$seed_admin_password"
+          } >> "$GITHUB_OUTPUT"
+      # D10: the seed loads before the build, smoke and bundle steps, so /media and the catalogue have data.
+      - name: Seed the database
+        run: npm run seed
+        env:
+          APP_ENV: ci
+          APP_URL: http://localhost:3210
+          MONGODB_URI: mongodb://127.0.0.1:27017/natours
+          SESSION_SECRET: ${{ steps.secrets.outputs.session_secret }}
+          SEED_USER_PASSWORD: ${{ steps.secrets.outputs.seed_user_password }}
+          SEED_ADMIN_PASSWORD: ${{ steps.secrets.outputs.seed_admin_password }}
       # No env block on purpose: a build that needs no secrets proves ARC-07.
       - name: Build
         run: npm run build
-      - name: Generate a session secret for the smoke run
-        run: echo "SESSION_SECRET=$(openssl rand -base64 48)" >> "$GITHUB_ENV"
       - name: Smoke test the built app
         run: npm run smoke
         env:
           APP_ENV: ci
           APP_URL: http://localhost:3210
           MONGODB_URI: mongodb://127.0.0.1:27017/natours
+          SESSION_SECRET: ${{ steps.secrets.outputs.session_secret }}
       # R9, D-10: the script transfer size of / may not exceed the recorded floor plus 40 KB.
       # The floor lives in docs/bundle-baseline.json and is recorded locally, never by CI.
       - name: Check the JavaScript budget
@@ -89,6 +115,7 @@ jobs:
           APP_ENV: ci
           APP_URL: http://localhost:3300
           MONGODB_URI: mongodb://127.0.0.1:27017/natours
+          SESSION_SECRET: ${{ steps.secrets.outputs.session_secret }}
       # Artifacts only: Lighthouse results are never uploaded to public temporary storage.
       - name: Upload Lighthouse results
         if: always()

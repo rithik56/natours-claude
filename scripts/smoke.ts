@@ -4,7 +4,9 @@ import { setTimeout as sleep } from 'node:timers/promises';
 
 // D4: the built app refuses to start on bad configuration and serves on good configuration.
 // S11, D7: the built app also gives every script tag the nonce from its own CSP.
-// Run `npm run build` first and keep MongoDB reachable at MONGODB_URI.
+// D2: a seeded photo is served from /media with its content type (ADR 0029).
+// Run `npm run build` first, keep MongoDB reachable at MONGODB_URI, and seed the database first
+// with `npm run seed`, so the seeded photo exists on disk under STORAGE_DIR.
 
 const ROOT = join(import.meta.dirname, '..');
 const PORT = '3210';
@@ -155,7 +157,26 @@ async function checkProbeHeaders(): Promise<void> {
   }
 }
 
-/** A start with the inherited environment must serve the home page and /readyz. */
+const SEEDED_PHOTO = '/media/tours/valley-of-flowers-trek-cover.jpg';
+
+/** A seeded photo must be served from /media as image/jpeg, so next/image can optimise it (D2). */
+async function checkSeededPhoto(): Promise<void> {
+  const response = await fetch(`${ORIGIN}${SEEDED_PHOTO}`);
+  await response.arrayBuffer();
+  if (response.status !== 200) {
+    throw new Error(
+      `GET ${SEEDED_PHOTO} answered ${String(response.status)}, expected 200; run npm run seed first`,
+    );
+  }
+  const type = response.headers.get('content-type') ?? '';
+  if (!type.startsWith('image/jpeg')) {
+    throw new Error(
+      `GET ${SEEDED_PHOTO} is ${type || 'untyped'}, expected image/jpeg`,
+    );
+  }
+}
+
+/** A start with the inherited environment must serve the home page, /readyz and a seeded photo. */
 async function checkServesGoodEnv(): Promise<void> {
   const app = startApp({ ...process.env });
   try {
@@ -169,6 +190,7 @@ async function checkServesGoodEnv(): Promise<void> {
     const second = await checkPage();
     if (first === second) throw new Error('two requests to / shared one nonce');
     await checkProbeHeaders();
+    await checkSeededPhoto();
   } finally {
     await stopApp(app);
   }

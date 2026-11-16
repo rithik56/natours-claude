@@ -1,12 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
+import { E2E_PORT, e2eEnv } from './test/app/e2e-env';
 
-const port = 3000;
+const port = E2E_PORT;
 
 /**
- * Two projects share one config.
+ * Three projects share one config.
  *
  * mockups: captures the design-gate mockups (docs/design/mockups/*.html) as
  * static screenshots. Not part of the Next.js app, see plan.md §9.7 step 3.
+ * It needs no database, so it does not depend on the seed.
+ *
+ * seed: resets the seed data in the database and pins the clock's date
+ * (test/app/seed-setup.ts, ADR 0030). The app project waits for it.
  *
  * app: drives the real app in a browser. Plan 03-01 sets this up so every
  * interactive ui/ component (mobile menu, star rating input, confirm dialog,
@@ -28,9 +33,15 @@ export default defineConfig({
       testMatch: '**/*.spec.ts',
     },
     {
+      name: 'seed',
+      testDir: 'test/app',
+      testMatch: 'seed-setup.ts',
+    },
+    {
       name: 'app',
       testDir: 'test/app',
       testMatch: '**/*.spec.ts',
+      dependencies: ['seed'],
       use: { baseURL: `http://localhost:${port}` },
     },
   ],
@@ -39,16 +50,10 @@ export default defineConfig({
     url: `http://localhost:${port}/healthz`,
     reuseExistingServer: true,
     timeout: 120_000,
-    // Test-only values, used when the shell and .env.local set none. They never leave this machine.
+    // Test-only values from test/app/e2e-env.ts, used when the shell sets none. They never leave this machine.
     env: {
       PORT: String(port),
-      APP_ENV: process.env.APP_ENV ?? 'ci',
-      APP_URL: process.env.APP_URL ?? `http://localhost:${port}`,
-      MONGODB_URI:
-        process.env.MONGODB_URI ?? 'mongodb://127.0.0.1:27017/natours',
-      SESSION_SECRET:
-        process.env.SESSION_SECRET ??
-        'playwright-run-session-secret-0123456789',
+      ...e2eEnv,
     },
   },
 });
