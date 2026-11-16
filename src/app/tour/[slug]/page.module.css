@@ -35,11 +35,6 @@
     line-height: 1.55;
   }
 
-  /* Reserved for the booking panel. Empty until plan 04-07 fills it, so it takes no space. */
-  .aside:empty {
-    display: none;
-  }
-
   .content {
     display: grid;
     gap: var(--space-7);

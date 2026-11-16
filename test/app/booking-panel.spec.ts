@@ -82,3 +82,66 @@ for (const width of [375, 1280]) {
     });
   });
 }
+
+// R4, C1, D-06: the skeleton is the same box as the panel it stands in for, at both widths.
+for (const width of [375, 1280]) {
+  test(`[R4] at ${width}px the booking-panel skeleton has the same box as the bookable panel`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/styleguide');
+    const panel = await page.getByRole('complementary').nth(0).boundingBox();
+    const skeleton = await page
+      .getByTestId('skeleton-booking-panel')
+      .locator('> div')
+      .boundingBox();
+
+    // Height is what moves the page when the real panel replaces the skeleton, so it must match exactly.
+    // The width is not compared here: the styleguide lays each state out as a flex row, which sizes
+    // both boxes to their content. In the tour page's column both are the column's width.
+    expect(panel).not.toBeNull();
+    expect(skeleton?.height).toBeCloseTo(panel?.height ?? 0, 0);
+  });
+}
+
+// U11, C1, D-06: on the tour page the panel is in the page flow on a phone and sticky beside the content from 64em.
+test.describe('[U11] the booking panel on the tour page', () => {
+  test('[U11] at 375px the panel is a block in the page flow, straight after the facts strip, and not pinned', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 900 });
+    await page.goto('/tour/ladakh-high-passes');
+    const panel = page.getByRole('complementary', { name: 'Book this tour' });
+    await expect(panel).toBeVisible();
+
+    const position = await panel.evaluate(
+      (element) => getComputedStyle(element).position,
+    );
+    expect(position).toBe('static');
+
+    const facts = await page.locator('article > header > ul').boundingBox();
+    const box = await panel.boundingBox();
+    expect(facts).not.toBeNull();
+    expect(box?.y ?? 0).toBeGreaterThanOrEqual(
+      (facts?.y ?? 0) + (facts?.height ?? 0),
+    );
+  });
+
+  test('[U11] at 1280px the panel stays sticky in the right column', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/tour/ladakh-high-passes');
+    const panel = page.getByRole('complementary', { name: 'Book this tour' });
+    await expect(panel).toBeVisible();
+
+    const position = await panel.evaluate(
+      (element) => getComputedStyle(element).position,
+    );
+    expect(position).toBe('sticky');
+
+    // The panel fills the 22rem right column (352px at the default 16px root size).
+    const box = await panel.boundingBox();
+    expect(box?.width ?? 0).toBeCloseTo(352, 0);
+  });
+});

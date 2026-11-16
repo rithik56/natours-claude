@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { cache } from 'react';
+import { cache, Suspense } from 'react';
+import { BookingSection } from '@/components/features/booking-section';
 import {
   TourGallery,
   type GalleryPhoto,
@@ -10,6 +11,7 @@ import { TourRoute } from '@/components/features/tour-route';
 import { FactsStrip } from '@/components/ui/facts-strip';
 import { Link } from '@/components/ui/link';
 import { PhotoCredits } from '@/components/ui/photo-credits';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatPrice } from '@/lib/format';
 import { getConfig } from '@/server/config';
 import { getDeps } from '@/server/deps';
@@ -159,8 +161,12 @@ export default async function TourPage({ params }: TourPageProps) {
           rating={tour.ratingsAverage}
         />
       </header>
-      {/* Reserved for the booking panel (plan 04-07): empty until then, so the aside column stays hidden. */}
-      <div className={styles.aside} />
+      {/* The booking panel depends on the visitor, so it streams behind a same-sized skeleton (R4, R5). */}
+      <div className={styles.aside}>
+        <Suspense fallback={<Skeleton variant="booking-panel" />}>
+          <BookingSection tour={tour} />
+        </Suspense>
+      </div>
       <div className={styles.content}>
         {tour.locations.length > 0 ? (
           <section className={styles.section}>
