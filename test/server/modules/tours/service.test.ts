@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { list } from '@/server/modules/tours/service';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { list, monthOptions } from '@/server/modules/tours/service';
+import { Tour } from '@/server/modules/tours/model';
 import { useTestDatabase } from '../../../helpers/db';
 import { createTour } from '../../../helpers/factories';
 import { seedTours } from '../../../helpers/seed';
@@ -92,6 +93,34 @@ describe('tours service: list', () => {
     expect(result.items).toEqual([]);
     expect(result.page).toBe(99);
     expect(result.total).toBe(13);
+  });
+
+  it('[U10] monthOptions gives ascending, unique YYYY-MM months from the cached catalogue', async () => {
+    await createWholeCatalogue();
+
+    const options = await monthOptions();
+
+    expect(options.length).toBeGreaterThan(0);
+    expect(options.every((month) => /^\d{4}-\d{2}$/.test(month))).toBe(true);
+    expect(options).toEqual([...new Set(options)].sort());
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('[B10] a read that fails with a network error is refused as SERVICE_UNAVAILABLE, with the driver error as the cause', async () => {
+    const driverError = Object.assign(new Error('connection reset'), {
+      name: 'MongoNetworkError',
+    });
+    vi.spyOn(Tour, 'find').mockImplementation(() => {
+      throw driverError;
+    });
+
+    const error = await list(PAGE_ONE_QUERY).catch((caught: unknown) => caught);
+
+    expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+    expect((error as Error).cause).toBe(driverError);
   });
 
   it('[B12] an empty catalogue lists nothing, with a total of 0 and one page', async () => {

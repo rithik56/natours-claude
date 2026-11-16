@@ -1,7 +1,7 @@
 import 'server-only';
 
 /** Options a cached read may set. `revalidate` is seconds; absent means Next's default (ADR 0031). */
-export type CacheOptions = { revalidate?: number };
+type CacheOptions = { revalidate?: number };
 
 /**
  * The tagged data cache (ADR 0012). Services call `cached` and `invalidate`

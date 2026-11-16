@@ -1,11 +1,14 @@
 import 'server-only';
 import { cache } from 'react';
 import type { Types } from 'mongoose';
+import { toIstDay } from '@/lib/ist';
+import { now } from '@/server/clock';
 import { connectDb, isDbUnavailableError } from '@/server/db';
 import { getDeps } from '@/server/deps';
 import { AppError } from '@/server/errors';
 import {
   applyCatalogueQuery,
+  monthOptionsFrom,
   type CatalogueQuery,
   type TourListResult,
 } from './catalogue-query';
@@ -44,13 +47,27 @@ const readCatalogue = cache(() =>
 
 /**
  * Lists tours for `/` and for GET /api/v1/tours (D-11, D-12). Both call this one
- * function, so the page and the API cannot drift (B13).
+ * function, so the page and the API cannot drift (B13). Filtering, sorting and
+ * paging run in memory on the cached catalogue, against today's IST day, so a
+ * cached entry never freezes which departures are still bookable (QA-13).
  *
- * @param query - The sort tokens, page, limit and clamp flag, already parsed.
+ * @param query - The filters, sort tokens, page, limit and clamp flag, already parsed.
  * @returns One page of tour summaries, with the total before paging.
  * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
  */
 export async function list(query: CatalogueQuery): Promise<TourListResult> {
   const catalogue = await readCatalogue();
-  return applyCatalogueQuery(catalogue, query);
+  return applyCatalogueQuery(catalogue, query, toIstDay(now()));
+}
+
+/**
+ * The month options for the filter form (D-04): each YYYY-MM with at least one
+ * bookable departure, ascending.
+ *
+ * @returns The months, from the cached catalogue and today's IST day.
+ * @throws AppError SERVICE_UNAVAILABLE when MongoDB cannot be reached (B10).
+ */
+export async function monthOptions(): Promise<string[]> {
+  const catalogue = await readCatalogue();
+  return monthOptionsFrom(catalogue, toIstDay(now()));
 }

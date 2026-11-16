@@ -5,6 +5,20 @@ import type { TourSummary } from './dto';
 /** One catalogue tour, as the list shows it. */
 export type CatalogueEntry = TourSummary;
 
+type Difficulty = CatalogueEntry['difficulty'];
+
+/** The numeric fields the API may filter on (S7). */
+type NumericField = 'price' | 'duration' | 'ratingsAverage' | 'maxGroupSize';
+
+/** `eq` is plain equality; the others are the bracketed operators (price[gte] and so on). */
+type NumericOp = 'eq' | 'gte' | 'gt' | 'lte' | 'lt';
+
+export type CatalogueFilter = {
+  field: NumericField;
+  op: NumericOp;
+  value: number;
+};
+
 /** A parsed list query. The query module never reads the URL itself. */
 export type CatalogueQuery = {
   /**
@@ -20,6 +34,15 @@ export type CatalogueQuery = {
    * false on the API: a page past the end answers an empty list with the real total.
    */
   clampPage: boolean;
+  difficulty?: Difficulty;
+  /** An inclusive range of whole days, such as [3, 4] (D-02). */
+  lengthBand?: readonly [number, number];
+  /** An inclusive ceiling in whole rupees, such as 20000 (D-02). */
+  maxPrice?: number;
+  /** YYYY-MM. A tour matches when it has a bookable departure in that IST month (D-04). */
+  month?: string;
+  /** Numeric filters from the API, all of which must hold (S7). */
+  filters?: readonly CatalogueFilter[];
 };
 
 export type TourListResult = {
@@ -30,6 +53,10 @@ export type TourListResult = {
   totalPages: number;
 };
 
+/** A catalogue tour with only the fields the caller asked for, and always its id. */
+export type ProjectedEntry = Partial<CatalogueEntry> &
+  Pick<CatalogueEntry, 'id'>;
+
 type SortField =
   | 'price'
   | 'ratingsAverage'
@@ -37,6 +64,15 @@ type SortField =
   | 'maxGroupSize'
   | 'name'
   | 'createdAt';
+
+const OPERATORS: Record<NumericOp, (value: number, bound: number) => boolean> =
+  {
+    eq: (value, bound) => value === bound,
+    gte: (value, bound) => value >= bound,
+    gt: (value, bound) => value > bound,
+    lte: (value, bound) => value <= bound,
+    lt: (value, bound) => value < bound,
+  };
 
 // Strings compare by code unit, so the order is the same on every machine.
 function compare(a: number | string, b: number | string): number {
@@ -58,26 +94,58 @@ function comparatorFor(
   };
 }
 
+/** Every filter the query names must hold. Each is inclusive where the plan says so. */
+function matches(
+  entry: CatalogueEntry,
+  query: CatalogueQuery,
+  today: IstDay,
+): boolean {
+  if (query.difficulty !== undefined && entry.difficulty !== query.difficulty) {
+    return false;
+  }
+  if (query.lengthBand !== undefined) {
+    const [min, max] = query.lengthBand;
+    if (entry.duration < min || entry.duration > max) return false;
+  }
+  if (query.maxPrice !== undefined && entry.price > query.maxPrice)
+    return false;
+  for (const filter of query.filters ?? []) {
+    if (!OPERATORS[filter.op](entry[filter.field], filter.value)) return false;
+  }
+  if (query.month !== undefined) {
+    const prefix = `${query.month}-`;
+    const bookable = entry.startDates.some(
+      (day) => day > today && day.startsWith(prefix),
+    );
+    if (!bookable) return false;
+  }
+  return true;
+}
+
 /**
- * Sorts, counts, pages and clamps a catalogue. Pure: it never reads the database
- * or the clock, and it never changes `entries`, which may be a shared cache value.
+ * Filters, sorts, counts, pages and clamps a catalogue. Pure: it never reads the
+ * database or the clock, and it never changes `entries`, which may be a shared cache value.
  *
  * @param entries - Every catalogue tour, in any order.
- * @param query - The sort tokens, page, limit and clamp flag.
+ * @param query - The filters, sort tokens, page, limit and clamp flag.
+ * @param today - The IST day a departure must be after to be bookable (D-03).
  * @returns The page of items, the total before paging, and the page numbers used.
  */
 export function applyCatalogueQuery(
   entries: readonly CatalogueEntry[],
   query: CatalogueQuery,
+  today: IstDay,
 ): TourListResult {
   const comparators = query.sort.map(comparatorFor);
-  const sorted = [...entries].sort((a, b) => {
-    for (const byToken of comparators) {
-      const order = byToken(a, b);
-      if (order !== 0) return order;
-    }
-    return compare(a.name, b.name) || compare(a.id, b.id);
-  });
+  const sorted = entries
+    .filter((entry) => matches(entry, query, today))
+    .sort((a, b) => {
+      for (const byToken of comparators) {
+        const order = byToken(a, b);
+        if (order !== 0) return order;
+      }
+      return compare(a.name, b.name) || compare(a.id, b.id);
+    });
   const total = sorted.length;
   const totalPages = Math.max(1, Math.ceil(total / query.limit));
   const page = query.clampPage
@@ -106,4 +174,37 @@ export function nextBookableDate(
     if (day > today && (next === null || day < next)) next = day;
   }
   return next;
+}
+
+/**
+ * D-04: the months, YYYY-MM and ascending, that have at least one bookable
+ * departure in the catalogue. Only months after today count.
+ */
+export function monthOptionsFrom(
+  entries: readonly CatalogueEntry[],
+  today: IstDay,
+): string[] {
+  const months = new Set<string>();
+  for (const entry of entries) {
+    for (const day of entry.startDates) {
+      if (day > today) months.add(day.slice(0, 7));
+    }
+  }
+  return [...months].sort();
+}
+
+/**
+ * The API's `fields` projection (B11). It copies TourSummary keys only, never the
+ * stored document, so no hidden field can be asked for (T-04-14).
+ */
+export function projectFields(
+  items: readonly CatalogueEntry[],
+  fields: readonly (keyof CatalogueEntry)[],
+): ProjectedEntry[] {
+  const keep = new Set<keyof CatalogueEntry>(['id', ...fields]);
+  return items.map((item) => {
+    const picked: Record<string, unknown> = {};
+    for (const field of keep) picked[field] = item[field];
+    return picked as ProjectedEntry;
+  });
 }
