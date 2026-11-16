@@ -27,7 +27,7 @@ QA-06, QA-07 and SEC-07 say that only a `paid` booking counts, and that a trip w
 
 ## Consequences
 
-- The tour page's aside column is a plain block on a phone and a sticky column from 64em. The booking skeleton is the same size as the panel it stands in for.
+- The tour page's aside column is a plain block on a phone and a sticky column from 64em. The booking skeleton is the same size as the panel it stands in for. The tour page no longer streams the panel (ADR 0039 awaits it instead), so the skeleton is shown only on `/styleguide`.
 - The "booked" state needs a date from the booking, so the panel calls a function that returns a day, not a boolean. Anything else that needs only "has this traveller booked" can call the same function and test for null.
 - A tour on which the traveller has an upcoming booking shows "booked", not "bookable", even when another start date is still open. The booked date is the one that matters to that traveller.
 - The state order in the panel is: no bookable start date, then booked, then logged out, then bookable. A traveller with a booking whose start date is today or earlier, and no later start date, sees "No upcoming start dates".
