@@ -63,7 +63,7 @@ These are the specific `fieldErrors` messages for the validation rules plan.md a
 
 ## Credits (attribution wording)
 
-Seed photos are licensed CC BY, CC BY-SA or similar and require credit (U27). Each tour page's "Photo credits" section and the site-wide `/credits` page use this wording shape for every photo: "Photo by {author}, {licence}" with the author name and licence each linking out — to the photographer's source page and the licence text respectively. This matches the shape already used in the Phase 2 mockups (`docs/design/mockups/tour.html`, `docs/design/mockups/overview.html`), sourced from `seed/CREDITS.md`.
+Seed photos are licensed CC BY, CC BY-SA or similar and require credit (U27). The seed has no author link, so the author is always plain text. Only the licence links out, to its licence text, and on `/credits` the photo title links to its source page. Two wording shapes are used. A caption under a photo reads "Photo: {author}, {licence}". A credit list reads "Photo by {author}, {licence}": the tour page's "Photo credits" section, and each row of the site-wide `/credits` page. The shapes follow the Phase 2 mockups (`docs/design/mockups/tour.html`, `docs/design/mockups/overview.html`), sourced from `seed/CREDITS.md`, with the author link removed.
 
 ## Component wording
 
@@ -129,3 +129,90 @@ State the fact, then the one action, per the rule above.
 | Pagination, where the reader is | "Page {n} of {total}", for example "Page 1 of 3" |
 | Footer, copyright line | "© {year} Natours." with the current year, for example "© 2026 Natours." |
 | Link to the credits page | "Read the photo credits" |
+
+### Phase 4 wording (approved 16 Nov 2026, plan 04-01)
+
+The user approved every row below as written on 16 Nov 2026, at the plan 04-01 content checkpoint. Status: **New** = first approved on 16 Nov 2026; **Mockup** = approved in the Phase 2 or Phase 3 mockups and direction, added here because `copy.md` lacked it; **copy.md** = already approved above, listed for the page that uses it.
+
+## Tour list
+
+Rules from the Indian English section apply. Prices only through `formatPrice`, months only through `formatMonth`.
+
+| Element | Wording | Status |
+|---|---|---|
+| List page heading (`h1`) | "Find your next trip" | Mockup |
+| Filter disclosure, no filter active | "Filters" | New |
+| Filter disclosure, one or more filters active | "Filters ({n} active)", for example "Filters (2 active)" | New |
+| Filter form, accessible name | "Filter tours" | Mockup |
+| Field labels | "Difficulty", "Length", "Month", "Max price", "Sort" | Mockup |
+| First option of each select (empty value) | "Any difficulty", "Any length", "Any month", "Any price" | Mockup |
+| Length options | "3 to 4 days", "5 to 6 days", "7 to 8 days" | New |
+| Max price options, built as `Up to {formatPrice(n)}` | "Up to ₹20,000", "Up to ₹30,000", "Up to ₹40,000" | New |
+| Month options, built by `formatMonth` | "Nov 2026" style, one per month with an upcoming departure | New (helper) |
+| Sort options | "Rating, highest first" (default), "Price, low to high", "Price, high to low", "Length, shortest first", "Length, longest first" | New, except the two price options (Mockup) |
+| Filter submit button | "Show tours" | Mockup |
+| Result count, paragraph above the list | "{n} tours", "1 tour", "0 tours" | Mockup (plural), New (singular) |
+| Empty state, message and action | "No tours match these filters." then "Clear filters" | copy.md |
+| List row with no upcoming start date (component change C8) | "No upcoming dates" | New |
+| Pagination, text links | "Previous", "Next" (existing `pagination` component text) | New entry |
+| Pagination, accessible name of the nav | "Tour pages" | New |
+
+## Tour page
+
+| Element | Wording | Status |
+|---|---|---|
+| Itinerary heading (`h2`) | "Itinerary" | New |
+| Day label in the itinerary | "Day {n}" | Mockup |
+| Route map, accessible name | "Route map: {n} stops, days {a} to {b}" | Mockup |
+| Section heading (`h2`) | "About this tour" | Mockup |
+| Gallery heading (`h2`) | "Photos" | New |
+| Guide section heading (`h2`) | "Your guides" | Mockup |
+| Reviews heading (`h2`, the anchor `#reviews`) | "Reviews" | Mockup |
+| Review pagination, accessible name of the nav | "Review pagination" | Mockup |
+| Reviews empty state (plain muted line, no action) | "No reviews yet." | New |
+| Photo credits heading (`h2`) | "Photo credits" | Mockup |
+| Caption under the cover and each gallery photo | "Photo: {author}, {licence}". The author is plain text; the licence links to its licence text | Mockup (cover), D-09 (gallery) |
+| Credit list row | "Photo by {author}, {licence}". The author is plain text; the licence links | copy.md shape, corrected above |
+| Rating accessible name, built into `StarRating` | "Rated {value} out of {max}" | Mockup |
+| Booking panel field label | "Start date" | Mockup |
+| Booking panel link for a signed-out visitor | "Log in to book" | Mockup |
+
+## Credits page
+
+| Element | Wording | Status |
+|---|---|---|
+| Page heading (`h1`) | "Photo credits" | Mockup |
+| Intro line under the heading | "Every photo on Natours is from Wikimedia Commons, used under the licence shown. Photos were resized and saved as JPEG; nothing else was changed." | New |
+| Group heading (`h2`) | The tour name, linked to its tour page | Real seed names, no new copy |
+| Credit row | The photo title linked to its source page, then "Photo by {author}, {licence}" with the licence linked | copy.md shape, corrected above |
+
+## Page titles and descriptions
+
+Titles use the root template `%s | Natours`, with the default title "Natours". The author and tour descriptions are drafted from the seed; `{summary}` is the tour's real summary.
+
+| Page | Title | Description | Status |
+|---|---|---|---|
+| `/` | "Small-group tours across India" | "Small-group tours across India, from the high passes of Ladakh to the backwaters of Kerala." | New |
+| `/tour/[slug]` | "{tour name}", for example "Ladakh High Passes" | "{tour summary} {n} days, {price} per person." for example "Walk through alpine meadows in full bloom and climb to the glacial lake at Hemkund Sahib. 6 days, ₹18,999 per person." | New (template) |
+| `/credits` | "Photo credits" | "Author, licence and source for every photo on Natours." | New |
+
+## Map attribution
+
+| Element | Wording | Status |
+|---|---|---|
+| Leaflet attribution control, wherever the India boundary is drawn (ADR 0028) | "India boundary: Survey of India, via DataMeet Maps, {licence}", with `{licence}` set to "CC BY-SA 2.5 / ODbL" as ADR 0028 records. The prefix "Leaflet" is switched off | New |
+
+## Tour API messages
+
+These are the messages an API client receives, as `AppError` messages (plan.md §4.2). They follow the same rules as the rest of this document.
+
+| Case | HTTP | Wording | Status |
+|---|---|---|---|
+| Deleting a tour that has bookings | 409 | "This tour has bookings, so it can't be deleted." | New (no next step proposed yet; see the note below) |
+| Images upload with no file | 400 | "Choose a photo to upload." | New |
+| An uploaded file without its credit | 400 | "Add a credit for each photo you upload." | New |
+| More than one cover in one upload | 400 | "Upload one cover photo at a time." | New |
+| More than three gallery images | 400 | "A tour can have up to three gallery photos." | New |
+| A credits part that is not valid JSON | 400 | "The credits are not valid JSON. Check the credits and try again." | New |
+
+Note: the 409 message says what happened but not the next step, because the API has no way to cancel a booking in Phase 4. The user approved it as written on 16 Nov 2026. Name the next step once Phase 6 defines it.
