@@ -125,15 +125,13 @@ test('[U27] the photo credits list has all four photos, each with its author and
   ).toHaveAttribute('href', '/credits');
 });
 
-// U11, B12, R4, D-08: the streamed parts of the page with JavaScript off, where the server's HTML is
-// all a visitor gets. OPEN: these are held as test.fixme. Streamed Suspense content is written into a
-// hidden container and only shown by inline script, so with JavaScript off the skeletons stay and the
-// real content never appears. Resolving that needs a decision (see the plan's checkpoint); when it is
-// made, these become plain tests with the same assertions.
-test.describe('[U11] the streamed sections with JavaScript off', () => {
+// U11, B12, R4, R11, D-08: the booking panel, guides and reviews with JavaScript off, where the server's
+// HTML is all a visitor gets. The page awaits these sections rather than streaming them, so their real
+// content is in the first response (ADR 0039). A streamed Suspense boundary would show only skeletons here.
+test.describe('[U11] the tour page sections with JavaScript off', () => {
   test.use({ javaScriptEnabled: false });
 
-  test.fixme('[U11] the booking panel shows the dates, the price and a Log in to book link to this tour', async ({
+  test('[U11] the booking panel shows the dates, the price and a Log in to book link to this tour', async ({
     page,
   }) => {
     await page.goto('/tour/ladakh-high-passes');
@@ -148,7 +146,7 @@ test.describe('[U11] the streamed sections with JavaScript off', () => {
     ).toHaveAttribute('href', '/login?next=%2Ftour%2Fladakh-high-passes');
   });
 
-  test.fixme('[B12] Your guides lists two guides, the lead guide first', async ({
+  test('[B12] Your guides lists two guides, the lead guide first', async ({
     page,
   }) => {
     await page.goto('/tour/ladakh-high-passes');
@@ -164,7 +162,7 @@ test.describe('[U11] the streamed sections with JavaScript off', () => {
     await expect(items.nth(1)).toContainText('Guide');
   });
 
-  test.fixme('[D-08] Reviews lists the four reviews, with no Review pagination nav', async ({
+  test('[D-08] Reviews lists the four reviews, with no Review pagination nav', async ({
     page,
   }) => {
     await page.goto('/tour/ladakh-high-passes');
@@ -184,16 +182,16 @@ test.describe('[U11] the streamed sections with JavaScript off', () => {
   });
 });
 
-// R4: the streamed sections do not move the page once they have arrived. The 375px check is held:
-// the site header changes height when its mobile menu hydrates, which shifts the page on every route,
-// including /styleguide with nothing streamed (0.139 there too; see deferred-items.md).
+// R4: the sections do not move the page once they have loaded. The 375px check is held: the site header
+// changes height when its mobile menu hydrates, which shifts the page on every route, including
+// /styleguide (0.139 there too; see deferred-items.md).
 for (const width of [375, 1280]) {
   const check = width === 375 ? test.fixme : test;
   check(
     `[R4] at ${width}px the layout shift after load is under 0.1`,
     async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
-      // Recorded from the first paint, so a shift caused by a streamed section is counted.
+      // Recorded from the first paint, so a shift caused by any section that loads late is counted.
       await page.addInitScript(() => {
         const shifted = window as Window & { __layoutShift?: number };
         shifted.__layoutShift = 0;
