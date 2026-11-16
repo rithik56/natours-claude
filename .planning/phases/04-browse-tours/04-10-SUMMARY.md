@@ -265,3 +265,8 @@ None. No external service configuration is required.
 ---
 *Phase: 04-browse-tours*
 *Completed: 2026-11-16*
+
+## Self-Check: PASSED
+
+- All 7 key created files are on disk.
+- All 5 plan commits (54645ae, 7803324, 44751fb, ad509d9, 6a74cdb) are on the branch, and the working tree was clean before this SUMMARY commit.
