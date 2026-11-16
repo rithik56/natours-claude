@@ -511,5 +511,43 @@ describe('tours service', () => {
       expect(mi[0]?.name).toBe('Golden Triangle Heritage');
       expect(mi[0]?.distance).toBeCloseTo((km[0]?.distance ?? 0) * 0.621371, 1);
     });
+
+    it('[B10] distancesFrom refuses a failed read as SERVICE_UNAVAILABLE, with the driver error as the cause', async () => {
+      const driverError = Object.assign(new Error('connection reset'), {
+        name: 'MongoNetworkError',
+      });
+      vi.spyOn(Tour, 'aggregate').mockImplementation(() => {
+        throw driverError;
+      });
+
+      const error = await distancesFrom({ ...DELHI, unit: 'km' }).catch(
+        (caught: unknown) => caught,
+      );
+
+      expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
+      expect((error as Error).cause).toBe(driverError);
+    });
+
+    it('[B10] a failed read that is not a database outage is passed on unchanged, so it is not hidden as 503', async () => {
+      const bug = new Error('a bad pipeline stage');
+      vi.spyOn(Tour, 'find').mockImplementation(() => {
+        throw bug;
+      });
+      vi.spyOn(Tour, 'aggregate').mockImplementation(() => {
+        throw bug;
+      });
+
+      const near = await toursWithin({
+        ...DELHI,
+        distance: 300,
+        unit: 'km',
+      }).catch((caught: unknown) => caught);
+      const plan = await getMonthlyPlan(2027).catch(
+        (caught: unknown) => caught,
+      );
+
+      expect(near).toBe(bug);
+      expect(plan).toBe(bug);
+    });
   });
 });
