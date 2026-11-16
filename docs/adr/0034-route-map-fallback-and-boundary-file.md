@@ -38,6 +38,7 @@ ADR 0028 decided that India's boundary comes from the Survey of India outline, r
   | 5% | 197,464 | 58,591 |
 
   The source file is 12,330,591 bytes. Candidates are kept in the session scratch directory until the user chooses one.
+- The chosen file: the user chose 2% (keep-2) on 16 Nov 2026 IST. `public/data/india-soi.geojson` is the 2% candidate committed in 259d90c and has not changed since. Final sizes: 84,432 bytes raw and 26,955 bytes gzipped (Node's `zlib.gzipSync` at its default level, measured 16 Nov 2026). The gzipped figures in the table above and in the 04-08 summary (27,022, and 27,017 and 26,973 from the system gzip) come from other gzip implementations and headers, so they differ by a few dozen bytes. The raw size is exact.
 
 **The map.** The Leaflet route map is non-interactive: no drag, zoom control, wheel, double-click, box or keyboard zoom, and its markers are not focusable. There is no tile layer and no third-party host. The CSP in `src/proxy.ts` is unchanged.
 
