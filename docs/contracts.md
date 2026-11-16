@@ -1569,3 +1569,48 @@ export const dynamic = 'force-dynamic';
 | Catalogue slugs | the catalogue entry, `['catalogue']` | `tours` | `listSlugs` |
 
 Any tour write clears `tours`, so the credits are rebuilt with the catalogue. The credits entry has no `revalidate`; after `npm run seed`, restart the server, as for the catalogue.
+
+### Top-5, statistics, monthly plan and geo reads (plan 04-11, B2, F1, F2, B3)
+
+```ts
+// src/server/modules/tours/catalogue-query.ts (pure, server-only, no database)
+export type DifficultyStats = {
+  difficulty: 'easy' | 'medium' | 'difficult';
+  numTours: number;
+  numRatings: number; // the sum of ratingsQuantity
+  avgRating: number; // the mean ratingsAverage, rounded half up to 1 decimal
+  avgPrice: number; // the mean price, rounded half up to whole rupees
+  minPrice: number;
+  maxPrice: number;
+};
+export function statsFrom(entries: readonly CatalogueEntry[]): DifficultyStats[];
+
+// src/server/modules/tours/service.ts (server-only)
+export function getStats(): Promise<DifficultyStats[]>;
+export type MonthlyPlanMonth = { month: number; numTourStarts: number; tours: string[] };
+export function getMonthlyPlan(year: number): Promise<MonthlyPlanMonth[]>;
+export function toursWithin(input: GeoPoint & { distance: number; unit: 'mi' | 'km' }): Promise<TourSummary[]>;
+export function distancesFrom(input: GeoPoint & { unit: 'mi' | 'km' }): Promise<TourDistance[]>;
+export type GeoPoint = { lat: number; lng: number };
+export type TourDistance = { id: string; name: string; slug: string; distance: number };
+
+// src/server/modules/tours/schemas.ts (server-only)
+export const monthlyPlanParamsSchema; // year: four digits, 2000 to 2100
+export const withinParamsSchema; // distance, latlng, unit
+export const distancesParamsSchema; // latlng, unit
+```
+
+| Route | Access | Answers |
+|-------|--------|---------|
+| `GET /api/v1/tours/top-5-cheap` | public; no query parameter | `list` with `sort: ['price', '-ratingsAverage']`, `limit: 5`, `page: 1` (the same `list()` as the list endpoint) |
+| `GET /api/v1/tours/stats` | public; no query parameter | `{ stats }`: one row per difficulty, easy, medium, difficult, only those present |
+| `GET /api/v1/tours/monthly-plan/[year]` | `{ roles: ['guide', 'lead-guide', 'admin'] }`, an exact match | `{ plan }`: 401 for an anonymous caller, 403 for a user |
+| `GET /api/v1/tours/within/[distance]/center/[latlng]/unit/[unit]` | public; no query parameter | `{ tours }`: `TourSummary` documents, by name |
+| `GET /api/v1/tours/distances/[latlng]/unit/[unit]` | public; no query parameter | `{ distances }`: `{ id, name, slug, distance }`, nearest first |
+
+- **Stats come from the catalogue entry (F1).** `getStats()` runs `statsFrom` on the cached catalogue, so it agrees with the list and needs no cache key of its own. ADR 0031's planned `['stats']` key is therefore not used.
+- **The monthly plan is an aggregation and is not cached (F2).** Its year comes from the URL. It unwinds `startDates`, matches the year's `[start, end)` IST bounds, and groups with `$month` in `Asia/Kolkata`, so 1 January 00:00 IST is in January (QA-10). `tours` lists each name once, sorted, however many starts the tour has that month.
+- **The geo reads are not cached and not paginated (B3).** `toursWithin` uses `$geoWithin` with `$centerSphere` and the radius in radians (the Earth's radius is 6378.1 km or 3963.2 mi). `distancesFrom` makes `$geoNear` the first stage, on `startLocation` with `spherical: true`, and rounds with `$round` to 2 places. Both return documents, never a query plan (B3). `distancesFrom` needs the `startLocation` 2dsphere index, which `Model.init` builds in tests and the seed syncs.
+- **Coordinate and radius rules (B3, T-04-29).** `lat,lng`: latitude −90 to 90 and longitude −180 to 180, both ends included. Each part is a whole number or a decimal with an optional minus sign; no exponent, no spaces. `distance` is above 0 and at most 20000, a whole number or a decimal, in either unit. `unit` is `mi` or `km`. Any other value is a 400 `VALIDATION_ERROR` before MongoDB is called. A radius that contains no start location gives `tours: []` with 200.
+- **Ordering.** `toursWithin` sorts by name then id. `distancesFrom` is nearest first, as `$geoNear` sorts. `getMonthlyPlan` is in month order, and `getStats` in difficulty order.
+- **Concurrency.** Every read on these routes is side-effect free, so two parallel calls return identical bodies.
