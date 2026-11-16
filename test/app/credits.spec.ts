@@ -38,6 +38,44 @@ test.describe('[U27] /credits with JavaScript off', () => {
   });
 });
 
+// U7: exactly one image per page is preloaded with high priority: the first list row on `/`,
+// the cover on a tour page, and none on `/credits`, whose thumbnails are all lazy.
+test.describe('[U7] preloaded images', () => {
+  const preloaded = 'img[fetchpriority="high"]';
+
+  test('[U7] / preloads exactly one image, the first list row', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    await expect(page.locator(preloaded)).toHaveCount(1);
+    await expect(page.locator(`main li ${preloaded}`)).toHaveCount(1);
+    await expect(page.locator('main li img').first()).toHaveAttribute(
+      'fetchpriority',
+      'high',
+    );
+  });
+
+  test('[U7] a tour page preloads exactly one image, its cover', async ({
+    page,
+  }) => {
+    await page.goto('/tour/ladakh-high-passes');
+
+    await expect(page.locator(preloaded)).toHaveCount(1);
+    await expect(page.locator(`main header ${preloaded}`)).toHaveCount(1);
+  });
+
+  test('[U7] /credits preloads no image, and every thumbnail is lazy', async ({
+    page,
+  }) => {
+    await page.goto('/credits');
+
+    await expect(page.locator('main li img')).toHaveCount(52);
+    await expect(page.locator(preloaded)).toHaveCount(0);
+    await expect(page.locator('main li img[loading="lazy"]')).toHaveCount(52);
+  });
+});
+
 test.describe('[U27] /credits at 375px', () => {
   test.use({ viewport: { width: 375, height: 900 } });
 
