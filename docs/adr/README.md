@@ -36,6 +36,7 @@ Every decision that departs from `plan.md`, and every project-level decision, is
 | 0030 | [The seed's guards, passwords, date roll and post-checks](0030-seed-guards-passwords-and-date-roll.md) | Accepted |
 | 0031 | [One cached catalogue, queried in memory](0031-one-cached-catalogue-queried-in-memory.md) | Accepted |
 | 0032 | [No loading.tsx on the tour page or at the root](0032-no-loading-file-on-the-tour-page.md) | Accepted |
+| 0033 | [The booking panel sits in the page flow on a phone, and "booked" means an upcoming paid booking](0033-booking-panel-in-the-page-flow.md) | Accepted |
 
 ## Format
 

@@ -41,6 +41,8 @@ Every TypeScript block below is copied from the file named in its first line. Fu
 | A `src/components/ui/` contract (section 4.6) | Not written yet. Phase 3 adds it. | ADR 0005 |
 | `getBySlug` throws NOT_FOUND for an unknown slug (plan.md 4.4) | Returns `null`; the tour page calls `notFound()`. `getById` throws NOT_FOUND for the API. | ADR 0031 |
 | A `loading.tsx` on every route segment (R4) | None under `src/app/tour/[slug]` or at `src/app/loading.tsx`: a loading boundary turns a missing slug into HTTP 200. Streaming sits inside the page, after the 404 decision. | ADR 0032 |
+| `bookingsService.hasPaidBooking(userId, tourId)` returns a boolean (plan.md 4.4) | `findUpcomingPaid(userId, tourId, durationDays)` returns the IST day of the earliest upcoming paid booking, or null. The panel prints the date. | ADR 0033 |
+| The booking panel is a bar pinned to the bottom of a phone (plan.md 9.2, `direction.md`, the mockups) | Below 64em it is a block in the page flow after the facts strip; from 64em it is sticky in the right column (D-06, C1) | ADR 0033 |
 
 ## 2. REST format and errors
 
@@ -1257,8 +1259,8 @@ Each is written into this file by the phase that builds it (ADR 0005).
 | Contract | Phase |
 | --- | --- |
 | `toursService.list(query)` returning `{ items, total, page, limit, totalPages }`, cached with a tag (R5); `toursService.getBySlug(slug)`; `toursService.getById(id)` | 4 (`list` and `monthOptions` are done, section 11; `getBySlug` and `getById` follow in later plans) |
-| `reviewsService.listForTour(tourId, page)`, cached with a tag | 4 |
-| `bookingsService.hasPaidBooking(userId, tourId)`, which the booking panel needs for "already booked", never cached | 4 |
+| `reviewsService.listForTour(tourId, page)`, cached with a tag | 4 (done, section 11) |
+| `bookingsService.hasPaidBooking(userId, tourId)`, which the booking panel needs for "already booked", never cached | 4 (done as `findUpcomingPaid`, returning the day, section 11, ADR 0033) |
 | `images.normalize(file, preset)`, and the real storage adapter | 4 (the disk adapter and `/media` are in, ADR 0029; S3 waits for 8) |
 | The cache keys and tag names, and the shape of a list response in `data` (section 2.1) | 4 (done: ADR 0031, section 11) |
 | `npm run seed` with `--reset` and `--today=YYYY-MM-DD`: the date roll (`rollStartDates`), and the seed/README.md rules (`checkSeedRules`) that stop a run and name the first broken rule (ADR 0023, ADR 0030) | 4 |
@@ -1441,3 +1443,89 @@ Cache keys and tags:
 A tour update or an image change clears `tour:<id>` (the write-to-tag table above). A change to a guide's name, photo or role clears `tour:<id>` for each tour the guide works on, as the user row of that table says.
 
 API: `GET /api/v1/tours/[id]` answers `{ status: 'success', data: { tour } }`. `tour` is the `TourDetail` with `guides` added: each guide is `{ id, name, photo, role }`, in the order above. A malformed id is 400 VALIDATION_ERROR and an unknown id is 404 NOT_FOUND, both in the standard envelope (section 2.3).
+
+### Booking panel, guides and reviews (plan 04-07, ADR 0033)
+
+```ts
+// src/server/modules/bookings/service.ts (server-only)
+export function findUpcomingPaid(
+  userId: string,
+  tourId: string,
+  durationDays: number,
+): Promise<IstDay | null>; // the earliest upcoming paid booking's start day, or null
+
+// src/components/features/booking-state.ts (pure)
+export type BookingPanelInput = {
+  slug: string;
+  price: number;
+  startDates: IstDay[];
+  signedIn: boolean;
+  bookedDay: IstDay | null;
+  today: IstDay;
+};
+export function bookingPanelProps(input: BookingPanelInput): BookingPanelProps;
+
+// src/components/features/booking-section.tsx (server component, streamed)
+export function BookingSection(props: {
+  tour: Pick<TourDetail, 'id' | 'slug' | 'price' | 'startDates' | 'duration'>;
+}): Promise<JSX.Element>;
+
+// src/server/modules/reviews/service.ts (server-only)
+export const REVIEWS_PER_PAGE = 5;
+export type ReviewPage = {
+  items: ReviewDto[];
+  total: number; // every review the tour has, before paging
+  page: number; // the page shown, clamped to the last page
+  totalPages: number; // at least 1
+};
+export function listForTour(tourId: string, page: number): Promise<ReviewPage>;
+
+// src/server/modules/reviews/schemas.ts (server-only)
+export const reviewPageQuerySchema; // reviewPage: digits only, at least 1, default 1
+
+// src/components/features/guides-section.tsx
+export function guideRoleLabel(role: Role): 'Lead guide' | 'Guide';
+export function GuidesSection(props: { tour: Pick<TourDetail, 'id' | 'guideIds'> }): Promise<JSX.Element>;
+export function GuidesFallback(): JSX.Element; // two guide-item skeletons
+
+// src/components/features/reviews-section.tsx
+export type ReviewListItem = {
+  id: string;
+  authorName: string;
+  authorPhotoUrl?: string;
+  rating: number;
+  comment: string;
+  createdAt: string; // ISO
+};
+export function ReviewList(props: {
+  items: ReviewListItem[];
+  page: number;
+  totalPages: number;
+  slug: string;
+}): JSX.Element;
+export function ReviewsSection(props: {
+  tour: Pick<TourDetail, 'id' | 'slug'>;
+  page: number;
+}): Promise<JSX.Element>;
+export function ReviewsFallback(): JSX.Element; // four review-item skeletons
+```
+
+Rules:
+
+- `findUpcomingPaid` counts only `paid` bookings whose trip is upcoming on today's IST day (`tripStatus`). A refunded booking and a trip that has ended do not count (QA-06, QA-07, SEC-07). A malformed id gives null without a database read, and an outage is `SERVICE_UNAVAILABLE` (B10).
+- It is never cached (R5). Its user id comes only from `getCurrentUser()`. `BookingSection` has no try/catch, so a failed read reaches the error page.
+- `bookingPanelProps` chooses in this order: no start date after today gives `no-dates`; an upcoming booking gives `booked` with its day; a visitor who is not signed in gives `logged-out` with `tourHref` `/tour/<slug>`; otherwise `bookable`. A start date on today's IST day is not listed, and the dates are in ascending order.
+- `listForTour` reads the tour's reviews once, newest first (`createdAt` then `_id`, both descending), and populates the author to `name`, `photo` and `role` only (T-04-21). A review whose author no longer exists is skipped and logged as a warning, and the call does not throw. A deactivated author's review stays (RESEARCH A9).
+- Paging is five per page, in memory. A page past the end is clamped to the last page, so `reviewPage=999999` shows the last page and creates no cache entry (T-04-22). A tour id that is not a 24-character hex id gives an empty first page, with no read.
+- `reviewPageQuerySchema` reads leniently through `parseQuery`: a value that is not digits, or is below 1, falls back to 1.
+- The pagination nav is labelled "Review pagination". It appears only when `totalPages` is above 1. Its links are `/tour/<slug>?reviewPage=<n>#reviews`, plain links that do not need JavaScript.
+- The guides list shows the lead guide first, with the role "Lead guide", and every other guide "Guide". Both streamed lists and their headings sit inside the page's section structure, with the headings outside their boundaries (R4).
+
+Cache keys and tags:
+
+| Read | Key | Tag | Built by |
+|------|-----|-----|----------|
+| Reviews of one tour, the whole list | `['reviews', id]` | `reviews:<id>` | `listForTour` |
+| Booking state | none: never cached (R5) | none | `findUpcomingPaid` |
+
+Open: with JavaScript off, the streamed sections (the booking panel, the guides and the reviews) show their skeletons and not their content, because a streamed Suspense boundary's content is shown only by inline script. D-08 and R11 expect the reviews and their paging to work with JavaScript off. This is held for a decision; until it is made, the no-JavaScript checks in `test/app/tour-page.spec.ts` are marked `test.fixme`.
