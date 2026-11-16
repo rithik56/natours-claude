@@ -1,5 +1,6 @@
 import { Itinerary } from '@/components/ui/itinerary';
-import { MapFrame, type RouteStop } from '@/components/ui/map-frame';
+import { MapFrame, mapLabel, type RouteStop } from '@/components/ui/map-frame';
+import { RouteMapSlot } from './route-map-slot';
 import styles from './tour-route.module.css';
 
 type TourStop = {
@@ -30,7 +31,9 @@ export function TourRoute({ locations }: TourRouteProps) {
   return (
     <div className={styles.route}>
       <div className={styles.slot}>
-        <MapFrame locations={stops} animate={false} />
+        <RouteMapSlot stops={stops} label={mapLabel(stops)}>
+          <MapFrame locations={stops} animate={false} />
+        </RouteMapSlot>
       </div>
       <Itinerary days={days} />
     </div>

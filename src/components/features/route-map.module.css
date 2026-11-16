@@ -1,0 +1,115 @@
+@layer components {
+  /* The slot's host: it fills the 5:3 slot, and the map is placed over it (D-07). */
+  .host {
+    position: relative;
+    height: 100%;
+    min-width: 0;
+  }
+
+  /*
+   * The map fills the slot's inner box, the same box the static drawing occupies inside its frame padding,
+   * so the two drawings line up while the map takes over (D-07).
+   */
+  .map {
+    position: absolute;
+    inset: var(--space-3);
+    overflow: hidden;
+    background: transparent;
+    outline: none;
+  }
+
+  /*
+   * tour-route.module.css sizes every SVG in the slot to 100% of its box, for the static drawing. Leaflet
+   * sizes its own overlay SVG from its width and height attributes, and a 100% height inside Leaflet's
+   * zero-size pane collapses it to 0, so the overlay keeps its own size here (the more specific selector wins).
+   */
+  .host .map svg {
+    height: auto;
+  }
+
+  /* The route's outline under the line: Neel in both themes, so the yellow line stands out (C4). */
+  .outline {
+    stroke: var(--color-header-bg);
+    stroke-width: 8;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 0;
+    animation: draw-route var(--duration-signature) var(--easing-standard)
+      forwards;
+  }
+
+  .line {
+    stroke: var(--color-accent);
+    stroke-width: 4;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 0;
+    animation: draw-route var(--duration-signature) var(--easing-standard)
+      forwards;
+  }
+
+  /* The India boundary: an unfilled hairline in the border colour, below the route (ADR 0028). */
+  .boundary {
+    fill: none;
+    stroke: var(--color-border);
+    stroke-width: 1;
+  }
+
+  /* A day marker: an accent label with a Neel border, the same as the static drawing. */
+  .icon {
+    background: none;
+    border: 0;
+  }
+
+  .marker {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    background: var(--color-accent);
+    border: var(--focus-ring-width) solid var(--color-header-bg);
+    color: var(--color-text-on-accent);
+    font-size: var(--step-0);
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  /* The attribution (copy.md "Map attribution"): the surface and muted text, so it reads in both themes. */
+  .attribution {
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: var(--step-0);
+    padding: 0 var(--space-2);
+  }
+
+  .attribution a {
+    color: inherit;
+  }
+
+  /* Reduced motion: the route is already drawn, and no animation plays at all (U25). */
+  @media (prefers-reduced-motion: reduce) {
+    .outline,
+    .line {
+      animation: none;
+      stroke-dasharray: none;
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes draw-route {
+    from {
+      stroke-dashoffset: 1;
+    }
+
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}

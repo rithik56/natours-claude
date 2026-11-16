@@ -1,6 +1,12 @@
+import {
+  nudgeCoincident,
+  type PlanarStop,
+  type RouteStop,
+  toPlanar,
+} from '@/lib/route-projection';
 import styles from './map-frame.module.css';
 
-export type RouteStop = { day: number; lat: number; lng: number };
+export type { RouteStop };
 
 type MapFrameProps = {
   locations: RouteStop[];
@@ -38,23 +44,21 @@ const MARKER_HEIGHT = FRAME_TOKENS.markerHeight;
 // Two stops at the same place (Leh on day 1 and day 8) are nudged apart by this much.
 const COLLISION_NUDGE = FRAME_TOKENS.nudge;
 
-type Placed = RouteStop & { x: number; y: number };
-
 /**
- * Projects the stops into the viewBox. Longitude is scaled by cos(latitude), so
- * east-west distance keeps its real proportion to north-south distance. One
- * scale factor is used on both axes, so the route is never stretched.
+ * Fits the planar stops into the viewBox. SVG y grows downwards, so north goes to the top (the y flip
+ * happens here, after the shared projection). One scale factor is used on both axes, so the route is
+ * never stretched.
  */
-function project(stops: RouteStop[]): Placed[] {
-  const meanLat = stops.reduce((sum, stop) => sum + stop.lat, 0) / stops.length;
-  const cos = Math.cos((meanLat * Math.PI) / 180);
-  // Latitude grows northwards, but SVG y grows downwards, so north goes to the top.
-  const toPlanar = (stop: RouteStop) => ({ x: stop.lng * cos, y: -stop.lat });
-  const planar = stops.map(toPlanar);
-  const minX = Math.min(...planar.map((point) => point.x));
-  const minY = Math.min(...planar.map((point) => point.y));
-  const spanX = Math.max(...planar.map((point) => point.x)) - minX;
-  const spanY = Math.max(...planar.map((point) => point.y)) - minY;
+function fit(planar: PlanarStop[]): FittedStop[] {
+  const flipped = planar.map((stop) => ({
+    day: stop.day,
+    x: stop.x,
+    y: -stop.y,
+  }));
+  const minX = Math.min(...flipped.map((point) => point.x));
+  const minY = Math.min(...flipped.map((point) => point.y));
+  const spanX = Math.max(...flipped.map((point) => point.x)) - minX;
+  const spanY = Math.max(...flipped.map((point) => point.y)) - minY;
   const scaleX = spanX > 0 ? (WIDTH - 2 * PADDING) / spanX : Infinity;
   const scaleY = spanY > 0 ? (HEIGHT - 2 * PADDING) / spanY : Infinity;
   const scale = Math.min(scaleX, scaleY);
@@ -62,44 +66,37 @@ function project(stops: RouteStop[]): Placed[] {
   const unit = Number.isFinite(scale) ? scale : 1;
   const offsetX = (WIDTH - spanX * unit) / 2;
   const offsetY = (HEIGHT - spanY * unit) / 2;
-  return stops.map((stop) => {
-    const point = toPlanar(stop);
-    return {
-      ...stop,
-      x: offsetX + (point.x - minX) * unit,
-      y: offsetY + (point.y - minY) * unit,
-    };
-  });
+  return flipped.map((point) => ({
+    day: point.day,
+    x: offsetX + (point.x - minX) * unit,
+    y: offsetY + (point.y - minY) * unit,
+  }));
 }
 
-/** Moves a marker that lands on an earlier stop's point along the diagonal, so both stay visible. */
-function placeMarkers(projected: Placed[]): Placed[] {
-  const seen = new Map<string, number>();
-  return projected.map((stop) => {
-    const key = `${stop.x.toFixed(1)},${stop.y.toFixed(1)}`;
-    const count = seen.get(key) ?? 0;
-    seen.set(key, count + 1);
-    const nudge = count * COLLISION_NUDGE;
-    return { ...stop, x: stop.x + nudge, y: stop.y + nudge };
-  });
+/** A stop in SVG user units, inside the viewBox. */
+type FittedStop = { day: number; x: number; y: number };
+
+/** The accessible name of the route drawing, shared with the Leaflet map that replaces it (R8). */
+export function mapLabel(locations: RouteStop[]): string {
+  const sorted = [...locations].sort((a, b) => a.day - b.day);
+  return `Route map: ${sorted.length} stops, days ${sorted[0]?.day} to ${sorted.at(-1)?.day}`;
 }
 
 // A static, server-rendered route. The only motion is the CSS draw in map-frame.module.css, and
-// `animate={false}` holds it still. The Leaflet map (plan 04-08) replaces this drawing in the same box.
+// `animate={false}` holds it still. The Leaflet map replaces this drawing in the same box (R8, D-07).
 export function MapFrame({ locations, animate = true }: MapFrameProps) {
   if (locations.length === 0) return null;
 
   const stops = [...locations].sort((a, b) => a.day - b.day);
-  const projected = project(stops);
-  const markers = placeMarkers(projected);
+  const projected = fit(toPlanar(stops));
+  // Markers that land on one point are nudged apart; the route line itself is not nudged.
+  const markers = nudgeCoincident(projected, COLLISION_NUDGE);
   const path = projected
     .map(
       (stop, index) =>
         `${index === 0 ? 'M' : 'L'}${stop.x.toFixed(1)},${stop.y.toFixed(1)}`,
     )
     .join(' ');
-  const first = stops[0]?.day;
-  const last = stops.at(-1)?.day;
 
   return (
     <div className={styles.frame}>
@@ -107,7 +104,7 @@ export function MapFrame({ locations, animate = true }: MapFrameProps) {
         className={animate ? styles.route : `${styles.route} ${styles.still}`}
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         role="img"
-        aria-label={`Route map: ${stops.length} stops, days ${first} to ${last}`}
+        aria-label={mapLabel(stops)}
       >
         <path className={styles.outline} d={path} pathLength={1} />
         <path className={styles.line} d={path} pathLength={1} />

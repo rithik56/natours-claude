@@ -1,0 +1,2 @@
+/* Leaflet's own stylesheet, in the vendor layer declared first in reset.css (ADR 0035). Components override it without !important. */
+@import url('leaflet/dist/leaflet.css') layer(vendor);
