@@ -26,7 +26,7 @@ Roadmap mode is `mvp`: the first plans are a thin slice the user can see working
 
 ### Tour page `/tour/[slug]`
 - **D-06:** On a phone the order is cover photo and name, facts strip, booking panel, route map and itinerary, description, photo gallery, guides, then reviews. The booking panel comes straight after the facts strip. From the desktop breakpoint it becomes a sticky column beside the content. No pinned bottom bar.
-- **D-07:** The Leaflet route map and the India boundary load when the map scrolls into view, then the route line draws once. Until then, and with JavaScript off, the itinerary list fills the same space at the same size, so nothing jumps (R8, U11).
+- **D-07:** The Leaflet route map and the India boundary load when the map scrolls into view, then the route line draws once. The day-by-day itinerary list is always visible beside the map (below it on a phone) and is never hidden or replaced. Until Leaflet loads, and with JavaScript off, the map slot holds a same-size static route drawing with no animation, so nothing jumps (R8, U11). *Amended 2026-11-16 at the UI-SPEC check: the original wording could be read as the itinerary list disappearing once the map loads; the user confirmed the itinerary stays visible and the static route holds the slot.*
 - **D-08:** Reviews are paged 5 per page, newest first. Page links appear only when a tour has more than 5 reviews. They work without JavaScript through a query parameter and return to the reviews heading. Every seed tour has exactly 4 reviews, so a test must add reviews to prove paging.
 
 ### Photos and credits
