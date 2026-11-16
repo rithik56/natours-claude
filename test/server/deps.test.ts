@@ -102,6 +102,14 @@ describe('getDeps under APP_ENV development', () => {
     ).resolves.toBeUndefined();
   });
 
+  it('[D2] uses the disk adapter for storage, which keeps no in-memory files', async () => {
+    vi.stubEnv('APP_ENV', 'development');
+    vi.resetModules();
+    const deps = (await import('@/server/deps')).getDeps();
+    expect('files' in deps.storage).toBe(false);
+    expect(deps.storage.urlFor('tours/a.jpg')).toBe('/media/tours/a.jpg');
+  });
+
   it('[Q7] uses the real tagged cache, not the fake', async () => {
     vi.stubEnv('APP_ENV', 'development');
     vi.resetModules();
