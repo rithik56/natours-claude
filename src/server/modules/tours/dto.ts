@@ -81,7 +81,7 @@ export type TourDetail = TourSummary & {
 };
 
 /** One photo's credit on `/credits` (U27). The key is the storage key the photo is served from. */
-export type CreditPhoto = {
+type CreditPhoto = {
   key: string;
   title: string;
   sourceUrl: string;

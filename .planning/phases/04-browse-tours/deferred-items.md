@@ -13,4 +13,4 @@
   status: open
 
 - `CreditPhoto` is exported from `src/server/modules/tours/dto.ts` (line 84) but nothing imports it, so `npx knip --no-progress` reports it and the CI checks job would fail on it. It is already on the base commit 04bda8b, and it is outside plan 04-11's files, so it was left alone. The same fix as `TourPhotoCredit` applies: drop the export keyword in a later plan that touches `dto.ts`. Found during plan 04-11 (Task 3, knip check).
-  status: open
+  status: resolved (16 Nov 2026, the export keyword was dropped)
