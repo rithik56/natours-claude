@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getDeps } from '@/server/deps';
 import { getLogger } from '@/server/logger';
 import { Review } from '@/server/modules/reviews/model';
-import { listForTour } from '@/server/modules/reviews/service';
+import { deleteForTour, listForTour } from '@/server/modules/reviews/service';
 import type { TourDoc } from '@/server/modules/tours/model';
 import { User } from '@/server/modules/users/model';
 import { useTestDatabase } from '../../../helpers/db';
@@ -155,5 +155,27 @@ describe('reviews service: listForTour', () => {
 
     expect(error).toMatchObject({ code: 'SERVICE_UNAVAILABLE' });
     expect((error as Error).cause).toBe(driverError);
+  });
+
+  describe('deleteForTour (F6)', () => {
+    it('[F6] deletes every review of the tour, returns how many, and leaves other tours alone', async () => {
+      const tour = await createTour({ slug: 'valley-of-flowers-trek' });
+      const other = await createTour({ slug: 'kedarkantha-winter-trek' });
+      const { user: first } = await createUser();
+      const { user: second } = await createUser();
+      await createReview({ user: first, tour });
+      await createReview({ user: second, tour });
+      await createReview({ user: first, tour: other });
+
+      expect(await deleteForTour(String(tour._id))).toBe(2);
+      expect(await Review.countDocuments({ tour: tour._id })).toBe(0);
+      expect(await Review.countDocuments({ tour: other._id })).toBe(1);
+    });
+
+    it('[F6] a tour with no reviews deletes none', async () => {
+      const tour = await createTour({ slug: 'valley-of-flowers-trek' });
+
+      expect(await deleteForTour(String(tour._id))).toBe(0);
+    });
   });
 });

@@ -1,8 +1,10 @@
 // F6, S4, B4: the admin tour writes over JSON. PATCH changes only the editable fields, for a lead guide or an admin;
 // POST and DELETE follow in the same file (plan 04-12). Every refusal is in the standard envelope.
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as collection from '@/app/api/v1/tours/route';
 import * as route from '@/app/api/v1/tours/[id]/route';
+import { getLogger } from '@/server/logger';
+import { Review } from '@/server/modules/reviews/model';
 import { Tour } from '@/server/modules/tours/model';
 import {
   distancesFrom,
@@ -15,7 +17,12 @@ import {
 } from '@/server/modules/tours/service';
 import { callRoute } from '../../helpers/call-route';
 import { useTestDatabase } from '../../helpers/db';
-import { createTour, createUser } from '../../helpers/factories';
+import {
+  createBooking,
+  createReview,
+  createTour,
+  createUser,
+} from '../../helpers/factories';
 import { fakes } from '../../helpers/fakes';
 import { seedTours } from '../../helpers/seed';
 
@@ -131,6 +138,16 @@ async function create(body: unknown, as?: WriteUser, origin?: string | null) {
     method: 'POST',
     path: '/api/v1/tours',
     body,
+    as,
+    origin,
+  });
+}
+
+async function remove(id: string, as?: WriteUser, origin?: string | null) {
+  return callRoute(route, {
+    method: 'DELETE',
+    path: `/api/v1/tours/${id}`,
+    params: { id },
     as,
     origin,
   });
@@ -496,5 +513,134 @@ describe('admin tour writes over JSON (F6, B4, D-13)', () => {
       expect((await create(createBodyFor(HAMPI))).status).toBe(401);
       expect((await create(createBodyFor(HAMPI), user)).status).toBe(403);
     });
+  });
+
+  describe('DELETE /api/v1/tours/[id] (F6, B4, D-16)', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    async function storeFilesFor(tour: {
+      imageCover?: string;
+      images: string[];
+    }) {
+      const keys = [tour.imageCover as string, ...tour.images];
+      for (const key of keys) {
+        await fakes.storage.put(key, Buffer.from('photo'), 'image/jpeg');
+      }
+      return keys;
+    }
+
+    it('[F6] a tour with a booking answers 409 with the approved message, and the tour, its reviews and its photos stay', async () => {
+      const tour = await createTour({ slug: VALLEY });
+      const { user: lead } = await createUser({ role: 'lead-guide' });
+      const { user: traveller } = await createUser({ role: 'user' });
+      await createBooking({ user: traveller, tour, status: 'refunded' });
+      await createReview({ user: traveller, tour });
+      const keys = await storeFilesFor(tour);
+
+      const response = await remove(String(tour._id), lead);
+
+      const body = response.body as ErrorBody;
+      expect(response.status).toBe(409);
+      expect(body.error.code).toBe('CONFLICT');
+      expect(body.error.message).toBe(
+        "This tour has bookings, so it can't be deleted.",
+      );
+      expect(await Tour.countDocuments({ _id: tour._id })).toBe(1);
+      expect(await Review.countDocuments({ tour: tour._id })).toBe(1);
+      for (const key of keys) {
+        expect(fakes.storage.files.has(key)).toBe(true);
+      }
+    });
+
+    it('[F6] a tour with no booking answers 204, and its reviews and stored photos go with it', async () => {
+      const tour = await createTour({ slug: VALLEY });
+      const { user: lead } = await createUser({ role: 'lead-guide' });
+      const { user: reviewer } = await createUser({ role: 'user' });
+      await createReview({ user: reviewer, tour });
+      const keys = await storeFilesFor(tour);
+      const id = String(tour._id);
+
+      const response = await remove(id, lead);
+
+      expect(response.status).toBe(204);
+      expect(await Tour.countDocuments({ _id: tour._id })).toBe(0);
+      expect(await Review.countDocuments({ tour: tour._id })).toBe(0);
+      for (const key of keys) {
+        expect(fakes.storage.files.has(key)).toBe(false);
+      }
+      expect(fakes.cache.invalidated).toEqual([
+        'tours',
+        `tour:${id}`,
+        `reviews:${id}`,
+      ]);
+    });
+
+    it('[F6] a storage delete that throws still answers 204, and the failure is logged', async () => {
+      const tour = await createTour({ slug: VALLEY });
+      const { user: lead } = await createUser({ role: 'lead-guide' });
+      await storeFilesFor(tour);
+      vi.spyOn(fakes.storage, 'delete').mockRejectedValueOnce(
+        new Error('disk unavailable'),
+      );
+      const logged = vi.spyOn(getLogger(), 'error');
+
+      const response = await remove(String(tour._id), lead);
+
+      expect(response.status).toBe(204);
+      expect(logged).toHaveBeenCalled();
+      expect(await Tour.countDocuments({ _id: tour._id })).toBe(0);
+    });
+
+    it('[F6] a second DELETE of the same tour is 404', async () => {
+      const tour = await createTour({ slug: VALLEY });
+      const { user: lead } = await createUser({ role: 'lead-guide' });
+      const id = String(tour._id);
+
+      expect((await remove(id, lead)).status).toBe(204);
+      const again = await remove(id, lead);
+      expect(again.status).toBe(404);
+      expect((again.body as ErrorBody).error.code).toBe('NOT_FOUND');
+    });
+  });
+
+  describe('who may write, for each method (D-16, S1)', () => {
+    it('[D-16] an anonymous caller gets 401 on POST, PATCH and DELETE', async () => {
+      await createTour({ slug: VALLEY });
+      const id = seedIdOf(VALLEY);
+
+      expect((await create(createBodyFor(HAMPI))).status).toBe(401);
+      expect((await patch(id, { price: 15999 })).status).toBe(401);
+      expect((await remove(id)).status).toBe(401);
+    });
+
+    it.each([['user'], ['guide']] as const)(
+      '[D-16] a %s gets 403 on POST, PATCH and DELETE',
+      async (role) => {
+        await createTour({ slug: VALLEY });
+        const { user } = await createUser({ role });
+        const id = seedIdOf(VALLEY);
+
+        expect((await create(createBodyFor(HAMPI), user)).status).toBe(403);
+        expect((await patch(id, { price: 15999 }, user)).status).toBe(403);
+        expect((await remove(id, user)).status).toBe(403);
+      },
+    );
+
+    it.each([['lead-guide'], ['admin']] as const)(
+      '[D-16] a %s creates, changes and deletes tours: 201, 200 and 204',
+      async (role) => {
+        await createTour({ slug: VALLEY });
+        await createTour({ slug: KEDARKANTHA });
+        const { user } = await createUser({ role });
+
+        expect((await create(createBodyFor(HAMPI), user)).status).toBe(201);
+        expect(
+          (await patch(seedIdOf(VALLEY), { price: 15999 }, user)).status,
+        ).toBe(200);
+        expect((await remove(seedIdOf(KEDARKANTHA), user)).status).toBe(204);
+      },
+    );
   });
 });
