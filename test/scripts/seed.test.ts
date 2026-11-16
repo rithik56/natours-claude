@@ -1,9 +1,44 @@
+import mongoose from 'mongoose';
 import { describe, expect, it } from 'vitest';
 import { parseSeedArgs } from '../../scripts/seed.ts';
-import { runSeed } from '../../scripts/seed/run.ts';
+import {
+  seedBookingRecords,
+  seedReviewRecords,
+  seedTourRecords,
+  seedUserRecords,
+} from '../../scripts/seed/load.ts';
+import {
+  assertSeedAllowed,
+  readSeedPasswords,
+  runSeed,
+} from '../../scripts/seed/run.ts';
 import { useTestDatabase } from '../helpers/db';
 import { fakes } from '../helpers/fakes';
+import { Booking } from '@/server/modules/bookings/model';
+import { Review } from '@/server/modules/reviews/model';
 import { Tour } from '@/server/modules/tours/model';
+import { User } from '@/server/modules/users/model';
+
+// Test-only passwords. They are never shown to a person and never committed as configuration.
+const PASSWORDS = {
+  user: 'seed-test-traveller-pass',
+  admin: 'seed-test-admin-passphrase-2026',
+};
+
+/** The four seed collections as stored, with password hashes, timestamps and every field. */
+async function snapshot(): Promise<Record<string, unknown[]>> {
+  const db = mongoose.connection.db;
+  if (!db) throw new Error('no database connection');
+  const collections: Record<string, unknown[]> = {};
+  for (const name of ['tours', 'users', 'reviews', 'bookings']) {
+    collections[name] = await db
+      .collection(name)
+      .find({})
+      .sort({ _id: 1 })
+      .toArray();
+  }
+  return collections;
+}
 
 describe('parseSeedArgs', () => {
   it('[D10] defaults to no reset and no --today', () => {
@@ -27,17 +62,92 @@ describe('parseSeedArgs', () => {
   });
 });
 
+describe('assertSeedAllowed', () => {
+  it('[D10] (SEC-16) refuses production before any connection', () => {
+    expect(() =>
+      assertSeedAllowed({ appEnv: 'production', reset: false }),
+    ).toThrow(/APP_ENV/);
+  });
+
+  it.each(['development', 'test', 'ci', 'staging'])(
+    '[D10] allows a plain seed in %s',
+    (appEnv) => {
+      expect(() => assertSeedAllowed({ appEnv, reset: false })).not.toThrow();
+    },
+  );
+
+  it.each(['development', 'test', 'ci'])(
+    '[D10] (SEC-16) allows --reset in %s',
+    (appEnv) => {
+      expect(() => assertSeedAllowed({ appEnv, reset: true })).not.toThrow();
+    },
+  );
+
+  it('[D10] (SEC-16) refuses --reset in staging', () => {
+    expect(() =>
+      assertSeedAllowed({ appEnv: 'staging', reset: true }),
+    ).toThrow(/--reset/);
+  });
+});
+
+describe('readSeedPasswords', () => {
+  it('[D10] (SEC-27) reads both passwords from the configuration', () => {
+    expect(
+      readSeedPasswords({
+        SEED_USER_PASSWORD: 'seed-user-pass-0123',
+        SEED_ADMIN_PASSWORD: 'seed-admin-passphrase-0123',
+      }),
+    ).toEqual({
+      user: 'seed-user-pass-0123',
+      admin: 'seed-admin-passphrase-0123',
+    });
+  });
+
+  it('[D10] (SEC-27) a missing user password stops the seed and names the key', () => {
+    expect(() =>
+      readSeedPasswords({ SEED_ADMIN_PASSWORD: 'seed-admin-passphrase-0123' }),
+    ).toThrow(/SEED_USER_PASSWORD/);
+  });
+
+  it('[D10] (SEC-27) a missing admin password stops the seed and names the key', () => {
+    expect(() =>
+      readSeedPasswords({ SEED_USER_PASSWORD: 'seed-user-pass-0123' }),
+    ).toThrow(/SEED_ADMIN_PASSWORD/);
+  });
+
+  it('[D10] (SEC-27) an admin password under 16 characters is refused, and its value is never shown', () => {
+    const short = 'too-short-42';
+    let message = '';
+    try {
+      readSeedPasswords({
+        SEED_USER_PASSWORD: 'seed-user-pass-0123',
+        SEED_ADMIN_PASSWORD: short,
+      });
+    } catch (error) {
+      message = error instanceof Error ? error.message : '';
+    }
+    expect(message).toMatch(/SEED_ADMIN_PASSWORD/);
+    expect(message).not.toContain(short);
+  });
+});
+
 describe('runSeed photos and tours', () => {
   useTestDatabase();
 
-  it('[D10] loads the 13 tours from seed/data/tours.json', async () => {
-    await runSeed({ reset: false });
-    expect(await Tour.countDocuments()).toBe(13);
+  it('[D10] loads 13 tours, 35 users, 52 reviews, 58 bookings and stores 52 photos', async () => {
+    const counts = await runSeed({ reset: false, passwords: PASSWORDS });
+    expect(counts).toEqual({
+      tours: 13,
+      users: 35,
+      reviews: 52,
+      bookings: 58,
+      photos: 52,
+    });
+    expect(fakes.storage.files.size).toBe(52);
   });
 
   it('[D2] uploads the 52 seed photos under tours/<file> as image/jpeg', async () => {
-    await runSeed({ reset: false });
-    expect(fakes.storage.files.size).toBe(52);
+    await runSeed({ reset: false, passwords: PASSWORDS });
     for (const [key, file] of fakes.storage.files) {
       expect(key.startsWith('tours/')).toBe(true);
       expect(file.contentType).toBe('image/jpeg');
@@ -45,10 +155,70 @@ describe('runSeed photos and tours', () => {
   });
 
   it('[D2] every tour cover is a key the storage holds', async () => {
-    await runSeed({ reset: false });
+    await runSeed({ reset: false, passwords: PASSWORDS });
     const tours = await Tour.find().lean();
     for (const tour of tours) {
       expect(fakes.storage.files.has(tour.imageCover)).toBe(true);
     }
+  });
+
+  it('[D10] a second run changes nothing: every document of the four collections is deep-equal, passwords and timestamps included', async () => {
+    await runSeed({ reset: false, passwords: PASSWORDS });
+    const before = await snapshot();
+    await runSeed({ reset: false, passwords: PASSWORDS });
+    expect(await snapshot()).toEqual(before);
+  });
+
+  it('[D10] --reset rebuilds the seed after a tour is deleted, with the same tours, reviews and bookings', async () => {
+    await runSeed({ reset: false, passwords: PASSWORDS });
+    const before = await snapshot();
+    await Tour.deleteOne({ slug: 'valley-of-flowers-trek' });
+
+    await runSeed({ reset: true, passwords: PASSWORDS });
+
+    const after = await snapshot();
+    expect(after.tours).toEqual(before.tours);
+    expect(after.reviews).toEqual(before.reviews);
+    expect(after.bookings).toEqual(before.bookings);
+    expect(after.users).toHaveLength(35);
+  });
+
+  it('[D10] keeps each review and booking createdAt equal to its seed value', async () => {
+    await runSeed({ reset: false, passwords: PASSWORDS });
+    const [review] = seedReviewRecords();
+    const [booking] = seedBookingRecords();
+    expect(review).toBeDefined();
+    expect(booking).toBeDefined();
+    const storedReview = await Review.findById(review?._id).lean();
+    const storedBooking = await Booking.findById(booking?._id).lean();
+    expect(storedReview?.createdAt).toEqual(new Date(review?.createdAt ?? ''));
+    expect(storedBooking?.createdAt).toEqual(
+      new Date(booking?.createdAt ?? ''),
+    );
+  });
+
+  it('[D10] stores every user with the seed role and an email on the example.com domain', async () => {
+    await runSeed({ reset: false, passwords: PASSWORDS });
+    const seeded = seedUserRecords();
+    const stored = await User.find().select('+active').lean();
+    expect(stored).toHaveLength(seeded.length);
+    for (const person of seeded) {
+      const row = stored.find((entry) => String(entry._id) === person._id);
+      expect(row?.role).toBe(person.role);
+      expect(row?.email.endsWith('@example.com')).toBe(true);
+    }
+  });
+
+  it('[QA-18] builds the 2dsphere index and the unique indexes after a seed', async () => {
+    await runSeed({ reset: false, passwords: PASSWORDS });
+    const tourIndexes = await Tour.collection.indexes();
+    const userIndexes = await User.collection.indexes();
+    expect(
+      tourIndexes.some((index) => index.key.startLocation === '2dsphere'),
+    ).toBe(true);
+    expect(
+      userIndexes.some((index) => index.key.email === 1 && index.unique),
+    ).toBe(true);
+    expect(seedTourRecords()).toHaveLength(13);
   });
 });
